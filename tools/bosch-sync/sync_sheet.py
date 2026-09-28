@@ -8,7 +8,8 @@ Per tab: row 3 = DDS, row 4 = Showroom (cols B/C/D = cumulative / monthly new / 
 store rows start at row 8 and run until column A is blank or a section header
 ("Total Retail", "1-on-1 ...") begins. Blank or non-numeric cells -> 0.
 Writes <out_dir>/<YYYYMM>.json shaped {dds:{cum,monthly,shipped}, showroom:{...}, stores:[...]},
-plus chat:{dds,showroom} (1-on-1 chat windows) for months whose tab has a "1-on-1 Chat" block.
+plus chat:{dds,showroom} (1-on-1 chat windows) and tags (total tags used) for months whose tab
+has a "1-on-1 Chat" / "Total Tags Used" block.
 """
 import base64, json, os, re, sys
 import openpyxl
@@ -39,6 +40,18 @@ def chat_block(rows):
     return found if len(found) == 2 else None
 
 
+def tags_block(rows):
+    """The optional "Total Tags Used" block: the number in column B of its "Total Retail" row."""
+    label = lambda r: '' if r[0] is None else str(r[0]).strip()
+    start = next((i for i, r in enumerate(rows) if label(r).lower().startswith('total tags used')), None)
+    if start is None:
+        return None
+    for r in rows[start + 1:]:
+        if label(r) == 'Total Retail' and isinstance(r[1], (int, float)):
+            return num(r[1])
+    return None
+
+
 def load_workbook(src):
     if src.endswith('.xlsx'):
         return openpyxl.load_workbook(src, data_only=True)
@@ -66,6 +79,9 @@ def main(src, out_dir):
         chat = chat_block(rows)
         if chat:
             doc['chat'] = chat
+        tags = tags_block(rows)
+        if tags is not None:
+            doc['tags'] = tags
         json.dump(doc, open(os.path.join(out_dir, month_id + '.json'), 'w', encoding='utf-8'), ensure_ascii=False)
         print(month_id, 'DDS', doc['dds'], 'Showroom', doc['showroom'], len(doc['stores']), 'stores')
 
