@@ -343,7 +343,7 @@
   <section class="section" id="retail">
     <div class="section-top">
       <div>
-        <div class="greeting" id="greeting">Good morning!</div>
+        <div class="greeting" id="greeting">Hi there!</div>
         <div class="kicker" data-i18n="kicker1">零售會員</div>
         <h1 data-i18n="h1_1">零售門市與展示中心會員表現</h1>
       </div>
@@ -1435,14 +1435,9 @@
     }, 150);
   });
 
-  // Greeting follows the viewer's local clock; always English regardless of the language toggle.
-  function renderGreeting(){
-    var h = new Date().getHours();
-    document.getElementById('greeting').textContent =
-      h >= 5 && h < 12 ? 'Good morning!' : h >= 12 && h < 18 ? 'Good afternoon!' : 'Good evening!';
-  }
-  renderGreeting();
-  setInterval(renderGreeting, 60000);
+  // One of these, picked at random on each page load; always English regardless of the language toggle.
+  var GREETINGS = ['Hi there!', 'Welcome back!'];
+  document.getElementById('greeting').textContent = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
 
   function showStamp(d){
     var el = document.getElementById('syncedAt');
