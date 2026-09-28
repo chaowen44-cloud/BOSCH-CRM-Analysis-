@@ -86,18 +86,25 @@
   .logo-chip img{height:32px; width:auto; display:block}
   .brand .app-name{color:var(--muted); font-size:13px; font-weight:500}
   .top-right{display:flex; align-items:center; gap:12px}
-  .greet{display:inline-flex; align-items:center; gap:9px; padding:4px 14px 4px 4px; border:1px solid var(--border); border-radius:999px; background:var(--bg); font-size:13px; line-height:1; white-space:nowrap; animation:greet-in .6s cubic-bezier(.22,1,.36,1) both}
+  .greet{display:inline-flex; align-items:center; gap:9px; padding:4px 14px 4px 4px; border:1px solid var(--border); border-radius:999px; background:var(--bg); font-size:13px; line-height:1; white-space:nowrap}
   .greet-ico{width:28px; height:28px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; color:#fff; flex:none; box-shadow:0 2px 6px rgba(0,0,0,.12)}
-  .greet-ico svg{width:16px; height:16px; animation:greet-bob 2.4s ease-in-out .6s 2}
+  .greet-ico svg{width:16px; height:16px}
   .greet[data-part="morning"] .greet-ico{background:linear-gradient(135deg,#FFC24B,#F57721)}
   .greet[data-part="afternoon"] .greet-ico{background:linear-gradient(135deg,#FF9A3D,#E8590C)}
   .greet[data-part="evening"] .greet-ico{background:linear-gradient(135deg,#9B86D6,#314D6A)}
-  .greet:hover .greet-ico svg{animation:greet-bob 1.2s ease-in-out 1}
   .greet-hi{font-weight:600; color:var(--ink)}
   .greet-time{color:var(--muted); font-weight:500}
-  @keyframes greet-in{from{opacity:0; transform:translateX(10px)} to{opacity:1; transform:none}}
-  @keyframes greet-bob{0%,100%{transform:rotate(0) translateY(0)} 30%{transform:rotate(-12deg) translateY(-1px)} 60%{transform:rotate(8deg)}}
-  @media (prefers-reduced-motion: reduce){ .greet, .greet-ico svg, .greet:hover .greet-ico svg{animation:none} }
+  /* Intro (JS adds .pre at once and .play after page load, then removes both): pill slides in with a small
+     overshoot, the icon pops, then waves twice. Hovering waves it again. */
+  .greet.pre{opacity:0}
+  .greet.play{animation:greet-in .75s cubic-bezier(.34,1.4,.64,1) both}
+  .greet.play .greet-ico{animation:greet-pop .5s cubic-bezier(.34,1.56,.64,1) .45s both}
+  .greet.play .greet-ico svg{animation:greet-wave 1s ease-in-out .95s 2}
+  .greet:hover .greet-ico svg{animation:greet-wave .9s ease-in-out}
+  @keyframes greet-in{0%{opacity:0; transform:translateX(32px)} 60%{opacity:1; transform:translateX(-4px)} 100%{opacity:1; transform:none}}
+  @keyframes greet-pop{0%{transform:scale(.3)} 60%{transform:scale(1.2)} 100%{transform:scale(1)}}
+  @keyframes greet-wave{0%,100%{transform:rotate(0)} 20%{transform:rotate(-20deg)} 40%{transform:rotate(15deg)} 60%{transform:rotate(-10deg)} 80%{transform:rotate(5deg)}}
+  @media (prefers-reduced-motion: reduce){ .greet.pre{opacity:1} .greet.play, .greet.play .greet-ico, .greet.play .greet-ico svg, .greet:hover .greet-ico svg{animation:none} }
   @media (max-width:480px){
     .top-right{width:100%; justify-content:space-between; gap:8px}
     .greet{font-size:12.5px; gap:7px; padding-right:12px}
@@ -1537,6 +1544,18 @@
     }
     update();
     setInterval(update, 60000);
+    // Play the intro once the page has finished loading (so it isn't missed while charts render),
+    // then drop the intro classes so hovering can replay the wave on its own.
+    el.classList.add('pre');
+    var played = false;
+    function playIntro(){
+      if (played) return; played = true;
+      el.classList.add('play');
+      setTimeout(function(){ el.classList.remove('pre', 'play'); }, 3200);
+    }
+    if (document.readyState === 'complete') setTimeout(playIntro, 150);
+    else window.addEventListener('load', function(){ setTimeout(playIntro, 150); });
+    setTimeout(playIntro, 2500);
   })();
 
   function showStamp(d){
