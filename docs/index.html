@@ -107,6 +107,7 @@
   main{max-width:1280px; margin:0 auto; padding:30px clamp(16px,4vw,40px) 64px; display:grid; gap:40px}
   .section{display:grid; gap:18px}
   .section-top{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .greeting{margin:0 0 14px; font-size:clamp(26px,3vw,34px); font-weight:700; letter-spacing:-.015em; color:var(--ink)}
   .kicker{display:inline-flex; align-items:center; gap:8px; color:var(--orange); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:11.5px}
   h1{margin:5px 0 0; font-size:clamp(21px,2.4vw,26px); font-weight:600; letter-spacing:-.01em; text-wrap:balance}
   .subtitle{color:var(--muted); font-size:13px; margin:2px 0 0}
@@ -342,6 +343,7 @@
   <section class="section" id="retail">
     <div class="section-top">
       <div>
+        <div class="greeting" id="greeting">Good morning!</div>
         <div class="kicker" data-i18n="kicker1">零售會員</div>
         <h1 data-i18n="h1_1">零售門市與展示中心會員表現</h1>
       </div>
@@ -1432,6 +1434,15 @@
       renderCrmChart();
     }, 150);
   });
+
+  // Greeting follows the viewer's local clock; always English regardless of the language toggle.
+  function renderGreeting(){
+    var h = new Date().getHours();
+    document.getElementById('greeting').textContent =
+      h >= 5 && h < 12 ? 'Good morning!' : h >= 12 && h < 18 ? 'Good afternoon!' : 'Good evening!';
+  }
+  renderGreeting();
+  setInterval(renderGreeting, 60000);
 
   function showStamp(d){
     var el = document.getElementById('syncedAt');
