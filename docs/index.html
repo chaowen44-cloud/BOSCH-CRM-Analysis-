@@ -1,0 +1,1447 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>BOSCH Retail CRM Dashboard</title>
+<style>
+  :root{
+    --navy:#314D6A;
+    --navy-2:#3C5672;
+    --bg:#F5F7FA;
+    --surface:#FFFFFF;
+    --border:#E3E6EA;
+    --ink:#434343;
+    --muted:#A3A4A4;
+
+    --orange:#F57721;
+    --orange-soft:#FEE3D6;
+    --orange-tint:#FFF7F2;
+
+    --purple:#725CA2;
+    --purple-deep:#341779;
+    --purple-tint:#FAF9FF;
+    --purple-soft:#EAE6F5;
+
+    --teal:#01BDA5;
+    --teal-bright:#3CF6D5;
+    --teal-tint:#F6FFFE;
+    --teal-soft:#DDFBF5;
+
+    --up:#01BDA5;
+    --down:#F4585B;
+    --blue:#409EFF;
+    --blue-tint:#EEF6FF;
+    --field-border:#DCDFE6;
+
+    --table-navy:#303D5A;
+    --tint-pink:#FBF1EE;
+    --tint-gray:#EEF0F3;
+    --coral:#EE8162;
+    --line-ink:#303D5A;
+
+    --shadow: 0 1px 2px rgba(20,30,45,.04), 0 10px 26px rgba(20,30,45,.07);
+    --radius: 18px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#1C2A3A; --navy-2:#25374A;
+      --bg:#0F141B; --surface:#181F29; --border:#2B3644;
+      --ink:#EDEFF2; --muted:#8B93A0;
+      --orange:#FF8B45; --orange-soft:#3A2416; --orange-tint:#241811;
+      --purple:#9B86D6; --purple-deep:#C7B9F2; --purple-tint:#1B1830; --purple-soft:#241C3C;
+      --teal:#2FE0C2; --teal-bright:#5CF3DC; --teal-tint:#0E211F; --teal-soft:#0F2E29;
+      --up:#2FE0C2; --down:#FF7477; --blue:#5AAEFF; --blue-tint:#132A40; --field-border:#3A4552;
+      --table-navy:#1E2A42; --tint-pink:#2E211E; --tint-gray:#232830; --coral:#FF9B7A; --line-ink:#C9D3E6;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#1C2A3A; --navy-2:#25374A;
+    --bg:#0F141B; --surface:#181F29; --border:#2B3644;
+    --ink:#EDEFF2; --muted:#8B93A0;
+    --orange:#FF8B45; --orange-soft:#3A2416; --orange-tint:#241811;
+    --purple:#9B86D6; --purple-deep:#C7B9F2; --purple-tint:#1B1830; --purple-soft:#241C3C;
+    --teal:#2FE0C2; --teal-bright:#5CF3DC; --teal-tint:#0E211F; --teal-soft:#0F2E29;
+    --up:#2FE0C2; --down:#FF7477; --blue:#5AAEFF; --blue-tint:#132A40; --field-border:#3A4552;
+    --table-navy:#1E2A42; --tint-pink:#2E211E; --tint-gray:#232830; --coral:#FF9B7A; --line-ink:#C9D3E6;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:"Lexend","Helvetica Neue",Arial,sans-serif}
+  .num{font-variant-numeric:tabular-nums}
+
+  .tri{display:inline-block; width:0; height:0}
+  .tri.up{border-left:4px solid transparent; border-right:4px solid transparent; border-bottom:6px solid currentColor}
+  .tri.down{border-left:4px solid transparent; border-right:4px solid transparent; border-top:6px solid currentColor}
+  .trend{display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600}
+  .trend.up{color:var(--up)}
+  .trend.down{color:var(--down)}
+
+  /* ---- top strip ---- */
+  .topbar{
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:14px clamp(16px,4vw,40px);
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo-chip{background:#fff; padding:6px 10px; border-radius:8px; display:inline-flex; align-items:center}
+  .logo-chip img{height:32px; width:auto; display:block}
+  .brand .app-name{color:var(--muted); font-size:13px; font-weight:500}
+  .lang-toggle{display:inline-flex; border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; background:var(--bg)}
+  .lang-toggle button{
+    border:0; background:transparent; padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:600;
+    color:var(--muted); cursor:pointer; font-family:inherit;
+  }
+  .lang-toggle button.active{background:var(--navy); color:#fff}
+
+  /* ---- section nav bar (navy) ---- */
+  .navbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+    background:var(--navy);
+    padding:12px clamp(16px,4vw,40px);
+    display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
+  }
+  .page-nav{display:flex; align-items:center; gap:22px}
+  .page-nav a{color:rgba(255,255,255,.62); font-size:13.5px; font-weight:600; text-decoration:none; padding-bottom:3px; border-bottom:2px solid transparent; white-space:nowrap}
+  .page-nav a.active{color:#fff; border-bottom-color:var(--orange)}
+
+  /* ---- layout ---- */
+  main{max-width:1280px; margin:0 auto; padding:30px clamp(16px,4vw,40px) 64px; display:grid; gap:40px}
+  .section{display:grid; gap:18px}
+  .section-top{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .kicker{display:inline-flex; align-items:center; gap:8px; color:var(--orange); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:11.5px}
+  h1{margin:5px 0 0; font-size:clamp(21px,2.4vw,26px); font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .subtitle{color:var(--muted); font-size:13px; margin:2px 0 0}
+
+  /* ---- row grids ---- */
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
+
+  .metric-group{display:grid; gap:12px}
+  .metric-group-label{font-size:13.5px; font-weight:600; color:var(--ink); opacity:.85; display:flex; align-items:center; gap:9px}
+  .metric-group-label:before{content:""; width:3px; height:14px; background:var(--orange); border-radius:2px}
+
+  /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
+  .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
+  .stat-card.c-orange{border-color:var(--orange); background:var(--surface)}
+  .stat-card.c-purple{border-color:var(--purple); background:var(--purple-tint)}
+  .stat-card.c-teal{border-color:var(--teal-bright); background:var(--teal-tint)}
+  .funnel-name{font-size:13px; fill:var(--ink); font-weight:500; font-family:inherit}
+  .funnel-name.on-band{fill:#fff; font-weight:600}
+  .funnel-pct{font-size:12px; fill:var(--muted); font-family:inherit}
+  .funnel-pct.on-band{fill:rgba(255,255,255,.85)}
+  .stat-card .head{display:flex; align-items:center; gap:8px}
+  .stat-card .head .swatch{width:9px;height:9px;border-radius:3px}
+  .stat-card .head b{font-size:13.5px; font-weight:500; opacity:.85}
+  .stat-card .bignum{font-size:clamp(26px,2.8vw,32px); font-weight:600; letter-spacing:-.02em; margin:2px 0}
+  .stat-card .sub{font-size:12px; color:var(--muted); font-weight:500}
+
+  /* ---- charts ---- */
+  .chart-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .chart-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 24px 16px}
+  .chart-card.full{grid-column:1/-1}
+  .chart-head{display:flex; align-items:center; gap:9px; margin-bottom:14px}
+  .chart-head .swatch{width:9px;height:9px;border-radius:999px}
+  .chart-head b{font-size:16px; font-weight:500}
+  .chart-wrap{width:100%; position:relative}
+  .chart-wrap svg{width:100%; height:auto; display:block; overflow:visible}
+  .axis-label{font-size:13px; font-weight:400; fill:var(--muted); font-family:inherit}
+  .pt-label{font-size:16px; font-weight:500; font-family:inherit}
+  .peak-label{font-size:12.5px; font-weight:500; font-family:inherit; fill:var(--surface)}
+
+  /* ---- per-chart date filter ---- */
+  .chart-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border)}
+  .df-field{display:flex; align-items:center; gap:6px; border:1px solid var(--field-border); border-radius:8px; padding:6px 10px; background:var(--surface)}
+  .df-field svg{width:13px;height:13px;color:var(--muted); flex:none}
+  .df-field select{border:0; background:transparent; font-family:inherit; font-size:12.5px; color:var(--ink); cursor:pointer; padding-right:2px}
+  .df-field select option{color:#111}
+  .df-sep{color:var(--muted); font-size:12.5px}
+  .df-query{background:var(--blue); color:#fff; border:0; border-radius:8px; padding:7px 18px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit}
+  .df-query:hover{opacity:.92}
+  .df-radios{display:flex; align-items:center; gap:18px; margin-left:auto}
+  .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
+  .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
+
+  /* ---- shared filter bar: outside any card, drives the trend chart + store table together ---- */
+  .shared-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 6px; margin-bottom:2px; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border)}
+  .shared-filter-label{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap}
+  .shared-filter-label:before{content:""; width:8px; height:8px; border-radius:999px; background:linear-gradient(135deg, var(--orange), var(--purple) 55%, var(--teal-bright)); flex:none}
+
+  .tooltip{
+    position:absolute; pointer-events:none; background:var(--ink); color:var(--surface);
+    font-size:11.5px; font-weight:600; padding:6px 9px; border-radius:8px; white-space:nowrap;
+    transform:translate(-50%,-130%); opacity:0; z-index:5;
+    transition:opacity .18s ease, left .42s cubic-bezier(.22,1,.36,1), top .42s cubic-bezier(.22,1,.36,1), transform .42s cubic-bezier(.22,1,.36,1);
+  }
+  .tooltip.show{opacity:1}
+  .tooltip.snap{transition:opacity .15s ease}
+  /* multi-series tooltip: card beside the point with a left (or right, when flipped) pointer */
+  .tooltip.rich{background:rgba(46,51,64,.78); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); color:#fff; font-size:12px; font-weight:400; padding:8px 11px; border-radius:8px; transform:translate(16px,-50%); box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .tooltip.rich:before{content:""; position:absolute; top:calc(50% + var(--arrow-dy, 0px)); left:-6px; margin-top:-6px; border:6px solid transparent; border-left:0; border-right-color:rgba(46,51,64,.78)}
+  .tooltip.rich.flip{transform:translate(calc(-100% - 16px),-50%)}
+  .tooltip.rich.flip:before{left:auto; right:-6px; border:6px solid transparent; border-right:0; border-left-color:rgba(46,51,64,.78)}
+  .rt-title{font-size:12.5px; font-weight:600; margin-bottom:5px}
+  .rt-row{display:flex; align-items:center; gap:7px; line-height:1.75}
+  .rt-sw{width:10px; height:10px; border-radius:2px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35); flex:none}
+  .rt-sub{margin:-3px 0 4px; font-size:10.5px; color:rgba(255,255,255,.6)}
+  .rt-hint{margin-top:4px; font-size:10.5px; color:rgba(255,255,255,.6)}
+
+  /* ---- overview cards (CRM usage totals) ---- */
+  .ov-card{background:var(--surface); border:2px solid var(--orange); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px 26px}
+  .ov-card .label{font-size:14px; font-weight:600; opacity:.85}
+  .ov-card .bignum{font-size:clamp(32px,3.6vw,42px); font-weight:600; letter-spacing:-.02em; margin:8px 0 4px; color:var(--orange)}
+  .ov-card .sub{font-size:12.5px; color:var(--muted); font-weight:500}
+
+  /* ---- chat engagement cards ---- */
+  .engage-card{border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 24px; display:grid; gap:16px; border:2px solid var(--border)}
+  .engage-card.dds{border-color:var(--purple); background:var(--purple-tint)}
+  .engage-card.showroom{border-color:var(--teal-bright); background:var(--teal-tint)}
+  .engage-head{display:flex; align-items:center; justify-content:space-between}
+  .engage-head .name{display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600}
+  .engage-head .swatch{width:10px;height:10px;border-radius:3px}
+  .badge{font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); border:1px solid var(--border); padding:4px 10px; border-radius:999px; background:var(--surface)}
+  .metric-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .metric-box{padding:13px 14px; border-radius:12px; background:var(--surface); border:1px solid var(--border)}
+  .metric-box .k{display:block; font-size:11px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.03em; margin-bottom:5px}
+  .metric-box .v{font-size:22px; font-weight:600; letter-spacing:-.01em}
+  .bar-track{height:7px; border-radius:999px; background:var(--border); overflow:hidden}
+  .bar-fill{height:100%; border-radius:999px}
+
+  .footnote{color:var(--muted); font-size:12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:16px; margin-top:4px}
+  .live-flag{display:inline-flex; align-items:center; gap:8px; margin-left:auto; font-weight:500; color:var(--muted)}
+  .live-dot{position:relative; width:7px; height:7px; border-radius:50%; background:var(--up); flex:none}
+  .live-dot:after{content:""; position:absolute; inset:0; border-radius:50%; background:var(--up); animation:live-ping 1.8s cubic-bezier(0,0,.2,1) infinite}
+  @keyframes live-ping{0%{transform:scale(1); opacity:.7} 80%,100%{transform:scale(2.8); opacity:0}}
+  @media (prefers-reduced-motion: reduce){ .live-dot:after{animation:none} }
+  .data-wait{color:var(--muted); font-size:13px; padding:40px 0; text-align:center}
+
+  /* ---- store table ---- */
+  .store-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+  .store-card-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px}
+  .store-card-head .label{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+  .store-card-head .label:before{content:""; width:3px; height:14px; background:var(--table-navy); border-radius:2px}
+  .refresh-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit}
+  .refresh-btn[hidden]{display:none}
+  .refresh-btn:hover{background:var(--bg)}
+  .refresh-btn svg{width:13px;height:13px}
+  .store-table-wrap{overflow-x:auto}
+  table.store-table{width:100%; border-collapse:collapse; font-size:13.5px}
+  .store-table thead th{background:var(--table-navy); color:#fff; text-align:left; padding:12px 18px; font-weight:600; white-space:nowrap}
+  .store-table thead th.num{text-align:right}
+  .store-table tbody td{padding:11px 18px; border-bottom:1px solid var(--border); color:var(--ink)}
+  .store-table tbody tr:last-child td{border-bottom:0}
+  .st-name{text-align:left; white-space:nowrap}
+  .st-num{text-align:right; font-variant-numeric:tabular-nums}
+  .st-cum{background:var(--tint-pink)}
+  .st-monthly{background:var(--tint-gray)}
+  .st-shipped{color:var(--coral); font-weight:600}
+  .sort-dd{position:relative; display:inline-block; margin-left:6px; vertical-align:middle}
+  .sort-dd-btn{display:inline-flex; align-items:center; gap:3px; border:0; background:rgba(255,255,255,.12); color:#fff; font-family:inherit; font-size:11px; font-weight:500; padding:3px 7px; border-radius:6px; cursor:pointer}
+  .sort-dd-btn:hover{background:rgba(255,255,255,.22)}
+  .sort-dd.active .sort-dd-btn{background:rgba(255,255,255,.28)}
+  .sort-dd-caret{width:10px;height:10px; transition:transform .15s ease; flex:none}
+  .sort-dd.open .sort-dd-caret{transform:rotate(180deg)}
+  .sort-dd-menu{position:absolute; top:calc(100% + 6px); right:0; min-width:136px; background:var(--ink); color:#fff; border-radius:10px; padding:6px; box-shadow:0 10px 24px rgba(0,0,0,.28); z-index:20; display:none; text-align:left}
+  .sort-dd.open .sort-dd-menu{display:block}
+  .sort-dd-title{font-size:10.5px; font-weight:600; color:rgba(255,255,255,.5); padding:6px 8px 4px}
+  .sort-dd-item{display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; border:0; background:transparent; color:#fff; font-family:inherit; font-size:12.5px; font-weight:500; padding:7px 8px; border-radius:6px; cursor:pointer; text-align:left}
+  .sort-dd-item:hover{background:rgba(255,255,255,.1)}
+  .sort-dd-item .chk{opacity:0; font-size:11px; color:var(--up)}
+  .sort-dd-item.active .chk{opacity:1}
+  .sort-dd-group + .sort-dd-group{margin-top:4px; padding-top:4px; border-top:1px solid rgba(255,255,255,.1)}
+  /* store card's unified sort control sits on a light header, so it takes the neutral pill look instead of the on-dark table-header variant */
+  .store-sort-dd{margin-left:0}
+  .store-sort-dd .sort-dd-btn{background:var(--surface); border:1px solid var(--border); color:var(--ink); border-radius:999px; padding:7px 14px; font-size:12.5px}
+  .store-sort-dd .sort-dd-btn:hover{background:var(--bg)}
+  .store-sort-dd.active .sort-dd-btn{background:var(--bg); border-color:var(--ink)}
+  .store-sort-dd .sort-dd-caret{color:var(--muted)}
+  .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
+  .store-card{scroll-margin-top:70px}
+  .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .store-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; background:var(--bg)}
+  .seg button{border:0; background:transparent; padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:500; color:var(--muted); cursor:pointer; font-family:inherit}
+  .seg button.active{background:var(--table-navy); color:#fff}
+  .ch-dot{display:inline-block; width:8px; height:8px; border-radius:3px; margin-right:9px; vertical-align:middle}
+  .store-table tfoot td{padding:12px 18px; font-weight:600; border-top:2px solid var(--border); color:var(--ink)}
+  .hover-zone{cursor:pointer}
+  .hover-zone.no-drill{cursor:default}
+  .hover-dot{opacity:0; pointer-events:none; transition:transform .42s cubic-bezier(.22,1,.36,1), opacity .18s ease}
+  .hover-dot.show{opacity:1}
+  .hover-dot.snap{transition:opacity .15s ease}
+  .pager{display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top:8px; color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums}
+  .pg-btn{width:34px; height:34px; border-radius:50%; border:0; background:var(--bg); color:var(--muted); font-size:20px; line-height:1; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; justify-content:center; padding:0 0 2px}
+  .pg-btn:hover:not(:disabled){background:var(--border); color:var(--ink)}
+  .pg-btn:disabled{opacity:.4; cursor:default}
+  .crm-controls{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-left:auto}
+  .combo-legend{display:flex; align-items:center; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--ink); margin:0 0 6px}
+  .lg-item{display:inline-flex; align-items:center; gap:8px}
+  .lg-bar{width:14px; height:14px; border-radius:4px; opacity:.45}
+  .lg-line{position:relative; width:26px; height:2.5px; background:var(--crm-line, var(--line-ink)); border-radius:2px}
+  .lg-line:after{content:""; position:absolute; left:50%; top:50%; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--crm-line, var(--line-ink)); box-shadow:0 0 0 2px var(--surface)}
+  .axis-title{font-size:12.5px; fill:var(--muted); font-family:inherit}
+  .bar-label{font-size:13px; font-weight:500; font-family:inherit; fill:var(--ink)}
+  .rate-label{font-size:14px; font-weight:500; font-family:inherit; fill:var(--line-ink)}
+  .refresh-btn:disabled{opacity:.6; cursor:wait}
+  .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); background:var(--ink); color:var(--surface); font-size:13px; font-weight:500; padding:10px 16px; border-radius:10px; box-shadow:var(--shadow); z-index:50}
+  .chart-card{transition:box-shadow .2s ease}
+  .chart-card.drill-active{box-shadow:0 0 0 2px var(--drill), var(--shadow)}
+
+  @media (max-width:860px){
+    .row2, .row3, .chart-grid, .metric-row{grid-template-columns:1fr}
+    .page-nav{gap:14px}
+    .df-radios{margin-left:0}
+  }
+  @media (min-width:861px) and (max-width:1080px){
+    .row3{grid-template-columns:1fr 1fr}
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<div class="topbar">
+  <div class="brand">
+    <span class="logo-chip"><img src="data:image/png;base64,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" alt="Bosch"></span>
+    <span class="app-name" data-i18n="appname">CRM Dashboard · LINE OA</span>
+  </div>
+  <div class="lang-toggle">
+    <button type="button" data-lang="en" class="active">EN</button>
+    <button type="button" data-lang="zh">中文</button>
+  </div>
+</div>
+
+<div class="navbar">
+  <nav class="page-nav">
+    <a href="#retail" class="active" data-i18n="nav_retail">零售會員</a>
+    <a href="#bystore" data-i18n="nav_bystore">門市總覽</a>
+    <a href="#crmusage" data-i18n="nav_crm">CRM 系統使用</a>
+  </nav>
+</div>
+
+<main>
+
+  <!-- ================= RETAIL MEMBERSHIP ================= -->
+  <section class="section" id="retail">
+    <div class="section-top">
+      <div>
+        <div class="kicker" data-i18n="kicker1">零售會員</div>
+        <h1 data-i18n="h1_1">DDS 與展示中心會員表現</h1>
+      </div>
+    </div>
+
+    <div class="metric-group">
+      <div class="metric-group-label" data-i18n="group_members">會員數 Members</div>
+      <div class="row3">
+        <div class="stat-card c-orange">
+          <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
+          <div class="bignum num" data-kpi="cum" data-ch="total">–</div>
+          <span class="trend" data-kpi="mom" data-ch="total"></span>
+          <div class="sub num" data-kpi="delta" data-ch="total"></div>
+        </div>
+        <div class="stat-card c-purple">
+          <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
+          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="cum" data-ch="dds">–</div>
+          <span class="trend" data-kpi="mom" data-ch="dds"></span>
+          <div class="sub num" data-kpi="delta" data-ch="dds"></div>
+        </div>
+        <div class="stat-card c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
+          <div class="bignum num" style="color:var(--teal)" data-kpi="cum" data-ch="showroom">–</div>
+          <span class="trend" data-kpi="mom" data-ch="showroom"></span>
+          <div class="sub num" data-kpi="delta" data-ch="showroom"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-group">
+      <div class="metric-group-label" data-i18n="group_conversion">轉換率 Conversion</div>
+      <div class="row3">
+        <div class="stat-card c-orange">
+          <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
+          <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
+          <div class="sub num" data-kpi="shipped" data-ch="total"></div>
+        </div>
+        <div class="stat-card c-purple">
+          <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
+          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="conv" data-ch="dds">–</div>
+          <div class="sub num" data-kpi="shipped" data-ch="dds"></div>
+        </div>
+        <div class="stat-card c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
+          <div class="bignum num" style="color:var(--teal)" data-kpi="conv" data-ch="showroom">–</div>
+          <div class="sub num" data-kpi="shipped" data-ch="showroom"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Shared filter: drives both the trend chart and the By Store table below ---- -->
+    <div class="shared-filter">
+      <span class="shared-filter-label" data-i18n="shared_filter_label">篩選（同步套用至下方趨勢圖與門市明細）</span>
+      <div class="seg" id="globalChannelSeg">
+        <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
+        <button type="button" data-ch="dds">DDS</button>
+        <button type="button" data-ch="showroom">Showroom</button>
+      </div>
+      <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-start" id="globalStart" aria-label="Start month"></select></label>
+      <span class="df-sep" data-i18n="to">至</span>
+      <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-end" id="globalEnd" aria-label="End month"></select></label>
+      <button type="button" class="df-query" id="globalQuery" data-i18n="query">查詢</button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--orange)"></span><b id="mergedTitle" data-i18n="total_trend">零售會員趨勢</b>
+        <div class="df-radios">
+          <label class="df-radio"><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
+          <label class="df-radio"><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
+        </div>
+      </div>
+      <div class="chart-wrap" id="mergedChart"></div>
+      <div class="pager" data-pager="merged"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
+    </div>
+
+    <!-- ---- By Store drill-down (filtered by the shared control bar above) ---- -->
+    <div class="store-card" id="bystore">
+      <div class="store-card-head">
+        <div class="left">
+          <span class="label" data-i18n="by_store_label">BY STORE</span>
+        </div>
+        <div class="right">
+          <span class="sort-dd store-sort-dd">
+            <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="sort-dd-menu">
+              <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
+              <div class="sort-dd-group">
+                <button type="button" class="sort-dd-item" data-dir="desc"><span data-i18n="sort_desc">由多至少</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-dir="asc"><span data-i18n="sort_asc">由少至多</span><span class="chk">✓</span></button>
+              </div>
+            </div>
+          </span>
+          <button type="button" class="refresh-btn" id="storeRefreshBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            <span data-i18n="refresh">重整</span>
+          </button>
+          <button type="button" class="refresh-btn export-btn" data-export="store" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+            <span class="export-label" data-i18n="export_img">匯出圖片</span>
+          </button>
+        </div>
+      </div>
+      <div class="store-table-wrap">
+        <table class="store-table">
+          <thead>
+            <tr>
+              <th data-i18n="store_name">店櫃名稱</th>
+              <th class="num"><span data-i18n="cum_members">累積會員</span></th>
+              <th class="num"><span data-i18n="monthly_new">當月新增</span></th>
+              <th class="num"><span data-i18n="shipped_cum">已結案已出貨(累積)</span></th>
+            </tr>
+          </thead>
+          <tbody id="storeTableBody"></tbody>
+          <tfoot id="storeTableFoot"></tfoot>
+        </table>
+      </div>
+      <div class="store-footnote" data-i18n="store_footnote">點選上方趨勢圖任一月份的點，即可查看該通路當月的門市明細</div>
+    </div>
+  </section>
+
+  <!-- ================= CRM SYSTEM USAGE ================= -->
+  <section class="section" id="crmusage">
+    <div class="section-top">
+      <div>
+        <div class="kicker" data-i18n="kicker2">CRM 平台</div>
+        <h1 data-i18n="h2_2">CRM 系統使用狀況</h1>
+      </div>
+    </div>
+
+    <div class="ov-card">
+      <div class="label" data-i18n="total_tags">標籤使用總數</div>
+      <div class="bignum num">2,027</div>
+      <div class="sub" data-i18n="across_members">全台零售櫃位(包含DDS & Showroom)</div>
+    </div>
+
+    <div class="row2">
+      <div class="engage-card dds">
+        <div class="engage-head">
+          <span class="name"><span class="swatch" style="background:var(--purple)"></span>DDS</span>
+          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
+        </div>
+        <div class="metric-row">
+          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num">42</span></div>
+          <div class="metric-box"><span class="k" data-i18n="usage_rate">使用率</span><span class="v num" style="color:var(--purple)">5.26%</span></div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:5.26%; background:var(--purple)"></div></div>
+      </div>
+      <div class="engage-card showroom">
+        <div class="engage-head">
+          <span class="name"><span class="swatch" style="background:var(--teal-bright)"></span>Showroom</span>
+          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
+        </div>
+        <div class="metric-row">
+          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num">38</span></div>
+          <div class="metric-box"><span class="k" data-i18n="usage_rate">使用率</span><span class="v num" style="color:var(--teal)">33.04%</span></div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.04%; background:var(--teal)"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head"><span class="swatch" id="crmSwatch" style="background:var(--orange)"></span><b data-i18n="crm_trend">一對一聊天趨勢</b></div>
+      <div class="chart-filter" id="crmFilter">
+        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-start" aria-label="Start month"></select></label>
+        <span class="df-sep" data-i18n="to">至</span>
+        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-end" aria-label="End month"></select></label>
+        <button type="button" class="df-query" data-i18n="query">查詢</button>
+        <div class="crm-controls">
+          <div class="seg" id="crmChannelSeg">
+            <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
+            <button type="button" data-ch="dds">DDS</button>
+            <button type="button" data-ch="showroom">Showroom</button>
+          </div>
+        </div>
+      <button type="button" class="refresh-btn export-btn" data-export="crm" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg><span class="export-label" data-i18n="export_img">匯出圖片</span></button></div>
+      <div class="combo-legend">
+        <span class="lg-item"><span class="lg-bar" id="crmLegendBar"></span><span data-i18n="chat_windows">聊天視窗數</span></span>
+        <span class="lg-item"><span class="lg-line"></span><span data-i18n="usage_rate">使用率</span></span>
+      </div>
+      <div class="chart-wrap" id="crmChart"></div>
+        <div class="pager" data-pager="crm"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
+    </div>
+
+    <div class="footnote">
+      <span class="live-flag"><span class="live-dot" aria-hidden="true"></span><span data-i18n="draft_flag">零售會員數據已連接即時資料</span><span class="synced-at" id="syncedAt"></span></span>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="application/json" id="liveData">{"syncedAt":"2026-09-28T07:18:40Z","months":{"202603":{"dds":{"cum":34,"monthly":34,"shipped":0},"showroom":{"cum":16,"monthly":16,"shipped":0},"stores":[{"name":"Showroom- Taipei","cum":9,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":3,"monthly":3,"shipped":0},{"name":"Showroom- Hsinchu","cum":2,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":2,"monthly":2,"shipped":0},{"name":"SOGO- 復興","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 忠孝","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 天母","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 新竹","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 板橋","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 桃園","cum":3,"monthly":3,"shipped":0},{"name":"FEDS- 新竹","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":0,"monthly":0,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":6,"monthly":6,"shipped":0},{"name":"SKM- 台南西門","cum":0,"monthly":0,"shipped":0},{"name":"特力- 南崁","cum":0,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":1,"monthly":1,"shipped":0},{"name":"夢時代- 高雄","cum":7,"monthly":7,"shipped":0},{"name":"義享天地- 高雄","cum":1,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":0,"monthly":0,"shipped":0},{"name":"漢神洲際- 台中","cum":0,"monthly":0,"shipped":0}]},"202604":{"dds":{"cum":243,"monthly":208,"shipped":8},"showroom":{"cum":37,"monthly":22,"shipped":1},"stores":[{"name":"Showroom- Taipei","cum":20,"monthly":11,"shipped":0},{"name":"Showroom- Taichung","cum":8,"monthly":6,"shipped":1},{"name":"Showroom- Hsinchu","cum":5,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":4,"monthly":3,"shipped":0},{"name":"SOGO- 復興","cum":5,"monthly":1,"shipped":0},{"name":"SOGO- 忠孝","cum":20,"monthly":16,"shipped":4},{"name":"SOGO- 天母","cum":16,"monthly":12,"shipped":0},{"name":"SOGO- 新竹","cum":51,"monthly":50,"shipped":0},{"name":"FEDS- 板橋","cum":42,"monthly":42,"shipped":0},{"name":"FEDS- 桃園","cum":15,"monthly":12,"shipped":2},{"name":"FEDS- 新竹","cum":2,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":5,"monthly":4,"shipped":0},{"name":"FEDS- 台中","cum":18,"monthly":18,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":17,"monthly":11,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":10,"shipped":1},{"name":"特力- 南崁","cum":1,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":4,"monthly":3,"shipped":0},{"name":"夢時代- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"義享天地- 高雄","cum":7,"monthly":6,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":15,"monthly":15,"shipped":0},{"name":"漢神洲際- 台中","cum":5,"monthly":5,"shipped":0}]},"202605":{"dds":{"cum":316,"monthly":74,"shipped":23},"showroom":{"cum":42,"monthly":5,"shipped":3},"stores":[{"name":"Showroom- Taipei","cum":23,"monthly":3,"shipped":0},{"name":"Showroom- Taichung","cum":10,"monthly":2,"shipped":2},{"name":"Showroom- Hsinchu","cum":5,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":7,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":24,"monthly":1,"shipped":4},{"name":"SOGO- 天母","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 新竹","cum":55,"monthly":4,"shipped":2},{"name":"FEDS- 板橋","cum":55,"monthly":12,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":6,"shipped":3},{"name":"FEDS- 新竹","cum":2,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":18,"monthly":13,"shipped":0},{"name":"FEDS- 台中","cum":29,"monthly":11,"shipped":4},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":19,"monthly":2,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":0,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":1,"shipped":0},{"name":"南紡- 台南","cum":8,"monthly":4,"shipped":4},{"name":"夢時代- 高雄","cum":12,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":26,"monthly":11,"shipped":2},{"name":"漢神洲際- 台中","cum":7,"monthly":3,"shipped":2}]},"202606":{"dds":{"cum":349,"monthly":22,"shipped":27},"showroom":{"cum":47,"monthly":3,"shipped":4},"stores":[{"name":"Showroom- Taipei","cum":25,"monthly":2,"shipped":0},{"name":"Showroom- Taichung","cum":11,"monthly":1,"shipped":3},{"name":"Showroom- Hsinchu","cum":7,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":9,"monthly":0,"shipped":0},{"name":"SOGO- 忠孝","cum":26,"monthly":2,"shipped":4},{"name":"SOGO- 天母","cum":19,"monthly":1,"shipped":0},{"name":"SOGO- 新竹","cum":57,"monthly":2,"shipped":2},{"name":"FEDS- 板橋","cum":57,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":0,"shipped":3},{"name":"FEDS- 新竹","cum":3,"monthly":1,"shipped":2},{"name":"FEDS- 竹北","cum":19,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":31,"monthly":2,"shipped":4},{"name":"SKM- 信義A8","cum":3,"monthly":1,"shipped":0},{"name":"SKM- 台中中港","cum":20,"monthly":0,"shipped":1},{"name":"SKM- 台南西門","cum":11,"monthly":1,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":9,"monthly":0,"shipped":5},{"name":"夢時代- 高雄","cum":16,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":11,"monthly":3,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":27,"monthly":0,"shipped":1},{"name":"漢神洲際- 台中","cum":8,"monthly":2,"shipped":2}]},"202607":{"dds":{"cum":467,"monthly":107,"shipped":48},"showroom":{"cum":60,"monthly":19,"shipped":6},"stores":[{"name":"Showroom- Taipei","cum":34,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":14,"monthly":3,"shipped":5},{"name":"Showroom- Hsinchu","cum":7,"monthly":7,"shipped":1},{"name":"Showroom- Kaohsiung","cum":5,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":16,"monthly":9,"shipped":0},{"name":"SOGO- 忠孝","cum":35,"monthly":6,"shipped":4},{"name":"SOGO- 天母","cum":20,"monthly":0,"shipped":0},{"name":"SOGO- 新竹","cum":62,"monthly":5,"shipped":2},{"name":"FEDS- 板橋","cum":61,"monthly":4,"shipped":0},{"name":"FEDS- 桃園","cum":23,"monthly":2,"shipped":3},{"name":"FEDS- 新竹","cum":5,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":20,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":36,"monthly":5,"shipped":4},{"name":"SKM- 信義A8","cum":5,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":30,"monthly":7,"shipped":1},{"name":"SKM- 台南西門","cum":15,"monthly":4,"shipped":3},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":40,"monthly":31,"shipped":23},{"name":"夢時代- 高雄","cum":22,"monthly":6,"shipped":1},{"name":"義享天地- 高雄","cum":15,"monthly":4,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":28,"monthly":2,"shipped":1},{"name":"漢神洲際- 台中","cum":32,"monthly":17,"shipped":5}]},"202608":{"dds":{"cum":687,"monthly":216,"shipped":105},"showroom":{"cum":87,"monthly":18,"shipped":13},"stores":[{"name":"Showroom- Taipei","cum":44,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":17,"monthly":3,"shipped":7},{"name":"Showroom- Hsinchu","cum":20,"monthly":4,"shipped":5},{"name":"Showroom- Kaohsiung","cum":6,"monthly":2,"shipped":1},{"name":"SOGO- 復興","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":41,"monthly":8,"shipped":5},{"name":"SOGO- 天母","cum":32,"monthly":12,"shipped":6},{"name":"SOGO- 新竹","cum":67,"monthly":2,"shipped":5},{"name":"SOGO- 大巨蛋","cum":11,"monthly":10,"shipped":1},{"name":"FEDS- 板橋","cum":64,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":24,"monthly":0,"shipped":7},{"name":"FEDS- 新竹","cum":6,"monthly":1,"shipped":0},{"name":"FEDS- 竹北","cum":27,"monthly":7,"shipped":1},{"name":"FEDS- 台中","cum":45,"monthly":9,"shipped":14},{"name":"SKM- 信義A8","cum":33,"monthly":28,"shipped":1},{"name":"SKM- 台中中港","cum":47,"monthly":18,"shipped":3},{"name":"SKM- 台南西門","cum":24,"monthly":8,"shipped":6},{"name":"特力- 南崁","cum":15,"monthly":13,"shipped":0},{"name":"南紡- 台南","cum":60,"monthly":19,"shipped":35},{"name":"夢時代- 高雄","cum":49,"monthly":26,"shipped":4},{"name":"義享天地- 高雄","cum":23,"monthly":8,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":33,"monthly":4,"shipped":1},{"name":"漢神洲際- 台中","cum":68,"monthly":39,"shipped":15}]},"202609":{"dds":{"cum":799,"monthly":122,"shipped":117},"showroom":{"cum":115,"monthly":28,"shipped":16},"stores":[{"name":"Showroom- Taipei","cum":66,"monthly":22,"shipped":0},{"name":"Showroom- Taichung","cum":19,"monthly":2,"shipped":10},{"name":"Showroom- Hsinchu","cum":21,"monthly":1,"shipped":5},{"name":"Showroom- Kaohsiung","cum":9,"monthly":3,"shipped":1},{"name":"SOGO- 復興","cum":18,"monthly":0,"shipped":0},{"name":"SOGO- 忠孝","cum":52,"monthly":11,"shipped":6},{"name":"SOGO- 天母","cum":49,"monthly":17,"shipped":8},{"name":"SOGO- 新竹","cum":69,"monthly":4,"shipped":6},{"name":"SOGO- 大巨蛋","cum":16,"monthly":6,"shipped":1},{"name":"FEDS- 板橋","cum":71,"monthly":8,"shipped":0},{"name":"FEDS- 桃園","cum":29,"monthly":5,"shipped":7},{"name":"FEDS- 新竹","cum":9,"monthly":4,"shipped":0},{"name":"FEDS- 竹北","cum":33,"monthly":6,"shipped":1},{"name":"FEDS- 台中","cum":58,"monthly":12,"shipped":16},{"name":"SKM- 信義A8","cum":37,"monthly":4,"shipped":1},{"name":"SKM- 台中中港","cum":49,"monthly":3,"shipped":4},{"name":"SKM- 台南西門","cum":33,"monthly":10,"shipped":6},{"name":"特力- 南崁","cum":18,"monthly":2,"shipped":0},{"name":"南紡- 台南","cum":61,"monthly":2,"shipped":36},{"name":"夢時代- 高雄","cum":58,"monthly":9,"shipped":4},{"name":"義享天地- 高雄","cum":33,"monthly":10,"shipped":2},{"name":"漢神巨蛋- 高雄","cum":36,"monthly":4,"shipped":2},{"name":"漢神洲際- 台中","cum":70,"monthly":5,"shipped":17}]}}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+(function(){
+  /* ---------- i18n ---------- */
+  var dict = {
+    zh: {
+      appname:"CRM 儀表板 · LINE OA",
+      nav_retail:"零售會員", nav_bystore:"門市總覽", nav_crm:"CRM 系統使用",
+      kicker_bystore:"門市總覽", h1_bystore:"門市會員與出貨明細",
+      by_store_label:"BY STORE", refresh:"重整",
+      store_name:"店櫃名稱", cum_members:"累積會員", monthly_new:"當月新增", shipped_cum:"已結案已出貨(累積)",
+      sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
+      store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
+      click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
+      crm_trend:"一對一聊天趨勢",
+      export_img:"匯出圖片", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
+      kicker1:"零售會員", h1_1:"DDS 與展示中心會員表現",
+      total_members:"零售會員總數", total_conversion:"零售總轉換率",
+      group_members:"會員數", group_conversion:"轉換率", ch_total:"Total Retail",
+      mom:"月增率", shipped_orders:"已出貨訂單", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
+      total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增",
+      trend_suffix:" 會員趨勢", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
+      kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
+      total_tags:"標籤使用總數",
+      across_members:"全台零售櫃位(包含DDS & Showroom)",
+      chat_windows:"聊天視窗數", usage_rate:"使用率", chat_badge:"一對一聊天",
+      draft_flag:"零售會員數據已連接即時資料",
+      data_wait:"資料載入中…", synced_at:"更新於",
+      data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
+    },
+    en: {
+      appname:"CRM Dashboard · LINE OA",
+      nav_retail:"Retail Membership", nav_bystore:"By Store", nav_crm:"CRM System Usage",
+      kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Shipments",
+      by_store_label:"BY STORE", refresh:"Refresh",
+      store_name:"Store", cum_members:"Cumulative Members", monthly_new:"Monthly New", shipped_cum:"Closed & Shipped (Cum.)",
+      sort_by:"Sort by", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
+      store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
+      click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
+      crm_trend:"1-on-1 Chat Trend",
+      export_img:"Export image", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
+      kicker1:"Retail Membership", h1_1:"DDS & Showroom Member Performance",
+      total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
+      group_members:"Members", group_conversion:"Conversion", ch_total:"Total Retail",
+      mom:"MoM", shipped_orders:"Shipped Orders", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
+      total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add",
+      trend_suffix:" Member Trend", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
+      kicker2:"CRM Platform", h2_2:"CRM System Usage",
+      total_tags:"Total Tags Used",
+      across_members:"Nationwide retail counters (DDS & Showroom included)",
+      chat_windows:"Chat Windows", usage_rate:"Usage Rate", chat_badge:"1-on-1 Chat",
+      draft_flag:"Retail membership data is live",
+      data_wait:"Loading data…", synced_at:"updated",
+      data_unavailable:"Couldn't load live data right now — try reloading the page"
+    }
+  };
+  var currentLang = 'en';
+  var drill = {channel:'all', month:9};
+  function t(k){ return dict[currentLang][k] !== undefined ? dict[currentLang][k] : k; }
+
+  function setLang(lang){
+    currentLang = lang;
+    document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-Hant' : 'en');
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      if (dict[lang][key] !== undefined) el.textContent = dict[lang][key];
+    });
+    document.querySelectorAll('.lang-toggle button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+    });
+    renderKpis();
+    renderMergedChart();
+    renderStoreTable();
+    renderCrmChart();
+  }
+  document.querySelectorAll('.lang-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); });
+  });
+
+  /* ---------- nav active-state scroll spy ---------- */
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.page-nav a'));
+  var sections = navLinks.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 140;
+    var activeIdx = 0;
+    sections.forEach(function(sec, i){ if (sec && sec.offsetTop <= pos) activeIdx = i; });
+    navLinks.forEach(function(a, i){ a.classList.toggle('active', i === activeIdx); });
+  }, {passive:true});
+
+  /* ---------- data (live, from the artifact db — see the sync block near the end of this script) ---------- */
+  // m = yyyymm key so ranges can span a year boundary. Populated by applyMonthDocs() once the
+  // "months" collection loads; empty here so every render function must handle "no data yet".
+  var monthDefs = [];
+  var storesByMonth = {}; // m (int) -> [{name, channel, cum, monthly, shipped}, ...]
+  var firstM = 0, latestM = 0, YEAR = new Date().getFullYear();
+  function pad2(n){ return ('0' + n).slice(-2); }
+  function ymLabel(m){ return Math.floor(m / 100) + '/' + pad2(m % 100); }
+  function ymValue(m){ return Math.floor(m / 100) + '-' + pad2(m % 100); }
+  function prevMonthOf(m){
+    var idx = monthDefs.map(function(r){ return r.m; }).indexOf(m);
+    return idx > 0 ? monthDefs[idx-1].m : null;
+  }
+  var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function monthLabel(m, isLatest){
+    var y = Math.floor(m / 100), mm = m % 100;
+    var label = MONTH_NAMES[mm - 1] || ('#' + mm);
+    if (y !== YEAR) label += " '" + String(y).slice(-2);
+    return isLatest ? label + '*' : label;
+  }
+  function classifyChannel(name){ return /^Showroom/.test(name) ? 'showroom' : 'dds'; }
+
+  // "2026-03" -> 202603; "latest" -> newest month in the data, so it keeps extending as months are added.
+  // Picking an end month before the start month is treated as the swapped range.
+  function monthOf(val, fallback){
+    if (val === 'latest') return latestM;
+    var p = String(val || '').split('-');
+    var y = parseInt(p[0], 10), mm = parseInt(p[1], 10);
+    return (y && mm) ? y * 100 + mm : fallback;
+  }
+  function monthRange(startVal, endVal){
+    var a = monthOf(startVal, firstM), b = monthOf(endVal, latestM);
+    return a <= b ? [a, b] : [b, a];
+  }
+
+  // Month dropdowns are generated from the data, newest first; the end dropdown also gets "Latest (to date)" on top.
+  function latestOption(){
+    return '<option value="latest" data-i18n="latest_opt">' + t('latest_opt') + '</option>';
+  }
+  function monthOptions(newestFirst){
+    var ms = monthDefs.map(function(r){ return r.m; });
+    if (newestFirst) ms.reverse();
+    return ms.map(function(m){ return '<option value="' + ymValue(m) + '">' + ymLabel(m) + '</option>'; }).join('');
+  }
+  // Range the member chart is drawn with; only the Query / Refresh buttons change it. Filled in by applyMonthDocs().
+  var globalRange = {start:null, end:'latest'};
+  function refreshMonthDropdowns(){
+    document.querySelectorAll('select.df-start').forEach(function(sel){
+      var keep = sel.value;
+      sel.innerHTML = monthOptions(true);
+      sel.value = keep && sel.querySelector('option[value="' + keep + '"]') ? keep : ymValue(firstM);
+    });
+    document.querySelectorAll('select.df-end').forEach(function(sel){
+      var keep = sel.value;
+      sel.innerHTML = latestOption() + monthOptions(true);
+      sel.value = keep && sel.querySelector('option[value="' + keep + '"]') ? keep : 'latest';
+    });
+  }
+
+  // ‹ › pager: each chart shows up to WINDOW[key] months; offset 0 = the most recent window.
+  var WINDOW = {merged:9, crm:6};
+  var pager = {merged:0, crm:0};
+  function applyWindow(key, n){
+    var maxOff = Math.max(0, n - WINDOW[key]);
+    pager[key] = Math.min(Math.max(pager[key], 0), maxOff);
+    var end = n - pager[key], start = Math.max(0, end - WINDOW[key]);
+    var el = document.querySelector('.pager[data-pager="' + key + '"]');
+    el.querySelector('.pg-text').textContent = (n ? (start + 1) + '–' + end : 0) + ' / ' + n;
+    el.querySelector('.pg-prev').disabled = pager[key] >= maxOff;
+    el.querySelector('.pg-next').disabled = pager[key] <= 0;
+    return [start, end];
+  }
+
+  function seriesFor(channel, mode, startDate, endDate){
+    var range = monthRange(startDate, endDate), startM = range[0], endM = range[1];
+    var rows = monthDefs.filter(function(r){ return r.m >= startM && r.m <= endM; });
+    if (!rows.length) rows = monthDefs;
+    var labels = rows.map(function(r){ return r.label; });
+    var months = rows.map(function(r){ return r.m; });
+    var cumVals = rows.map(function(r){
+      return channel === 'total' ? (r.cum.dds + r.cum.showroom) : r.cum[channel];
+    });
+    if (mode === 'cumulative') return {labels:labels, values:cumVals, months:months};
+    var monthlyVals = cumVals.map(function(v, i){
+      if (i === 0){
+        var idx = monthDefs.indexOf(rows[0]);
+        var prev = idx > 0 ? (channel === 'total' ? (monthDefs[idx-1].cum.dds+monthDefs[idx-1].cum.showroom) : monthDefs[idx-1].cum[channel]) : 0;
+        return v - prev;
+      }
+      return v - cumVals[i-1];
+    });
+    return {labels:labels, values:monthlyVals, months:months};
+  }
+
+  /* ---------- chart renderer ---------- */
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function renderChart(containerId, labels, values, colorVar, softVar, mode, scale, months, drillKey, opts){
+    scale = scale || 1;
+    months = months || [];
+    opts = opts || {};
+    var fmtV = opts.fmt || function(v){ return v; };
+    var fmtAxis = opts.fmtAxis || function(v){ return Math.round(v); };
+    var wrap = document.getElementById(containerId);
+    var color = cssVar(colorVar);
+    var soft = cssVar(softVar);
+    var ink = cssVar('--ink');
+    var axisFont = 13 * scale, ptFont = 16 * scale;
+    var W = 1040;
+    var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
+    if (labels.length <= 2){ W = 520; }
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxVal = Math.max.apply(null, values.concat([0]));
+    var minVal = Math.min.apply(null, values.concat([0]));
+    var span = Math.max(maxVal - minVal, 1);
+    var niceMax = Math.ceil((maxVal + span*0.15) / 5) * 5 || 5;
+    var niceMin = minVal < 0 ? Math.floor((minVal - span*0.15) / 5) * 5 : 0;
+    var range = niceMax - niceMin || 1;
+    var x = function(i){ return labels.length > 1 ? padL + (plotW * i) / (labels.length - 1) : padL + plotW/2; };
+    var y = function(v){ return padT + plotH - (plotH * (v - niceMin)) / range; };
+
+    var gridLines = '', axisLabels = '';
+    for (var g = 0; g <= 4; g++){
+      var val = niceMin + (range / 4) * g;
+      if (!opts.fmtAxis) val = Math.round(val);
+      var yy = y(val);
+      gridLines += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--border)" stroke-width="1"/>';
+      axisLabels += '<text x="' + (padL - 8 - 4*(scale-1)) + '" y="' + (yy + 4 + 4*(scale-1)) + '" text-anchor="end" class="axis-label" style="font-size:' + axisFont + 'px">' + fmtAxis(val) + '</text>';
+    }
+    var xLabels = '';
+    labels.forEach(function(lab, i){
+      xLabels += '<text x="' + x(i) + '" y="' + (H - 6 - 12*(scale-1)) + '" text-anchor="middle" class="axis-label" style="font-size:' + axisFont + 'px">' + lab + '</text>';
+    });
+
+    var points = values.map(function(v, i){ return [x(i), y(v)]; });
+    var pathD = points.length ? ('M ' + points[0][0] + ',' + points[0][1]) : '';
+    for (var i = 1; i < points.length; i++){
+      var x0 = points[i-1][0], y0 = points[i-1][1], x1 = points[i][0], y1 = points[i][1];
+      var cx = (x0 + x1) / 2;
+      pathD += ' C ' + cx + ',' + y0 + ' ' + cx + ',' + y1 + ' ' + x1 + ',' + y1;
+    }
+    var zeroY = y(0);
+    var areaD = points.length ? (pathD + ' L ' + points[points.length-1][0] + ',' + zeroY + ' L ' + points[0][0] + ',' + zeroY + ' Z') : '';
+
+    /* ---- peak emphasis: biggest step up (cumulative) or biggest single value (monthly) ---- */
+    var peakIdx = -1, peakDelta = -Infinity;
+    if (mode === 'monthly'){
+      values.forEach(function(v, i){ if (v > peakDelta){ peakDelta = v; peakIdx = i; } });
+    } else if (values.length > 1){
+      for (var pi = 1; pi < values.length; pi++){
+        var d = values[pi] - values[pi-1];
+        if (d > peakDelta){ peakDelta = d; peakIdx = pi; }
+      }
+    }
+    var showPeakBadge = !opts.noPeak && peakIdx > 0 && peakIdx < points.length - 1;
+
+    var dots = '', endLabels = '', guide = '';
+    points.forEach(function(p, i){
+      var isEnd = (i === 0 || i === points.length - 1);
+      var isPeak = (i === peakIdx);
+      var isSel = !!drillKey && months[i] === drill.month;
+      var r = isPeak ? 7 : (isEnd ? 5.5 : 4);
+      if (isSel){
+        guide = '<line x1="' + p[0] + '" y1="' + (padT - 10) + '" x2="' + p[0] + '" y2="' + zeroY + '" stroke="' + color + '" stroke-width="2" stroke-dasharray="4,4" opacity="0.45"/>';
+        dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r + 6) + '" fill="none" stroke="' + color + '" stroke-width="2.5" opacity="0.5"/>';
+      }
+      dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + color + '" stroke="var(--surface)" stroke-width="' + (isPeak ? 2.5 : 2) + '"/>';
+      var ly = p[1] - 14 - 16*(scale-1);
+      var anchor = i === 0 ? 'start' : (i === points.length - 1 ? 'end' : 'middle');
+      endLabels += '<text x="' + p[0] + '" y="' + ly + '" text-anchor="' + anchor + '" class="pt-label" style="font-size:' + ptFont + 'px" fill="' + color + '">' + fmtV(values[i]) + '</text>';
+    });
+
+    var peakBadge = '';
+    if (showPeakBadge){
+      var px = points[peakIdx][0], py = points[peakIdx][1];
+      var badgeY = Math.max(py - 48 - 38*(scale-1), padT - 20 - 5*(scale-1));
+      var badgeText = (peakDelta >= 0 ? '+' : '') + peakDelta;
+      var badgeW = 22 + String(badgeText).length * 8.4;
+      var halfW = badgeW / 2;
+      var badgeCx = Math.min(Math.max(px, padL + halfW), (W - padR) - halfW);
+      peakBadge =
+        '<rect x="' + (badgeCx - halfW) + '" y="' + (badgeY - 14) + '" width="' + badgeW + '" height="28" rx="14" fill="' + ink + '"/>' +
+        '<text x="' + badgeCx + '" y="' + (badgeY + 5) + '" text-anchor="middle" class="peak-label">' + badgeText + '</text>';
+    }
+
+    wrap.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs><linearGradient id="grad-' + containerId + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="' + soft + '" stop-opacity="1"/>' +
+          '<stop offset="100%" stop-color="' + soft + '" stop-opacity="0"/>' +
+        '</linearGradient></defs>' +
+        gridLines +
+        '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W-padR) + '" y2="' + zeroY + '" stroke="var(--border)" stroke-width="1.5"/>' +
+        axisLabels + xLabels +
+        guide +
+        '<path d="' + areaD + '" fill="url(#grad-' + containerId + ')" stroke="none"/>' +
+        '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+        dots + endLabels + peakBadge +
+        '<g class="hover-dot"><circle r="' + (8*scale) + '" fill="' + color + '" stroke="var(--surface)" stroke-width="3"/></g>' +
+        '<rect class="hover-zone' + (drillKey ? '' : ' no-drill') + '" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/>' +
+      '</svg>' +
+      '<div class="tooltip" id="' + containerId + 'Tip"></div>';
+
+    var tip = document.getElementById(containerId + 'Tip');
+    attachSmoothHover({
+      wrap: wrap, tip: tip, W: W, n: points.length,
+      xOf: function(i){ return points[i][0]; },
+      yOf: function(i){ return points[i][1]; },
+      fill: function(i){
+        var bd = opts.breakdown && opts.breakdown[i];
+        if (!bd){
+          tip.textContent = labels[i] + ': ' + fmtV(values[i]) + (drillKey ? ' · ' + t('click_drill') : '');
+          return false;
+        }
+        var row = function(colorVar, name, v){
+          return '<div class="rt-row"><span class="rt-sw" style="background:var(' + colorVar + ')"></span>' + name + ': ' + Number(fmtV(v)).toLocaleString() + '</div>';
+        };
+        tip.innerHTML = '<div class="rt-title">' + ymLabel(months[i]) + '</div>' +
+          row('--orange', t('ch_total'), values[i]) +
+          row('--purple', 'DDS', bd.dds) +
+          row('--teal', 'Showroom', bd.showroom) +
+          (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
+        return true;
+      },
+      onClick: drillKey ? function(i){ if (months[i]) setDrill(drillKey, months[i], true); } : null
+    });
+  }
+
+  // One hover zone covers the whole chart: the pointer snaps to the nearest month and the
+  // tooltip + highlight dot glide there, so moving across the chart never drops the tooltip.
+  function attachSmoothHover(cfg){
+    var svgEl = cfg.wrap.querySelector('svg');
+    var zone = cfg.wrap.querySelector('.hover-zone'), mark = cfg.wrap.querySelector('.hover-dot');
+    var tip = cfg.tip, cur = -1;
+    function nearest(clientX){
+      var rect = svgEl.getBoundingClientRect(), x = (clientX - rect.left) * cfg.W / rect.width;
+      var best = 0, bestD = Infinity;
+      for (var i = 0; i < cfg.n; i++){
+        var d = Math.abs(cfg.xOf(i) - x);
+        if (d < bestD){ bestD = d; best = i; }
+      }
+      return best;
+    }
+    function show(i){
+      var rect = svgEl.getBoundingClientRect(), k = rect.width / cfg.W;
+      var entering = !tip.classList.contains('show');
+      var rich = cfg.fill(i);
+      tip.classList.toggle('rich', rich);
+      var px = cfg.xOf(i) * k, py = cfg.yOf(i) * k, ty = py;
+      tip.classList.toggle('flip', rich && px > rect.width * 0.62);
+      if (rich){
+        var half = tip.offsetHeight / 2;
+        ty = Math.min(Math.max(py, half + 4), cfg.wrap.clientHeight - half - 4);
+      }
+      // First appearance: place instantly (no slide in from the last position), then glide from there on.
+      if (entering){ tip.classList.add('snap'); mark.classList.add('snap'); }
+      tip.style.setProperty('--arrow-dy', (py - ty) + 'px');
+      tip.style.left = px + 'px';
+      tip.style.top = ty + 'px';
+      mark.style.transform = 'translate(' + cfg.xOf(i) + 'px,' + cfg.yOf(i) + 'px)';
+      if (entering){ void tip.offsetWidth; tip.classList.remove('snap'); mark.classList.remove('snap'); }
+      tip.classList.add('show'); mark.classList.add('show');
+    }
+    zone.addEventListener('pointermove', function(e){
+      var i = nearest(e.clientX);
+      if (i !== cur){ cur = i; show(i); }
+    });
+    zone.addEventListener('pointerleave', function(){
+      cur = -1;
+      tip.classList.remove('show'); mark.classList.remove('show');
+    });
+    if (cfg.onClick) zone.addEventListener('click', function(e){ cfg.onClick(nearest(e.clientX)); });
+  }
+
+  // The merged trend chart shows whichever channel the shared filter bar has selected.
+  var mergedChannelMeta = {
+    all:      {colorVar:'--orange', softVar:'--orange-tint', seriesKey:'total'},
+    dds:      {colorVar:'--purple', softVar:'--purple-soft', seriesKey:'dds'},
+    showroom: {colorVar:'--teal',   softVar:'--teal-soft',   seriesKey:'showroom'}
+  };
+
+  function renderMergedChart(){
+    if (!monthDefs.length) return;
+    var meta = mergedChannelMeta[drill.channel];
+    var mode = document.querySelector('input[name="merged-mode"]:checked').value;
+    var start = globalRange.start, end = globalRange.end;
+    var data = seriesFor(meta.seriesKey, mode, start, end);
+    var w = applyWindow('merged', data.labels.length);
+    var chartOpts = {};
+    if (drill.channel === 'all'){
+      var ddsVals = seriesFor('dds', mode, start, end).values;
+      var srVals = seriesFor('showroom', mode, start, end).values;
+      chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
+    }
+    renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, 1, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
+    document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
+    var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
+    document.getElementById('mergedTitle').textContent = name;
+  }
+
+  /* ---------- funnel (generalized: N stages, proportional taper) ---------- */
+  function shadeRamp(n){
+    var c0 = [255,117,88], c1 = [255,216,207]; // #FF7558 -> #FFD8CF
+    var out = [];
+    for (var i = 0; i < n; i++){
+      var t = n === 1 ? 0 : i/(n-1);
+      var r = Math.round(c0[0]+(c1[0]-c0[0])*t);
+      var g = Math.round(c0[1]+(c1[1]-c0[1])*t);
+      var b = Math.round(c0[2]+(c1[2]-c0[2])*t);
+      out.push('rgb('+r+','+g+','+b+')');
+    }
+    return out;
+  }
+
+  function renderFunnel(containerId, stages, opts){
+    opts = opts || {};
+    var wrap = document.getElementById(containerId);
+    var n = stages.length;
+    var colors = shadeRamp(n);
+    var bandH = opts.bandH || 68;
+    var padTop = 14, padBottom = 14;
+    var H = padTop + padBottom + n*bandH;
+    var W = opts.width || 460;
+    var fx0 = opts.labelWidth || 150, fx1 = W - 16, Wf = fx1 - fx0, centerX = (fx0 + fx1) / 2;
+    var maxVal = Math.max.apply(null, stages.map(function(s){ return s.value; }));
+    var minHalfW = Wf * 0.205;
+    var halfW = stages.map(function(s){ return minHalfW + (Wf/2 - minHalfW) * (s.value / maxVal); });
+    var boundaryHalfW = halfW.concat([halfW[n-1]]);
+    var shapes = '', labels = '';
+    for (var i = 0; i < n; i++){
+      var yTop = padTop + i*bandH, yBot = padTop + (i+1)*bandH;
+      var hw0 = boundaryHalfW[i], hw1 = boundaryHalfW[i+1];
+      var x0a = centerX-hw0, x0b = centerX+hw0, x1a = centerX-hw1, x1b = centerX+hw1;
+      shapes += '<polygon points="'+x0a+','+yTop+' '+x0b+','+yTop+' '+x1b+','+yBot+' '+x1a+','+yBot+'" fill="'+colors[i]+'" stroke="var(--surface)" stroke-width="3"/>';
+      var yMid = (yTop + yBot) / 2;
+      var st = stages[i];
+      var valueText = st.suffix ? (st.value + st.suffix) : st.value;
+      if (i === 0 && hw0 > 70){
+        labels += '<text x="'+centerX+'" y="'+(yMid+5)+'" text-anchor="middle" class="funnel-name on-band">'+st.label+' <tspan class="funnel-pct on-band">('+valueText+')</tspan></text>';
+      } else {
+        var edgeX = (x0a + x1a) / 2;
+        labels += '<text x="'+(fx0-14)+'" y="'+(yMid-3)+'" text-anchor="end" class="funnel-name">'+st.label+'</text>';
+        labels += '<text x="'+(fx0-14)+'" y="'+(yMid+13)+'" text-anchor="end" class="funnel-pct">('+valueText+')</text>';
+        labels += '<line x1="'+(fx0-10)+'" y1="'+yMid+'" x2="'+edgeX+'" y2="'+yMid+'" stroke="var(--border)" stroke-width="1.3" stroke-dasharray="2,3"/>';
+      }
+    }
+    wrap.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+shapes+labels+'</svg>';
+  }
+
+  document.querySelectorAll('input[name="merged-mode"]').forEach(function(r){
+    r.addEventListener('change', renderMergedChart);
+  });
+
+  /* ---------- by-store table ---------- */
+  var storeSort = {dir:null};
+
+  function storeRowsFor(channel, m){
+    var rows = storesByMonth[m] || [];
+    return channel === 'all' ? rows : rows.filter(function(s){ return s.channel === channel; });
+  }
+
+  function renderStoreTable(){
+    if (!monthDefs.length) return;
+    var rows = storeRowsFor(drill.channel, drill.month);
+    if (storeSort.dir){
+      rows.sort(function(a,b){
+        var d = (a.cum - b.cum) || (a.monthly - b.monthly) || (a.shipped - b.shipped);
+        return storeSort.dir === 'asc' ? d : -d;
+      });
+    }
+    var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
+    document.getElementById('storeTableBody').innerHTML = rows.map(function(r){
+      return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
+        '<td class="st-num st-cum">' + r.cum + '</td>' +
+        '<td class="st-num st-monthly">' + r.monthly + '</td>' +
+        '<td class="st-num st-shipped">' + r.shipped + '</td></tr>';
+    }).join('');
+    var sum = function(k){ return rows.reduce(function(a, r){ return a + r[k]; }, 0); };
+    document.getElementById('storeTableFoot').innerHTML =
+      '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
+      '<td class="st-num st-cum">' + sum('cum') + '</td>' +
+      '<td class="st-num st-monthly">' + sum('monthly') + '</td>' +
+      '<td class="st-num st-shipped">' + sum('shipped') + '</td></tr>';
+
+    document.querySelectorAll('#globalChannelSeg button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-ch') === drill.channel);
+    });
+    updateSortIndicators();
+  }
+
+  function updateSortIndicators(){
+    var dd = document.querySelector('.store-sort-dd');
+    dd.classList.toggle('active', !!storeSort.dir);
+    dd.querySelector('.sort-dd-label').textContent = storeSort.dir
+      ? (storeSort.dir === 'desc' ? t('sort_desc') : t('sort_asc'))
+      : t('sort_default');
+    dd.querySelectorAll('.sort-dd-item').forEach(function(item){
+      item.classList.toggle('active', storeSort.dir === item.getAttribute('data-dir'));
+    });
+  }
+
+  function setDrill(channel, month, fromChart){
+    drill = {channel:channel, month:month};
+    renderMergedChart();
+    renderStoreTable();
+    if (fromChart){
+      var card = document.getElementById('bystore');
+      var r = card.getBoundingClientRect();
+      if (r.top > window.innerHeight - 120) card.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
+
+  document.querySelectorAll('.sort-dd-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var dd = btn.closest('.sort-dd');
+      var wasOpen = dd.classList.contains('open');
+      document.querySelectorAll('.sort-dd.open').forEach(function(o){ o.classList.remove('open'); });
+      dd.classList.toggle('open', !wasOpen);
+    });
+  });
+  document.querySelectorAll('.sort-dd-item').forEach(function(item){
+    item.addEventListener('click', function(e){
+      e.stopPropagation();
+      var dd = item.closest('.sort-dd');
+      storeSort.dir = item.getAttribute('data-dir');
+      dd.classList.remove('open');
+      renderStoreTable();
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.sort-dd.open').forEach(function(o){ o.classList.remove('open'); });
+  });
+  document.querySelectorAll('#globalChannelSeg button').forEach(function(b){
+    b.addEventListener('click', function(){ setDrill(b.getAttribute('data-ch'), drill.month); });
+  });
+  function applyGlobalRange(){
+    globalRange = {start:document.getElementById('globalStart').value, end:document.getElementById('globalEnd').value};
+    pager.merged = 0;
+    setDrill(drill.channel, monthOf(globalRange.end, latestM));
+  }
+  document.getElementById('globalQuery').addEventListener('click', applyGlobalRange);
+  document.getElementById('storeRefreshBtn').addEventListener('click', function(){
+    storeSort = {dir:null};
+    document.getElementById('globalStart').value = ymValue(firstM);
+    document.getElementById('globalEnd').value = 'latest';
+    globalRange = {start:ymValue(firstM), end:'latest'};
+    pager.merged = 0;
+    setDrill('all', latestM);
+  });
+
+  /* ---------- CRM 1-on-1 chat trend (single card, DDS/Showroom switch) ---------- */
+  // Sample data: monthly chat windows; Sep matches the cards (DDS 42, Showroom 38).
+  // Usage rate = chat windows / cumulative members, so Sep lands on 5.26% / 33.04%.
+  // Sample data — no live source for CRM chat metrics yet. Indexed positionally against
+  // monthDefs, oldest first; if monthDefs ever has more months than this, the earliest
+  // months just get 0 (see renderCrmChart's chatWindowsFor() below).
+  var crmWindows = {
+    dds:      [3, 12, 15, 18, 24, 35, 42],
+    showroom: [4, 8, 10, 14, 20, 29, 38]
+  };
+  function chatWindowsFor(channel, monthIndex, monthCount){
+    var arr = crmWindows[channel];
+    var pad = monthCount - arr.length; // extra (older) months with no sample data
+    var idx = monthIndex - pad;
+    return idx >= 0 && idx < arr.length ? arr[idx] : 0;
+  }
+  var crmState = {channel:'all', start:null, end:'latest'};
+
+  // 4 equal intervals with a "nice" step (1/2/2.5/5 × 10^k) so both axes share gridlines.
+  function niceTop(max){
+    var raw = Math.max(max, 1e-9) * 1.15 / 4;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var n = raw / mag;
+    var step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+    return step * 4;
+  }
+  function trimNum(v){ return String(Math.round(v * 100) / 100); }
+
+  function renderCrmChart(){
+    if (!monthDefs.length) return;
+    var mr = monthRange(crmState.start, crmState.end), startM = mr[0], endM = mr[1];
+    var ch = crmState.channel, rows = [];
+    monthDefs.forEach(function(r, i){
+      if (r.m < startM || r.m > endM) return;
+      var rateOf = function(win, mem){ return mem ? Math.round(win / mem * 10000) / 100 : 0; };
+      var ddsW = chatWindowsFor('dds', i, monthDefs.length), srW = chatWindowsFor('showroom', i, monthDefs.length);
+      var w = ch === 'all' ? ddsW + srW : chatWindowsFor(ch, i, monthDefs.length);
+      var members = ch === 'all' ? r.cum.dds + r.cum.showroom : r.cum[ch];
+      var row = {label:r.label, m:r.m, windows:w, rate:rateOf(w, members)};
+      if (ch === 'all'){
+        row.dds = {windows:ddsW, rate:rateOf(ddsW, r.cum.dds)};
+        row.showroom = {windows:srW, rate:rateOf(srW, r.cum.showroom)};
+      }
+      rows.push(row);
+    });
+    var wrap = document.getElementById('crmChart');
+    var cw = applyWindow('crm', rows.length);
+    rows = rows.slice(cw[0], cw[1]);
+    if (!rows.length){ wrap.innerHTML = ''; return; }
+
+    var barColor = cssVar(ch === 'dds' ? '--purple' : ch === 'showroom' ? '--teal' : '--orange');
+    var lineColor = barColor;
+    document.querySelector('.combo-legend').style.setProperty('--crm-line', lineColor);
+    var W = 1040, H = 330, padL = 70, padR = 78, padT = 30, padB = 40;
+    var plotW = W - padL - padR, plotH = H - padT - padB, baseY = padT + plotH;
+    var wTop = niceTop(Math.max.apply(null, rows.map(function(r){ return r.windows; })));
+    var rTop = niceTop(Math.max.apply(null, rows.map(function(r){ return r.rate; })));
+    var yW = function(v){ return baseY - plotH * v / wTop; };
+    var yR = function(v){ return baseY - plotH * v / rTop; };
+    var band = plotW / rows.length, barW = Math.min(band * 0.38, 70);
+    var cxOf = function(i){ return padL + band * (i + 0.5); };
+
+    var grid = '', axes = '';
+    for (var g = 0; g <= 4; g++){
+      var yy = baseY - plotH * g / 4;
+      grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--border)" stroke-width="1"/>';
+      axes += '<text x="' + (padL - 10) + '" y="' + (yy + 4) + '" text-anchor="end" class="axis-label">' + trimNum(wTop * g / 4) + '</text>';
+      axes += '<text x="' + (W - padR + 10) + '" y="' + (yy + 4) + '" text-anchor="start" class="axis-label">' + trimNum(rTop * g / 4) + '%</text>';
+    }
+    axes += '<text transform="translate(16,' + (padT + plotH/2) + ') rotate(-90)" text-anchor="middle" class="axis-title">' + t('chat_windows') + '</text>';
+    axes += '<text transform="translate(' + (W - 14) + ',' + (padT + plotH/2) + ') rotate(90)" text-anchor="middle" class="axis-title">' + t('usage_rate') + ' (%)</text>';
+
+    var bars = '', barLabels = '', xLabels = '';
+    rows.forEach(function(r, i){
+      var cx = cxOf(i), top = yW(r.windows), h = baseY - top, x0 = cx - barW/2, rad = Math.min(6, h);
+      bars += '<path d="M' + x0 + ',' + baseY + ' V' + (top + rad) + ' Q' + x0 + ',' + top + ' ' + (x0 + rad) + ',' + top +
+        ' H' + (x0 + barW - rad) + ' Q' + (x0 + barW) + ',' + top + ' ' + (x0 + barW) + ',' + (top + rad) + ' V' + baseY + ' Z" fill="' + barColor + '" fill-opacity="0.45"/>';
+      barLabels += '<text x="' + cx + '" y="' + (h > 24 ? baseY - 9 : top - 6) + '" text-anchor="middle" class="bar-label">' + r.windows + '</text>';
+      xLabels += '<text x="' + cx + '" y="' + (H - 12) + '" text-anchor="middle" class="axis-label">' + r.label + '</text>';
+    });
+
+    var pts = rows.map(function(r, i){ return [cxOf(i), yR(r.rate)]; });
+    var path = 'M ' + pts[0][0] + ',' + pts[0][1];
+    for (var i = 1; i < pts.length; i++){
+      var mx = (pts[i-1][0] + pts[i][0]) / 2;
+      path += ' C ' + mx + ',' + pts[i-1][1] + ' ' + mx + ',' + pts[i][1] + ' ' + pts[i][0] + ',' + pts[i][1];
+    }
+    var dots = '', rateLabels = '';
+    pts.forEach(function(p, i){
+      dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="2.5"/>';
+      rateLabels += '<text x="' + p[0] + '" y="' + (p[1] - 14) + '" text-anchor="middle" class="rate-label" fill="' + lineColor + '" style="fill:' + lineColor + '">' + rows[i].rate.toFixed(2) + '%</text>';
+    });
+
+    wrap.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">' +
+        grid + '<line x1="' + padL + '" y1="' + baseY + '" x2="' + (W - padR) + '" y2="' + baseY + '" stroke="var(--border)" stroke-width="1.5"/>' +
+        axes + bars + barLabels + xLabels +
+        '<path d="' + path + '" fill="none" stroke="' + lineColor + '" stroke-width="2.5" stroke-linecap="round"/>' +
+        dots + rateLabels +
+        '<g class="hover-dot"><circle r="8" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="3"/></g>' +
+        '<rect class="hover-zone no-drill" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/>' +
+      '</svg><div class="tooltip" id="crmChartTip"></div>';
+
+    var tip = document.getElementById('crmChartTip');
+    attachSmoothHover({
+      wrap: wrap, tip: tip, W: W, n: rows.length,
+      xOf: function(i){ return cxOf(i); },
+      yOf: function(i){ return pts[i][1]; },
+      fill: function(i){
+        var r = rows[i];
+        if (!r.dds){
+          tip.textContent = r.label + ' · ' + t('chat_windows') + ' ' + r.windows + ' · ' + t('usage_rate') + ' ' + r.rate.toFixed(2) + '%';
+          return false;
+        }
+        var line = function(colorVar, name, d){
+          return '<div class="rt-row"><span class="rt-sw" style="background:var(' + colorVar + ')"></span>' + name + ': ' +
+            d.windows + ' · ' + d.rate.toFixed(2) + '%</div>';
+        };
+        tip.innerHTML = '<div class="rt-title">' + ymLabel(r.m) + '</div>' +
+          '<div class="rt-sub">' + t('chat_windows') + ' · ' + t('usage_rate') + '</div>' +
+          line('--orange', t('ch_all_btn'), r) +
+          line('--purple', 'DDS', r.dds) +
+          line('--teal', 'Showroom', r.showroom);
+        return true;
+      }
+    });
+
+    document.getElementById('crmSwatch').style.background = barColor;
+    var lb = document.getElementById('crmLegendBar');
+    lb.style.background = barColor;
+    document.querySelectorAll('#crmChannelSeg button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-ch') === ch);
+    });
+  }
+
+  document.querySelectorAll('#crmChannelSeg button').forEach(function(b){
+    b.addEventListener('click', function(){ crmState.channel = b.getAttribute('data-ch'); renderCrmChart(); });
+  });
+  document.querySelector('#crmFilter .df-query').addEventListener('click', function(){
+    var f = document.getElementById('crmFilter');
+    crmState.start = f.querySelector('.df-start').value;
+    crmState.end = f.querySelector('.df-end').value;
+    pager.crm = 0;
+    renderCrmChart();
+  });
+
+  document.querySelectorAll('.pager').forEach(function(el){
+    var key = el.getAttribute('data-pager');
+    var redraw = function(){ if (key === 'crm') renderCrmChart(); else renderMergedChart(); };
+    el.querySelector('.pg-prev').addEventListener('click', function(){ pager[key]++; redraw(); });
+    el.querySelector('.pg-next').addEventListener('click', function(){ pager[key]--; redraw(); });
+  });
+
+  /* ---------- export store table as PNG ---------- */
+  var toastTimer;
+  function toast(msg){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.hidden = true; }, 2600);
+  }
+
+  // Export works everywhere: inside claude.ai the page must use the platform's downloads capability
+  // (sandboxed frames can't trigger plain downloads); anywhere else (GitHub Pages, a saved file) a
+  // normal browser download link is used.
+  var downloadsApi = null;
+  var exportBtns = Array.prototype.slice.call(document.querySelectorAll('.export-btn'));
+  exportBtns.forEach(function(b){ b.hidden = typeof html2canvas === 'undefined'; });
+  if (window.claude && window.claude.use){
+    window.claude.use('downloads').then(function(api){ downloadsApi = api; });
+  }
+  function saveBlob(blob, filename){
+    if (downloadsApi) return downloadsApi.save({filename: filename, data: blob});
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    return Promise.resolve();
+  }
+
+  function exportCardAsImage(btn, card, filename, ignoreSelector){
+    if (typeof html2canvas === 'undefined') return;
+    var label = btn.querySelector('.export-label');
+    var prevLabel = label.textContent;
+    btn.disabled = true;
+    label.textContent = t('exporting');
+    html2canvas(card, {
+      backgroundColor: cssVar('--surface'),
+      scale: 2,
+      ignoreElements: function(el){ return ignoreSelector && el.matches && el.matches(ignoreSelector); }
+    }).then(function(canvas){
+      return new Promise(function(resolve){ canvas.toBlob(resolve, 'image/png'); });
+    }).then(function(blob){
+      return saveBlob(blob, filename);
+    }).then(function(){
+      toast(t('export_saved'));
+    }).catch(function(err){
+      if (err && err.code === 'declined') return;
+      toast(t('export_fail'));
+    }).then(function(){
+      btn.disabled = false;
+      label.textContent = prevLabel === t('exporting') ? t('export_img') : prevLabel;
+    });
+  }
+
+  var chartExportMeta = {
+    store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; },
+    crm: function(){ return 'CRMChat_' + crmState.channel; }
+  };
+  document.querySelectorAll('[data-export]').forEach(function(btn){
+    var key = btn.getAttribute('data-export');
+    btn.addEventListener('click', function(){
+      var card = btn.closest('.chart-card, .store-card');
+      var ignore = key === 'store' ? '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd' : '.chart-filter, .pager, .export-btn';
+      exportCardAsImage(btn, card, 'BOSCH_' + chartExportMeta[key]() + '_' + YEAR + '.png', ignore);
+    });
+  });
+
+  setLang('en');
+
+  /* ---------- live data: embedded in the page (#liveData), rewritten and republished by the hourly Google Sheet sync ---------- */
+  // Embedding (not a per-viewer data store) means everyone who can open the link sees identical numbers.
+  // Each entry of liveData.months is one calendar month keyed "yyyymm": {dds:{cum,monthly,shipped},
+  // showroom:{...}, stores:[{name,cum,monthly,shipped}, ...]}; sorting by key is chronological.
+  // KPI cards: latest month in the data vs the month before it.
+  var summaryByMonth = {};
+  function renderKpis(){
+    if (!monthDefs.length) return;
+    var cur = summaryByMonth[latestM], prevM = prevMonthOf(latestM), prev = prevM ? summaryByMonth[prevM] : null;
+    var pick = function(sum, ch, k){ return !sum ? 0 : ch === 'total' ? (sum.dds[k] || 0) + (sum.showroom[k] || 0) : (sum[ch][k] || 0); };
+    var prevName = prevM ? (currentLang === 'zh' ? (prevM % 100) + '月' : MONTH_NAMES[prevM % 100 - 1]) : '';
+    ['total', 'dds', 'showroom'].forEach(function(ch){
+      var q = function(kind){ return document.querySelector('[data-kpi="' + kind + '"][data-ch="' + ch + '"]'); };
+      var cum = pick(cur, ch, 'cum'), prevCum = pick(prev, ch, 'cum'), shipped = pick(cur, ch, 'shipped');
+      q('cum').textContent = cum.toLocaleString();
+      var momEl = q('mom'), deltaEl = q('delta');
+      if (prev && prevCum){
+        var pct = (cum - prevCum) / prevCum * 100, dir = pct >= 0 ? 'up' : 'down';
+        momEl.className = 'trend ' + dir;
+        momEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+        var d = cum - prevCum;
+        deltaEl.textContent = (d >= 0 ? '+' : '') + d.toLocaleString() + ' ' + t('vs_prev').replace('{m}', prevName);
+      } else {
+        momEl.className = 'trend'; momEl.textContent = ''; deltaEl.textContent = '';
+      }
+      q('conv').textContent = cum ? (shipped / cum * 100).toFixed(1) + '%' : '–';
+      q('shipped').textContent = shipped.toLocaleString() + ' ' + t('shipped_orders');
+    });
+  }
+
+  var dataBooted = false;
+  function applyMonthDocs(docs){
+    var sorted = docs.slice().sort(function(a, b){ return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
+    var newMonthDefs = [], newStoresByMonth = {}, newSummary = {};
+    sorted.forEach(function(doc, i){
+      var v = doc.data();
+      if (!v || !v.dds || !v.showroom) return;
+      var m = parseInt(doc.id, 10);
+      newMonthDefs.push({label: null, m: m, cum: {dds: v.dds.cum || 0, showroom: v.showroom.cum || 0}});
+      newSummary[m] = {dds: v.dds, showroom: v.showroom};
+      newStoresByMonth[m] = (v.stores || []).map(function(s){
+        return {name: s.name, channel: classifyChannel(s.name), cum: s.cum || 0, monthly: s.monthly || 0, shipped: s.shipped || 0};
+      });
+    });
+    if (!newMonthDefs.length){
+      document.getElementById('mergedChart').innerHTML = '<p class="data-wait" data-i18n="data_wait">' + t('data_wait') + '</p>';
+      return;
+    }
+    monthDefs = newMonthDefs; storesByMonth = newStoresByMonth; summaryByMonth = newSummary;
+    firstM = monthDefs[0].m; latestM = monthDefs[monthDefs.length - 1].m;
+    YEAR = Math.floor(latestM / 100);
+    monthDefs.forEach(function(r, i){ r.label = monthLabel(r.m, i === monthDefs.length - 1); });
+    if (!monthDefs.some(function(r){ return r.m === drill.month; })) drill.month = latestM;
+    refreshMonthDropdowns();
+    if (!dataBooted){ dataBooted = true; pager.merged = 0; pager.crm = 0; }
+    renderKpis();
+    renderMergedChart();
+    renderStoreTable();
+    renderCrmChart();
+  }
+
+  function showStamp(d){
+    var el = document.getElementById('syncedAt');
+    var stamp = pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    el.dataset.stamp = stamp;
+    el.textContent = ' · ' + t('synced_at') + ' ' + stamp;
+  }
+  document.querySelectorAll('.lang-toggle button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var el = document.getElementById('syncedAt');
+      if (el.dataset.stamp) el.textContent = ' · ' + t('synced_at') + ' ' + el.dataset.stamp;
+    });
+  });
+
+  // 1) Render the embedded copy immediately — works everywhere, even with no network access to Google.
+  var embeddedIds = [];
+  (function(){
+    var live = {};
+    try { live = JSON.parse(document.getElementById('liveData').textContent) || {}; } catch (e) {}
+    var months = live.months || {};
+    embeddedIds = Object.keys(months).sort();
+    applyMonthDocs(embeddedIds.map(function(id){ return {id: id, data: function(){ return months[id]; }}; }));
+    if (!embeddedIds.length){
+      document.getElementById('mergedChart').innerHTML = '<p class="data-wait" data-i18n="data_unavailable">' + t('data_unavailable') + '</p>';
+    }
+    if (live.syncedAt) showStamp(new Date(live.syncedAt));
+  })();
+
+  // 2) Then read the Google Sheet directly, so a sheet edit shows up on the next page load wherever the
+  // browser may reach docs.google.com (e.g. GitHub Pages). If that's blocked or fails, the embedded copy stays.
+  var SHEET_ID = '14XLEbQJf5qsLQ3cUhtGutuuY0lOuFS6p_TAevCgqLeE';
+  function parseCsv(text){
+    var rows = [], row = [], cell = '', inQ = false;
+    for (var i = 0; i < text.length; i++){
+      var c = text[i];
+      if (inQ){
+        if (c === '"'){ if (text[i + 1] === '"'){ cell += '"'; i++; } else inQ = false; }
+        else cell += c;
+      } else if (c === '"') inQ = true;
+      else if (c === ','){ row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r'){
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell !== '' || row.length){ row.push(cell); rows.push(row); }
+    return rows;
+  }
+  // Locates rows by their column-A labels rather than fixed positions, so it tolerates the CSV export
+  // dropping blank rows or header text.
+  function monthDocFromCsv(text){
+    var rows = parseCsv(text);
+    var a = function(r){ return String(r[0] || '').trim(); };
+    var n = function(v){ var x = parseFloat(String(v).replace(/,/g, '')); return isFinite(x) ? Math.round(x) : 0; };
+    var find = function(label, from){ for (var i = from; i < rows.length; i++) if (a(rows[i]) === label) return i; return -1; };
+    var di = find('DDS', 0), si = di < 0 ? -1 : find('Showroom', di + 1);
+    if (si < 0) return null;
+    var ti = find('Summarize', si + 1);
+    var triple = function(r){ return {cum: n(r[1]), monthly: n(r[2]), shipped: n(r[3])}; };
+    var doc = {dds: triple(rows[di]), showroom: triple(rows[si]), stores: []};
+    var i = (ti < 0 ? si : ti) + 1;
+    while (i < rows.length && !a(rows[i])) i++;
+    // The store list ends at a blank row or at the next section header (e.g. a "1-on-1 Chat" block below it).
+    var isSectionHead = function(label){ return label === 'Total Retail' || /^1-on-1/i.test(label); };
+    for (; i < rows.length && a(rows[i]) && !isSectionHead(a(rows[i])); i++){
+      var s = triple(rows[i]); s.name = a(rows[i]); doc.stores.push(s);
+    }
+    return doc.stores.length ? doc : null;
+  }
+  function nextYm(m){ var y = Math.floor(m / 100), mm = m % 100 + 1; if (mm > 12){ y++; mm = 1; } return y * 100 + mm; }
+  (function loadFromSheet(){
+    if (!window.fetch) return;
+    var now = new Date(), nowYm = now.getFullYear() * 100 + now.getMonth() + 1;
+    var ids = embeddedIds.length ? embeddedIds.slice() : ['202603'];
+    // Also try months after the newest known one, so a newly added tab appears without waiting for a sync.
+    for (var m = parseInt(ids[ids.length - 1], 10); m < nowYm + 1; ){ m = nextYm(m); ids.push(String(m)); }
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 10000);
+    Promise.all(ids.map(function(id){
+      var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&headers=0&sheet=' + id + '&_=' + Date.now();
+      return fetch(url, {signal: ctrl ? ctrl.signal : undefined, cache: 'no-store'})
+        .then(function(r){ return r.ok ? r.text() : null; })
+        .catch(function(){ return null; });
+    })).then(function(texts){
+      clearTimeout(timer);
+      // Any tab we already know about must come back readable, or we keep the embedded copy.
+      for (var k = 0; k < embeddedIds.length; k++) if (!texts[k]) return;
+      var docs = [], seen = {};
+      texts.forEach(function(txt, k){
+        if (!txt || seen[txt]) return;   // a tab that doesn't exist echoes another tab's content
+        seen[txt] = true;
+        var doc = monthDocFromCsv(txt);
+        if (doc) docs.push({id: ids[k], data: (function(d){ return function(){ return d; }; })(doc)});
+      });
+      if (!docs.length) return;
+      applyMonthDocs(docs);
+      showStamp(new Date());
+    });
+  })();
+})();
+</script>
+</body></html>
