@@ -247,8 +247,27 @@
   .sort-dd-item .chk{opacity:0; font-size:11px; color:var(--up)}
   .sort-dd-item.active .chk{opacity:1}
   .sort-dd-group + .sort-dd-group{margin-top:4px; padding-top:4px; border-top:1px solid rgba(255,255,255,.1)}
+  .th-sort{display:inline-block; margin-right:4px; color:#FFB199}
+  .th-sort:empty{display:none}
   /* store card's unified sort control sits on a light header, so it takes the neutral pill look instead of the on-dark table-header variant */
   .store-sort-dd{margin-left:0}
+  .store-sort-dd .sort-dd-item{white-space:nowrap}
+  .sort-dd-arrow:empty{display:none}
+  @media (max-width:480px){
+    main, .section{grid-template-columns:minmax(0,1fr)}
+    .shared-filter-label{white-space:normal}
+    #bystore .store-card-head{padding:14px 16px; gap:8px}
+    #bystore .store-card-head .label{white-space:nowrap}
+    #bystore .store-card-head .right{flex-wrap:nowrap; min-width:0; gap:8px}
+    #bystore .store-card-head .left{flex:none}
+    #bystore .store-sort-dd{display:flex; min-width:0; flex:0 1 auto}
+    #bystore .store-sort-dd .sort-dd-btn{min-width:0; max-width:100%; padding:7px 12px}
+    #bystore .store-sort-dd .sort-dd-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+    #bystore #storeRefreshBtn{flex:none}
+  }
+  @media (max-width:360px){
+    #bystore #storeRefreshBtn span{display:none}
+  }
   .store-sort-dd .sort-dd-btn{background:var(--surface); border:1px solid var(--border); color:var(--ink); border-radius:999px; padding:7px 14px; font-size:12.5px}
   .store-sort-dd .sort-dd-btn:hover{background:var(--bg)}
   .store-sort-dd.active .sort-dd-btn{background:var(--bg); border-color:var(--ink)}
@@ -406,10 +425,16 @@
         </div>
         <div class="right">
           <span class="sort-dd store-sort-dd">
-            <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><span class="sort-dd-arrow"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="sort-dd-menu">
-              <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
               <div class="sort-dd-group">
+                <div class="sort-dd-title" data-i18n="sort_field">排序欄位</div>
+                <button type="button" class="sort-dd-item" data-key="cum"><span data-i18n="cum_members">累積會員</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-key="monthly"><span data-i18n="monthly_new">當月新增</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-key="shipped"><span data-i18n="shipped_cum">已結案已出貨(累積)</span><span class="chk">✓</span></button>
+              </div>
+              <div class="sort-dd-group">
+                <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
                 <button type="button" class="sort-dd-item" data-dir="desc"><span data-i18n="sort_desc">由多至少</span><span class="chk">✓</span></button>
                 <button type="button" class="sort-dd-item" data-dir="asc"><span data-i18n="sort_asc">由少至多</span><span class="chk">✓</span></button>
               </div>
@@ -430,9 +455,9 @@
           <thead>
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
-              <th class="num"><span data-i18n="cum_members">累積會員</span></th>
-              <th class="num"><span data-i18n="monthly_new">當月新增</span></th>
-              <th class="num"><span data-i18n="shipped_cum">已結案已出貨(累積)</span></th>
+              <th class="num" data-sort-key="cum"><span class="th-sort"></span><span data-i18n="cum_members">累積會員</span></th>
+              <th class="num" data-sort-key="monthly"><span class="th-sort"></span><span data-i18n="monthly_new">當月新增</span></th>
+              <th class="num" data-sort-key="shipped"><span class="th-sort"></span><span data-i18n="shipped_cum">已結案已出貨(累積)</span></th>
             </tr>
           </thead>
           <tbody id="storeTableBody"></tbody>
@@ -532,7 +557,7 @@
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與出貨明細",
       by_store_label:"BY STORE", refresh:"重整",
       store_name:"店櫃名稱", cum_members:"累積會員", monthly_new:"當月新增", shipped_cum:"已結案已出貨(累積)",
-      sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
+      sort_field:"排序欄位", sort_short_shipped:"已出貨", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
       crm_trend:"一對一聊天趨勢",
@@ -557,7 +582,7 @@
       kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Shipments",
       by_store_label:"BY STORE", refresh:"Refresh",
       store_name:"Store", cum_members:"Cumulative Members", monthly_new:"Monthly New", shipped_cum:"Closed & Shipped (Cum.)",
-      sort_by:"Sort by", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
+      sort_field:"Sort by", sort_short_shipped:"Shipped", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
       crm_trend:"1-on-1 Chat Trend",
@@ -992,7 +1017,8 @@
   });
 
   /* ---------- by-store table ---------- */
-  var storeSort = {dir:null};
+  var storeSort = {key:'cum', dir:null};
+  var sortKeyLabel = {cum:'cum_members', monthly:'monthly_new', shipped:'sort_short_shipped'};
 
   function storeRowsFor(channel, m){
     var rows = storesByMonth[m] || [];
@@ -1003,9 +1029,9 @@
     if (!monthDefs.length) return;
     var rows = storeRowsFor(drill.channel, drill.month);
     if (storeSort.dir){
-      rows.sort(function(a,b){
-        var d = (a.cum - b.cum) || (a.monthly - b.monthly) || (a.shipped - b.shipped);
-        return storeSort.dir === 'asc' ? d : -d;
+      var k = storeSort.key;
+      rows = rows.slice().sort(function(a,b){
+        return storeSort.dir === 'asc' ? a[k] - b[k] : b[k] - a[k];
       });
     }
     var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
@@ -1031,11 +1057,17 @@
   function updateSortIndicators(){
     var dd = document.querySelector('.store-sort-dd');
     dd.classList.toggle('active', !!storeSort.dir);
-    dd.querySelector('.sort-dd-label').textContent = storeSort.dir
-      ? (storeSort.dir === 'desc' ? t('sort_desc') : t('sort_asc'))
-      : t('sort_default');
+    var arrow = storeSort.dir === 'asc' ? '↑' : '↓';
+    dd.querySelector('.sort-dd-label').textContent = storeSort.dir ? t(sortKeyLabel[storeSort.key]) : t('sort_default');
+    dd.querySelector('.sort-dd-arrow').textContent = storeSort.dir ? arrow : '';
     dd.querySelectorAll('.sort-dd-item').forEach(function(item){
-      item.classList.toggle('active', storeSort.dir === item.getAttribute('data-dir'));
+      var on = item.hasAttribute('data-key')
+        ? !!storeSort.dir && storeSort.key === item.getAttribute('data-key')
+        : storeSort.dir === item.getAttribute('data-dir');
+      item.classList.toggle('active', on);
+    });
+    document.querySelectorAll('.store-table th[data-sort-key]').forEach(function(th){
+      th.querySelector('.th-sort').textContent = storeSort.dir && th.getAttribute('data-sort-key') === storeSort.key ? arrow : '';
     });
   }
 
@@ -1063,7 +1095,12 @@
     item.addEventListener('click', function(e){
       e.stopPropagation();
       var dd = item.closest('.sort-dd');
-      storeSort.dir = item.getAttribute('data-dir');
+      if (item.hasAttribute('data-key')){
+        storeSort.key = item.getAttribute('data-key');
+        storeSort.dir = storeSort.dir || 'desc';
+      } else {
+        storeSort.dir = item.getAttribute('data-dir');
+      }
       dd.classList.remove('open');
       renderStoreTable();
     });
@@ -1081,7 +1118,7 @@
   }
   document.getElementById('globalQuery').addEventListener('click', applyGlobalRange);
   document.getElementById('storeRefreshBtn').addEventListener('click', function(){
-    storeSort = {dir:null};
+    storeSort = {key:'cum', dir:null};
     document.getElementById('globalStart').value = ymValue(firstM);
     document.getElementById('globalEnd').value = 'latest';
     globalRange = {start:ymValue(firstM), end:'latest'};
