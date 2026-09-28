@@ -2,7 +2,8 @@
 
 Usage: python3 sync_sheet.py <drive-tool-result.json | file.xlsx> <out_dir>
 
-Each tab named exactly YYYYMM (e.g. 202609) is one month; other tabs (copies etc.) are ignored.
+Each tab named YYYY-MM or YYYYMM (e.g. 2026-09) is one month; other tabs (copies etc.) are ignored.
+The dashed form is what the page's live read needs; the output id is always YYYYMM.
 Per tab: row 3 = DDS, row 4 = Showroom (cols B/C/D = cumulative / monthly new / shipped);
 store rows start at row 8 and run until column A is blank or a section header
 ("Total Retail", "1-on-1 ...") begins. Blank or non-numeric cells -> 0.
@@ -36,8 +37,10 @@ def main(src, out_dir):
     wb = load_workbook(src)
     os.makedirs(out_dir, exist_ok=True)
     for name in wb.sheetnames:
-        if not re.fullmatch(r'\d{6}', name):
+        m = re.fullmatch(r'(\d{4})-?(\d{2})', name.strip())
+        if not m:
             continue
+        month_id = m.group(1) + m.group(2)
         rows = list(wb[name].iter_rows(min_row=1, max_row=wb[name].max_row, values_only=True))
         doc = {'dds': triple(rows[2]), 'showroom': triple(rows[3]), 'stores': []}
         for r in rows[7:]:
@@ -45,8 +48,8 @@ def main(src, out_dir):
             if label == '' or label == 'Total Retail' or label.lower().startswith('1-on-1'):
                 break  # end of the store list: blank row or the next section (e.g. the 1-on-1 Chat block)
             doc['stores'].append({'name': str(r[0]).strip(), **triple(r)})
-        json.dump(doc, open(os.path.join(out_dir, name + '.json'), 'w', encoding='utf-8'), ensure_ascii=False)
-        print(name, 'DDS', doc['dds'], 'Showroom', doc['showroom'], len(doc['stores']), 'stores')
+        json.dump(doc, open(os.path.join(out_dir, month_id + '.json'), 'w', encoding='utf-8'), ensure_ascii=False)
+        print(month_id, 'DDS', doc['dds'], 'Showroom', doc['showroom'], len(doc['stores']), 'stores')
 
 
 if __name__ == '__main__':

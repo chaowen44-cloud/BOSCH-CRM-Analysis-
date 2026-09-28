@@ -1422,21 +1422,26 @@
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 10000);
     Promise.all(ids.map(function(id){
-      var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&headers=0&sheet=' + id + '&_=' + Date.now();
+      // Tabs are addressed as "2026-09": the CSV endpoint doesn't resolve all-digit names like "202609"
+      // (it silently returns the first tab), so the sheet's tabs must use the dashed form for live reads.
+      var tab = id.slice(0, 4) + '-' + id.slice(4);
+      var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&headers=0&sheet=' + encodeURIComponent(tab) + '&_=' + Date.now();
       return fetch(url, {signal: ctrl ? ctrl.signal : undefined, cache: 'no-store'})
         .then(function(r){ return r.ok ? r.text() : null; })
         .catch(function(){ return null; });
     })).then(function(texts){
       clearTimeout(timer);
-      // Any tab we already know about must come back readable, or we keep the embedded copy.
-      for (var k = 0; k < embeddedIds.length; k++) if (!texts[k]) return;
+      // A tab that can't be resolved comes back as another tab's content, so duplicates mean "not found".
+      // Every month we already know about must come back readable and distinct, or the live read is
+      // untrustworthy and the embedded copy stays.
       var docs = [], seen = {};
-      texts.forEach(function(txt, k){
-        if (!txt || seen[txt]) return;   // a tab that doesn't exist echoes another tab's content
-        seen[txt] = true;
-        var doc = monthDocFromCsv(txt);
-        if (doc) docs.push({id: ids[k], data: (function(d){ return function(){ return d; }; })(doc)});
-      });
+      for (var k = 0; k < ids.length; k++){
+        var txt = texts[k], known = k < embeddedIds.length;
+        var doc = txt && !seen[txt] ? monthDocFromCsv(txt) : null;
+        if (txt) seen[txt] = true;
+        if (!doc){ if (known) return; continue; }
+        docs.push({id: ids[k], data: (function(d){ return function(){ return d; }; })(doc)});
+      }
       if (!docs.length) return;
       applyMonthDocs(docs);
       showStamp(new Date());
