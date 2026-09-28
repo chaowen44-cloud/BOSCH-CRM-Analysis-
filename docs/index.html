@@ -322,6 +322,30 @@
   .bar-label{font-size:13px; font-weight:500; font-family:inherit; fill:var(--ink)}
   .rate-label{font-size:14px; font-weight:500; font-family:inherit; fill:var(--line-ink)}
   .refresh-btn:disabled{opacity:.6; cursor:wait}
+  /* ---- side navigation rail (wide screens) + back-to-top ---- */
+  .sn-target{scroll-margin-top:70px}
+  .side-nav{position:fixed; right:12px; top:50%; transform:translateY(-50%); z-index:15; display:flex; flex-direction:column; align-items:flex-end; padding:10px 8px; border:1px solid transparent; border-radius:14px; transition:background .2s ease, border-color .2s ease, box-shadow .2s ease}
+  .side-nav a{display:flex; align-items:center; justify-content:flex-end; gap:12px; height:24px; text-decoration:none; outline:none}
+  .side-nav a.sn-group:not(:first-child){margin-top:10px}
+  .sn-mark{width:6px; height:6px; border-radius:999px; background:var(--muted); opacity:.5; flex:none; transition:all .25s cubic-bezier(.22,1,.36,1)}
+  .sn-group .sn-mark{width:14px; height:3px; opacity:.7}
+  .side-nav a:hover .sn-mark, .side-nav a:focus-visible .sn-mark{opacity:1; background:var(--ink)}
+  .side-nav a.active .sn-mark{opacity:1; background:var(--orange); width:6px; height:16px}
+  .side-nav a.sn-group.active .sn-mark{width:18px; height:4px}
+  .sn-label{font-size:12.5px; font-weight:500; color:var(--muted); white-space:nowrap; opacity:0; transform:translateX(6px); pointer-events:none; transition:opacity .18s ease, transform .18s ease, color .15s ease}
+  .sn-group .sn-label{font-weight:600; color:var(--ink)}
+  .side-nav:hover, .side-nav:has(a:focus-visible){background:var(--surface); border-color:var(--border); box-shadow:var(--shadow)}
+  .side-nav:hover .sn-label, .side-nav:has(a:focus-visible) .sn-label{opacity:1; transform:none; pointer-events:auto}
+  .side-nav a:hover .sn-label, .side-nav a:focus-visible .sn-label{color:var(--ink)}
+  .side-nav a.active .sn-label{color:var(--orange)}
+  @media (max-width:1023px){ .side-nav{display:none} }
+  .to-top{position:fixed; right:20px; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); z-index:16; width:44px; height:44px; border-radius:999px; border:0; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 16px rgba(20,30,45,.22); opacity:0; transform:translateY(12px) scale(.9); pointer-events:none; transition:opacity .25s ease, transform .3s cubic-bezier(.22,1,.36,1), background .15s ease}
+  .to-top.show{opacity:1; transform:none; pointer-events:auto}
+  .to-top:hover{background:var(--orange)}
+  .to-top:focus-visible{outline:2px solid var(--orange); outline-offset:3px}
+  .to-top svg{width:20px; height:20px}
+  @media (max-width:480px){ .to-top{right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); width:42px; height:42px} }
+  @media (prefers-reduced-motion: reduce){ .side-nav, .sn-mark, .sn-label, .to-top{transition:none} }
   .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); background:var(--ink); color:var(--surface); font-size:13px; font-weight:500; padding:10px 16px; border-radius:10px; box-shadow:var(--shadow); z-index:50}
   .chart-card{transition:box-shadow .2s ease}
   .chart-card.drill-active{box-shadow:0 0 0 2px var(--drill), var(--shadow)}
@@ -374,7 +398,7 @@
       </div>
     </div>
 
-    <div class="metric-group">
+    <div class="metric-group sn-target" id="sn-members">
       <div class="metric-group-label" data-i18n="group_members">會員數 Members</div>
       <div class="row3">
         <div class="stat-card c-orange">
@@ -398,7 +422,7 @@
       </div>
     </div>
 
-    <div class="metric-group">
+    <div class="metric-group sn-target" id="sn-conversion">
       <div class="metric-group-label" data-i18n="group_conversion">轉換率 Conversion</div>
       <div class="row3">
         <div class="stat-card c-orange">
@@ -433,7 +457,7 @@
       <button type="button" class="df-query" id="globalQuery" data-i18n="query">查詢</button>
     </div>
 
-    <div class="chart-card">
+    <div class="chart-card sn-target" id="sn-trend">
       <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--orange)"></span><b id="mergedTitle" data-i18n="total_trend">零售會員趨勢</b>
         <div class="df-radios">
           <label class="df-radio"><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
@@ -504,13 +528,13 @@
       </div>
     </div>
 
-    <div class="ov-card">
+    <div class="ov-card sn-target" id="sn-tags">
       <div class="label" data-i18n="total_tags">標籤使用總數</div>
       <div class="bignum num" data-kpi="tags">–</div>
       <div class="sub" data-i18n="across_members">全台零售櫃位(包含DDS & Showroom)</div>
     </div>
 
-    <div class="row2">
+    <div class="row2 sn-target" id="sn-chat">
       <div class="engage-card dds">
         <div class="engage-head">
           <span class="name"><span class="swatch" style="background:var(--purple)"></span>DDS</span>
@@ -535,7 +559,7 @@
       </div>
     </div>
 
-    <div class="chart-card">
+    <div class="chart-card sn-target" id="sn-chattrend">
       <div class="chart-head"><span class="swatch" id="crmSwatch" style="background:var(--orange)"></span><b data-i18n="crm_trend">一對一聊天趨勢</b></div>
       <div class="chart-filter" id="crmFilter">
         <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-start" aria-label="Start month"></select></label>
@@ -565,6 +589,22 @@
 
 </main>
 
+<nav class="side-nav" aria-label="Sections">
+  <a href="#retail" class="sn-group"><span class="sn-label" data-i18n="nav_retail">零售會員</span><span class="sn-mark"></span></a>
+  <a href="#sn-members"><span class="sn-label" data-i18n="group_members">會員數</span><span class="sn-mark"></span></a>
+  <a href="#sn-conversion"><span class="sn-label" data-i18n="group_conversion">轉換率</span><span class="sn-mark"></span></a>
+  <a href="#sn-trend"><span class="sn-label" data-i18n="nav_trend">會員趨勢</span><span class="sn-mark"></span></a>
+  <a href="#bystore" class="sn-group"><span class="sn-label" data-i18n="nav_bystore">門市總覽</span><span class="sn-mark"></span></a>
+  <a href="#crmusage" class="sn-group"><span class="sn-label" data-i18n="nav_crm">CRM 系統使用</span><span class="sn-mark"></span></a>
+  <a href="#sn-tags"><span class="sn-label" data-i18n="total_tags">標籤使用總數</span><span class="sn-mark"></span></a>
+  <a href="#sn-chat"><span class="sn-label" data-i18n="chat_badge">一對一聊天</span><span class="sn-mark"></span></a>
+  <a href="#sn-chattrend"><span class="sn-label" data-i18n="crm_trend">一對一聊天趨勢</span><span class="sn-mark"></span></a>
+</nav>
+
+<button type="button" class="to-top" id="toTop" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
@@ -580,7 +620,7 @@
   var dict = {
     zh: {
       appname:"CRM Management",
-      nav_retail:"零售會員", nav_bystore:"門市總覽", nav_crm:"CRM 系統使用",
+      nav_retail:"零售會員", nav_bystore:"門市總覽", nav_crm:"CRM 系統使用", nav_trend:"會員趨勢", to_top:"回到頂部",
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與出貨明細",
       by_store_label:"BY STORE", refresh:"重整",
       store_name:"店櫃名稱", cum_members:"累積會員", monthly_new:"當月新增", shipped_cum:"已結案已出貨(累積)",
@@ -605,7 +645,7 @@
     },
     en: {
       appname:"CRM Management",
-      nav_retail:"Retail Membership", nav_bystore:"By Store", nav_crm:"CRM System Usage",
+      nav_retail:"Retail Membership", nav_bystore:"By Store", nav_crm:"CRM System Usage", nav_trend:"Member Trend", to_top:"Back to top",
       kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Shipments",
       by_store_label:"BY STORE", refresh:"Refresh",
       store_name:"Store", cum_members:"Cumulative Members", monthly_new:"Monthly New", shipped_cum:"Closed & Shipped (Cum.)",
@@ -643,6 +683,8 @@
     document.querySelectorAll('.lang-toggle button').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
+    var toTop = document.getElementById('toTop');
+    toTop.title = dict[lang].to_top; toTop.setAttribute('aria-label', dict[lang].to_top);
     renderKpis();
     renderMergedChart();
     renderStoreTable();
@@ -667,6 +709,34 @@
     sections.forEach(function(sec, i){ if (sec && sec.offsetTop <= pos) activeIdx = i; });
     navLinks.forEach(function(a, i){ a.classList.toggle('active', i === activeIdx); });
   }, {passive:true});
+
+  /* ---------- side navigation rail + back-to-top ---------- */
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var sideLinks = Array.prototype.slice.call(document.querySelectorAll('.side-nav a'));
+  var sideTargets = sideLinks.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  sideLinks.forEach(function(a, i){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      // Land 70px below the viewport top so the sticky section bar doesn't cover the heading; the first entry goes to the very top.
+      var y = i === 0 ? 0 : sideTargets[i].getBoundingClientRect().top + window.scrollY - 70;
+      window.scrollTo({top:y, behavior: reduceMotion ? 'auto' : 'smooth'});
+    });
+  });
+  var toTopBtn = document.getElementById('toTop');
+  toTopBtn.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+  function updateSideNav(){
+    var active = 0;
+    sideTargets.forEach(function(el, i){ if (el && el.getBoundingClientRect().top <= 100) active = i; });
+    // At the very bottom the last block may never reach the top of the viewport; treat it as current.
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = sideTargets.length - 1;
+    sideLinks.forEach(function(a, i){ a.classList.toggle('active', i === active); });
+    toTopBtn.classList.toggle('show', window.scrollY > 500);
+  }
+  window.addEventListener('scroll', updateSideNav, {passive:true});
+  window.addEventListener('resize', updateSideNav);
+  updateSideNav();
 
   /* ---------- data (live, from the artifact db — see the sync block near the end of this script) ---------- */
   // m = yyyymm key so ranges can span a year boundary. Populated by applyMonthDocs() once the
