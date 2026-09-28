@@ -522,7 +522,7 @@
             <button type="button" data-ch="showroom">Showroom</button>
           </div>
         </div>
-      <button type="button" class="refresh-btn export-btn" data-export="crm" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg><span class="export-label" data-i18n="export_img">匯出圖片</span></button></div>
+      </div>
       <div class="combo-legend">
         <span class="lg-item"><span class="lg-bar" id="crmLegendBar"></span><span data-i18n="chat_windows">聊天視窗數</span></span>
         <span class="lg-item"><span class="lg-line"></span><span data-i18n="usage_rate">使用率</span></span>
@@ -1344,14 +1344,13 @@
   }
 
   var chartExportMeta = {
-    store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; },
-    crm: function(){ return 'CRMChat_' + crmState.channel; }
+    store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; }
   };
   document.querySelectorAll('[data-export]').forEach(function(btn){
     var key = btn.getAttribute('data-export');
     btn.addEventListener('click', function(){
       var card = btn.closest('.chart-card, .store-card');
-      var ignore = key === 'store' ? '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd' : '.chart-filter, .pager, .export-btn';
+      var ignore = '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd';
       exportCardAsImage(btn, card, 'BOSCH_' + chartExportMeta[key]() + '_' + YEAR + '.png', ignore);
     });
   });
