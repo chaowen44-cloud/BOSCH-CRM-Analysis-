@@ -293,6 +293,18 @@
   .store-sort-dd .sort-dd-btn:hover{background:var(--bg)}
   .store-sort-dd.active .sort-dd-btn{background:var(--bg); border-color:var(--ink)}
   .store-sort-dd .sort-dd-caret{color:var(--muted)}
+  .store-toggle{display:inline-flex; align-items:center; gap:10px; border:0; background:none; padding:4px 0; margin:0; cursor:pointer; font-family:inherit; color:inherit; border-radius:8px}
+  .store-toggle:focus-visible{outline:2px solid var(--orange); outline-offset:3px}
+  .store-caret{width:24px; height:24px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; flex:none; transition:border-color .15s ease, color .15s ease}
+  .store-caret svg{width:14px; height:14px; transition:transform .3s cubic-bezier(.22,1,.36,1)}
+  .store-toggle:hover .store-caret{border-color:var(--ink); color:var(--ink)}
+  .store-card.collapsed .store-caret svg{transform:rotate(-90deg)}
+  .store-body{display:grid; grid-template-rows:1fr; transition:grid-template-rows .35s cubic-bezier(.22,1,.36,1)}
+  .store-body-inner{min-height:0; overflow:hidden}
+  .store-card.collapsed .store-body{grid-template-rows:0fr}
+  .store-card-head .right{transition:opacity .2s ease}
+  .store-card.collapsed .store-card-head .right{opacity:0; visibility:hidden}
+  @media (prefers-reduced-motion: reduce){ .store-body, .store-caret svg, .store-card-head .right{transition:none} }
   .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
   .store-card{scroll-margin-top:70px}
   .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
@@ -456,7 +468,10 @@
     <div class="store-card" id="bystore">
       <div class="store-card-head">
         <div class="left">
-          <span class="label" data-i18n="by_store_label">BY STORE</span>
+          <button type="button" class="store-toggle" id="storeToggle" aria-expanded="true" aria-controls="storeBody">
+            <span class="label" data-i18n="by_store_label">BY STORE</span>
+            <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
         </div>
         <div class="right">
           <span class="sort-dd store-sort-dd">
@@ -485,6 +500,7 @@
           </button>
         </div>
       </div>
+      <div class="store-body" id="storeBody"><div class="store-body-inner">
       <div class="store-table-wrap">
         <table class="store-table">
           <thead>
@@ -500,6 +516,7 @@
         </table>
       </div>
       <div class="store-footnote" data-i18n="store_footnote">點選上方趨勢圖任一月份的點，即可查看該通路當月的門市明細</div>
+      </div></div>
     </div>
   </section>
 
@@ -1123,11 +1140,20 @@
     });
   }
 
+  function setStoreExpanded(open){
+    document.getElementById('bystore').classList.toggle('collapsed', !open);
+    document.getElementById('storeToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  document.getElementById('storeToggle').addEventListener('click', function(){
+    setStoreExpanded(document.getElementById('bystore').classList.contains('collapsed'));
+  });
+
   function setDrill(channel, month, fromChart){
     drill = {channel:channel, month:month};
     renderMergedChart();
     renderStoreTable();
     if (fromChart){
+      setStoreExpanded(true);
       var card = document.getElementById('bystore');
       var r = card.getBoundingClientRect();
       if (r.top > window.innerHeight - 120) card.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1402,7 +1428,7 @@
     var key = btn.getAttribute('data-export');
     btn.addEventListener('click', function(){
       var card = btn.closest('.chart-card, .store-card');
-      var ignore = '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd';
+      var ignore = '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd, .store-caret';
       exportCardAsImage(btn, card, 'BOSCH_' + chartExportMeta[key]() + '_' + YEAR + '.png', ignore);
     });
   });
