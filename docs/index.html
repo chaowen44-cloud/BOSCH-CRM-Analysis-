@@ -684,6 +684,20 @@
   // ‹ › pager: each chart shows up to WINDOW[key] months; offset 0 = the most recent window.
   var WINDOW = {merged:9, crm:6};
   var pager = {merged:0, crm:0};
+
+  // Charts are hand-built SVG with a fixed 1040-wide viewBox, so on a narrow container the whole
+  // drawing (labels included) scales down with it. Desktop containers are always wider than the
+  // viewBox needs, so this always returns the untouched desktop numbers above 1080px; below that,
+  // it grows a scale factor (fed into renderChart/renderCrmChart) from the chart's real pixel width
+  // so on-screen text stays legible, and trims how many months are shown so points don't crowd.
+  function chartProfile(wrapEl){
+    if (window.innerWidth > 1080) return {scale:1, merged:WINDOW.merged, crm:WINDOW.crm};
+    var cw = (wrapEl && wrapEl.clientWidth) || window.innerWidth;
+    var scale = Math.min(3.2, Math.max(1.2, 900 / Math.max(cw, 200)));
+    var narrow = window.innerWidth <= 480;
+    var mid = window.innerWidth <= 860;
+    return {scale:scale, merged: narrow ? 4 : (mid ? 5 : 7), crm: narrow ? 3 : (mid ? 4 : 5)};
+  }
   function applyWindow(key, n){
     var maxOff = Math.max(0, n - WINDOW[key]);
     pager[key] = Math.min(Math.max(pager[key], 0), maxOff);
@@ -909,6 +923,8 @@
     var mode = document.querySelector('input[name="merged-mode"]:checked').value;
     var start = globalRange.start, end = globalRange.end;
     var data = seriesFor(meta.seriesKey, mode, start, end);
+    var profile = chartProfile(document.getElementById('mergedChart'));
+    WINDOW.merged = profile.merged;
     var w = applyWindow('merged', data.labels.length);
     var chartOpts = {};
     if (drill.channel === 'all'){
@@ -916,7 +932,7 @@
       var srVals = seriesFor('showroom', mode, start, end).values;
       chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
     }
-    renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, 1, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
+    renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
     document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
     var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
     document.getElementById('mergedTitle').textContent = name;
@@ -1126,14 +1142,18 @@
       rows.push(row);
     });
     var wrap = document.getElementById('crmChart');
+    var profile = chartProfile(wrap);
+    WINDOW.crm = profile.crm;
     var cw = applyWindow('crm', rows.length);
     rows = rows.slice(cw[0], cw[1]);
     if (!rows.length){ wrap.innerHTML = '<p class="data-wait" data-i18n="chat_none">' + t('chat_none') + '</p>'; return; }
 
+    var scale = profile.scale;
+    var axisFont = 13 * scale, titleFont = 12.5 * scale, barFont = 13 * scale, rateFont = 14 * scale;
     var barColor = cssVar(ch === 'dds' ? '--purple' : ch === 'showroom' ? '--teal' : '--orange');
     var lineColor = barColor;
     document.querySelector('.combo-legend').style.setProperty('--crm-line', lineColor);
-    var W = 1040, H = 330, padL = 70, padR = 78, padT = 30, padB = 40;
+    var W = 1040, H = 330 + 90*(scale-1), padL = 70 + 34*(scale-1), padR = 78 + 40*(scale-1), padT = 30 + 20*(scale-1), padB = 40 + 26*(scale-1);
     var plotW = W - padL - padR, plotH = H - padT - padB, baseY = padT + plotH;
     var wTop = niceTop(Math.max.apply(null, rows.map(function(r){ return r.windows; })));
     var rTop = niceTop(Math.max.apply(null, rows.map(function(r){ return r.rate; })));
@@ -1146,19 +1166,19 @@
     for (var g = 0; g <= 4; g++){
       var yy = baseY - plotH * g / 4;
       grid += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--border)" stroke-width="1"/>';
-      axes += '<text x="' + (padL - 10) + '" y="' + (yy + 4) + '" text-anchor="end" class="axis-label">' + trimNum(wTop * g / 4) + '</text>';
-      axes += '<text x="' + (W - padR + 10) + '" y="' + (yy + 4) + '" text-anchor="start" class="axis-label">' + trimNum(rTop * g / 4) + '%</text>';
+      axes += '<text x="' + (padL - 10 - 4*(scale-1)) + '" y="' + (yy + 4) + '" text-anchor="end" class="axis-label" style="font-size:' + axisFont + 'px">' + trimNum(wTop * g / 4) + '</text>';
+      axes += '<text x="' + (W - padR + 10 + 4*(scale-1)) + '" y="' + (yy + 4) + '" text-anchor="start" class="axis-label" style="font-size:' + axisFont + 'px">' + trimNum(rTop * g / 4) + '%</text>';
     }
-    axes += '<text transform="translate(16,' + (padT + plotH/2) + ') rotate(-90)" text-anchor="middle" class="axis-title">' + t('chat_windows') + '</text>';
-    axes += '<text transform="translate(' + (W - 14) + ',' + (padT + plotH/2) + ') rotate(90)" text-anchor="middle" class="axis-title">' + t('usage_rate') + ' (%)</text>';
+    axes += '<text transform="translate(' + (16 + 6*(scale-1)) + ',' + (padT + plotH/2) + ') rotate(-90)" text-anchor="middle" class="axis-title" style="font-size:' + titleFont + 'px">' + t('chat_windows') + '</text>';
+    axes += '<text transform="translate(' + (W - 14 - 6*(scale-1)) + ',' + (padT + plotH/2) + ') rotate(90)" text-anchor="middle" class="axis-title" style="font-size:' + titleFont + 'px">' + t('usage_rate') + ' (%)</text>';
 
     var bars = '', barLabels = '', xLabels = '';
     rows.forEach(function(r, i){
       var cx = cxOf(i), top = yW(r.windows), h = baseY - top, x0 = cx - barW/2, rad = Math.min(6, h);
       bars += '<path d="M' + x0 + ',' + baseY + ' V' + (top + rad) + ' Q' + x0 + ',' + top + ' ' + (x0 + rad) + ',' + top +
         ' H' + (x0 + barW - rad) + ' Q' + (x0 + barW) + ',' + top + ' ' + (x0 + barW) + ',' + (top + rad) + ' V' + baseY + ' Z" fill="' + barColor + '" fill-opacity="0.45"/>';
-      barLabels += '<text x="' + cx + '" y="' + (h > 24 ? baseY - 9 : top - 6) + '" text-anchor="middle" class="bar-label">' + r.windows + '</text>';
-      xLabels += '<text x="' + cx + '" y="' + (H - 12) + '" text-anchor="middle" class="axis-label">' + r.label + '</text>';
+      barLabels += '<text x="' + cx + '" y="' + (h > 24 ? baseY - 9 : top - 6 - 6*(scale-1)) + '" text-anchor="middle" class="bar-label" style="font-size:' + barFont + 'px">' + r.windows + '</text>';
+      xLabels += '<text x="' + cx + '" y="' + (H - 6 - 12*(scale-1)) + '" text-anchor="middle" class="axis-label" style="font-size:' + axisFont + 'px">' + r.label + '</text>';
     });
 
     var pts = rows.map(function(r, i){ return [cxOf(i), yR(r.rate)]; });
@@ -1169,8 +1189,8 @@
     }
     var dots = '', rateLabels = '';
     pts.forEach(function(p, i){
-      dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="2.5"/>';
-      rateLabels += '<text x="' + p[0] + '" y="' + (p[1] - 14) + '" text-anchor="middle" class="rate-label" fill="' + lineColor + '" style="fill:' + lineColor + '">' + rows[i].rate.toFixed(2) + '%</text>';
+      dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (6*scale) + '" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="2.5"/>';
+      rateLabels += '<text x="' + p[0] + '" y="' + (p[1] - 14 - 10*(scale-1)) + '" text-anchor="middle" class="rate-label" style="fill:' + lineColor + ';font-size:' + rateFont + 'px">' + rows[i].rate.toFixed(2) + '%</text>';
     });
 
     wrap.innerHTML =
@@ -1179,7 +1199,7 @@
         axes + bars + barLabels + xLabels +
         '<path d="' + path + '" fill="none" stroke="' + lineColor + '" stroke-width="2.5" stroke-linecap="round"/>' +
         dots + rateLabels +
-        '<g class="hover-dot"><circle r="8" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="3"/></g>' +
+        '<g class="hover-dot"><circle r="' + (8*scale) + '" fill="' + lineColor + '" stroke="var(--surface)" stroke-width="3"/></g>' +
         '<rect class="hover-zone no-drill" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/>' +
       '</svg><div class="tooltip" id="crmChartTip"></div>';
 
@@ -1364,6 +1384,18 @@
     renderStoreTable();
     renderCrmChart();
   }
+
+  // Re-render the two SVG charts on resize/orientation change so the scale factor in chartProfile()
+  // keeps tracking the chart's real pixel width (e.g. rotating a tablet, or a resizable window).
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      if (!monthDefs.length) return;
+      renderMergedChart();
+      renderCrmChart();
+    }, 150);
+  });
 
   function showStamp(d){
     var el = document.getElementById('syncedAt');
