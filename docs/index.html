@@ -267,7 +267,11 @@
     #bystore .store-sort-dd{display:flex; min-width:0; flex:0 1 auto}
     #bystore .store-sort-dd .sort-dd-btn{min-width:0; max-width:100%; padding:7px 12px}
     #bystore .store-sort-dd .sort-dd-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
-    #bystore #storeRefreshBtn{flex:none}
+    #bystore #storeRefreshBtn, #bystore .export-btn, #bystore .csv-btn{flex:none}
+    #bystore .export-btn .export-label, #bystore .csv-btn .export-label{display:none}
+    /* four controls don't fit beside the title on a phone: give them their own row under it */
+    #bystore .store-card-head{flex-wrap:wrap}
+    #bystore .store-card-head .right{flex:1 1 100%; justify-content:flex-end}
   }
   @media (max-width:360px){
     #bystore #storeRefreshBtn span{display:none}
@@ -481,6 +485,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
             <span class="export-label" data-i18n="export_img">匯出圖片</span>
           </button>
+          <button type="button" class="refresh-btn csv-btn" id="storeCsvBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15l3 3 3-3"/></svg>
+            <span class="export-label" data-i18n="export_csv">匯出 CSV</span>
+          </button>
         </div>
       </div>
       <div class="store-body" id="storeBody"><div class="store-body-inner">
@@ -601,7 +609,7 @@
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
       crm_trend:"一對一聊天趨勢",
-      export_img:"匯出圖片", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
+      export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", ch_total:"Total Retail",
@@ -626,7 +634,7 @@
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
       crm_trend:"1-on-1 Chat Trend",
-      export_img:"Export image", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
+      export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       kicker1:"Retail Membership", h1_1:"Retail Store & Showroom Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", ch_total:"Total Retail",
@@ -658,6 +666,11 @@
     });
     var toTop = document.getElementById('toTop');
     toTop.title = dict[lang].to_top; toTop.setAttribute('aria-label', dict[lang].to_top);
+    // On phones the export buttons are icon-only, so give them a tooltip / accessible name.
+    document.querySelectorAll('#bystore .export-btn, #bystore .csv-btn').forEach(function(btn){
+      var name = dict[lang][btn.classList.contains('csv-btn') ? 'export_csv' : 'export_img'];
+      btn.title = name; btn.setAttribute('aria-label', name);
+    });
     renderKpis();
     renderMergedChart();
     renderStoreTable();
@@ -1077,8 +1090,8 @@
     return channel === 'all' ? rows : rows.filter(function(s){ return s.channel === channel; });
   }
 
-  function renderStoreTable(){
-    if (!monthDefs.length) return;
+  // The rows the By Store table shows right now: current channel + month, in the chosen sort order.
+  function currentStoreRows(){
     var rows = storeRowsFor(drill.channel, drill.month);
     if (storeSort.dir){
       var k = storeSort.key;
@@ -1086,6 +1099,12 @@
         return storeSort.dir === 'asc' ? a[k] - b[k] : b[k] - a[k];
       });
     }
+    return rows;
+  }
+
+  function renderStoreTable(){
+    if (!monthDefs.length) return;
+    var rows = currentStoreRows();
     var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
     document.getElementById('storeTableBody').innerHTML = rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
@@ -1411,9 +1430,32 @@
     var key = btn.getAttribute('data-export');
     btn.addEventListener('click', function(){
       var card = btn.closest('.chart-card, .store-card');
-      var ignore = '.store-footnote, .export-btn, #storeRefreshBtn, .store-sort-dd, .store-caret';
+      var ignore = '.store-footnote, .export-btn, .csv-btn, #storeRefreshBtn, .store-sort-dd, .store-caret';
       exportCardAsImage(btn, card, 'BOSCH_' + chartExportMeta[key]() + '_' + YEAR + '.png', ignore);
     });
+  });
+
+  // CSV export of exactly what the By Store table shows (channel, month, sort order, subtotal row).
+  // A UTF-8 BOM keeps Chinese store names readable when the file is opened in Excel.
+  function csvCell(v){ v = String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  document.getElementById('storeCsvBtn').addEventListener('click', function(){
+    var btn = this;
+    if (!monthDefs.length || btn.disabled) return;
+    var rows = currentStoreRows();
+    var chName = {dds:'DDS', showroom:'Showroom'};
+    var lines = [[t('csv_channel'), t('store_name'), t('cum_members'), t('monthly_new'), t('shipped_cum')]];
+    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.cum, r.monthly, r.shipped]); });
+    var sum = function(k){ return rows.reduce(function(a, r){ return a + r[k]; }, 0); };
+    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), sum('cum'), sum('monthly'), sum('shipped')]);
+    var csv = '\ufeff' + lines.map(function(l){ return l.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+    var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+    btn.disabled = true;
+    saveBlob(blob, 'BOSCH_' + chartExportMeta.store() + '_' + YEAR + '.csv').then(function(){
+      toast(t('csv_saved'));
+    }).catch(function(err){
+      if (err && err.code === 'declined') return;
+      toast(t('export_fail'));
+    }).then(function(){ btn.disabled = false; });
   });
 
   setLang('en');
