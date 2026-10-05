@@ -298,7 +298,11 @@
   /* engagement rate column: channel averages sit once in the header; each store shows only its gap to its own channel's average */
   .th-avg{display:block; margin-top:3px; font-size:11px; font-weight:500; color:rgba(255,255,255,.72)}
   .th-avg i{font-style:normal; display:inline-block; width:7px; height:7px; border-radius:2px; margin:0 4px 0 8px; vertical-align:baseline}
-  .rate-delta{display:inline-block; min-width:62px; margin-left:8px; font-size:11.5px; font-weight:600; text-align:left; font-variant-numeric:tabular-nums}
+  /* the gap sits in the cell's bottom-right corner, smaller than the rate, so the rates stay in one tidy column and the gaps in another */
+  .rate-td{position:relative; padding-right:70px !important}
+  .rate-delta{position:absolute; right:18px; bottom:6px; font-size:10px; font-weight:600; line-height:1; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums}
+  .store-table thead th.rate-th{padding-right:70px}
+  .rate-th .th-avg{margin-right:-52px}
   .rate-delta.up{color:var(--up)}
   .rate-delta.down{color:var(--down)}
   .rate-delta.flat{color:var(--muted)}
@@ -626,7 +630,7 @@
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
               <th class="num" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span></th>
-              <th class="num" data-sort-key="rate"><span class="th-sort"></span><span data-i18n="usage_rate">互動率</span><span class="th-avg" id="chatRateAvgHead"></span></th>
+              <th class="num rate-th" data-sort-key="rate"><span class="th-sort"></span><span data-i18n="usage_rate">互動率</span><span class="th-avg" id="chatRateAvgHead"></span></th>
             </tr>
           </thead>
           <tbody id="chatStoreTableBody"></tbody>
@@ -1377,7 +1381,7 @@
     document.getElementById('chatStoreTableBody').innerHTML = rows.length ? rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
         '<td class="st-num st-cum">' + r.windows + '</td>' +
-        '<td class="st-num st-monthly">' + fmtRate(r.rate) + fmtDelta(r.diff) + '</td></tr>';
+        '<td class="st-num st-monthly rate-td">' + fmtRate(r.rate) + fmtDelta(r.diff) + '</td></tr>';
     }).join('') : '<tr><td class="store-empty" colspan="3">' + t('chat_store_none') + '</td></tr>';
     var tot = chatStoreTotals(rows);
     document.getElementById('chatRateAvgHead').innerHTML = t('rate_avg') +
@@ -1386,7 +1390,7 @@
     document.getElementById('chatStoreTableFoot').innerHTML =
       '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
       '<td class="st-num st-cum">' + tot.windows + '</td>' +
-      '<td class="st-num st-monthly">' + fmtRate(tot.rate) + '</td></tr>';
+      '<td class="st-num st-monthly rate-td">' + fmtRate(tot.rate) + '</td></tr>';
     document.querySelectorAll('#chatStoreChannelSeg button').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-ch') === chatStoreState.channel);
     });
