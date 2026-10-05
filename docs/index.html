@@ -892,13 +892,17 @@
     var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
     if (labels.length <= 2){ W = 520; }
     var plotW = W - padL - padR, plotH = H - padT - padB;
-    // "All" view, cumulative (opts.breakdown): DDS and Showroom are stacked as areas under the total line.
-    // The monthly net-add stays a single total line (the tooltip still lists the breakdown).
-    var stacked = !!opts.breakdown && mode === 'cumulative';
+    // "All" view (opts.breakdown): cumulative stacks DDS and Showroom as areas under the total line; the monthly
+    // net-add draws a DDS line and a Showroom line next to the total line (both on the same axis).
+    var stacked = !!opts.breakdown && mode === 'cumulative', multiLine = !!opts.breakdown && mode === 'monthly';
     var posTop = values.slice(), negBot = [0];
     if (stacked) opts.breakdown.forEach(function(bd, i){
       posTop.push(Math.max(bd.dds, 0) + Math.max(bd.showroom, 0));
       negBot.push(Math.min(bd.dds, 0) + Math.min(bd.showroom, 0));
+    });
+    if (multiLine) opts.breakdown.forEach(function(bd){
+      posTop.push(Math.max(bd.dds, bd.showroom));
+      negBot.push(Math.min(bd.dds, bd.showroom));
     });
     var maxVal = Math.max.apply(null, posTop.concat([0]));
     var minVal = Math.min.apply(null, values.concat(negBot, [0]));
@@ -948,7 +952,16 @@
     };
     var seriesSvg = '<path d="' + areaD + '" fill="url(#grad-' + containerId + ')" stroke="none"/>' +
       '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-    if (stacked && points.length > 1){
+    if (multiLine && points.length > 1){
+      var lineOf = function(key, c){
+        var pts = opts.breakdown.map(function(bd, i){ return [x(i), y(bd[key])]; });
+        return '<path d="' + curve(pts) + '" fill="none" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+          pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="3.6" fill="' + c + '" stroke="var(--surface)" stroke-width="1.6"/>'; }).join('');
+      };
+      seriesSvg = '<path d="' + areaD + '" fill="url(#grad-' + containerId + ')" stroke="none"/>' +
+        lineOf('dds', purpleC) + lineOf('showroom', tealC) +
+        '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    } else if (stacked && points.length > 1){
       var ddsPts = opts.breakdown.map(function(bd, i){ return [x(i), y(bd.dds)]; });
       var back = '';
       for (var kk = ddsPts.length - 1; kk > 0; kk--){ var mx2 = (ddsPts[kk][0] + ddsPts[kk-1][0]) / 2; back += ' C ' + mx2 + ',' + ddsPts[kk][1] + ' ' + mx2 + ',' + ddsPts[kk-1][1] + ' ' + ddsPts[kk-1][0] + ',' + ddsPts[kk-1][1]; }
@@ -1071,7 +1084,7 @@
     showroom: {colorVar:'--teal',   softVar:'--teal-soft',   seriesKey:'showroom'}
   };
 
-  // "All" cumulative view only: what the stacked layers and the orange total line mean.
+  // "All" view only: colour key for the DDS / Showroom layers (or lines) and the orange total line.
   function renderMergedLegend(bd){
     var el = document.getElementById('mergedLegend');
     if (!bd || !bd.length){ el.hidden = true; el.innerHTML = ''; return; }
@@ -1095,7 +1108,7 @@
       var srVals = seriesFor('showroom', mode, start, end).values;
       chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
     }
-    renderMergedLegend(mode === 'cumulative' ? chartOpts.breakdown : null);
+    renderMergedLegend(chartOpts.breakdown);
     renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
     document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
     var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
