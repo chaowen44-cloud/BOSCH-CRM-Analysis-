@@ -299,6 +299,16 @@
   .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
   .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
+  /* member trend, "All" view: legend for the stacked DDS / Showroom layers and the Showroom share read-out */
+  .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:-4px 0 8px; font-size:12.5px; color:var(--muted)}
+  .trend-legend .tl-item{display:inline-flex; align-items:center; gap:7px}
+  .trend-legend .tl-sw{width:10px; height:10px; border-radius:3px; flex:none}
+  .trend-legend .tl-ln{width:16px; height:3px; border-radius:2px; background:var(--orange); flex:none}
+  .trend-legend .tl-share{margin-left:auto; white-space:nowrap}
+  .trend-legend .tl-share b{color:var(--ink); font-weight:600}
+  .trend-legend .tl-share em{font-style:normal; font-weight:600; margin-left:4px}
+  .trend-legend .tl-share em.up{color:var(--up)}
+  .trend-legend .tl-share em.down{color:var(--down)}
   /* engagement rate column: channel averages sit once in the header; each store shows only its gap to its own channel's average */
   .th-avg{display:block; margin-top:4px; font-size:10px; font-weight:500; color:rgba(255,255,255,.55)}
   .th-avg b{font-weight:500; color:inherit}
@@ -458,6 +468,7 @@
           <label class="df-radio"><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
         </div>
       </div>
+      <div class="trend-legend" id="mergedLegend" hidden></div>
       <div class="chart-wrap" id="mergedChart"></div>
       <div class="pager" data-pager="merged"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
     </div>
@@ -661,7 +672,7 @@
       sort_field:"排序欄位", sort_short_shipped:"已出貨", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
-      rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
+      rate_avg:"平均", sr_share_cum:"Showroom 占比", sr_share_new:"Showroom 占新增", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
@@ -686,7 +697,7 @@
       sort_field:"Sort by", sort_short_shipped:"Shipped", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
-      rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
+      rate_avg:"Average", sr_share_cum:"Showroom share", sr_share_new:"Showroom share of net-add", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       kicker1:"Retail Membership", h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
@@ -886,13 +897,23 @@
     var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
     if (labels.length <= 2){ W = 520; }
     var plotW = W - padL - padR, plotH = H - padT - padB;
-    var maxVal = Math.max.apply(null, values.concat([0]));
-    var minVal = Math.min.apply(null, values.concat([0]));
+    // "All" view (opts.breakdown): DDS and Showroom are stacked - areas under the total line when cumulative,
+    // columns when showing the monthly net-add - so the axis has to fit the stacked segments too.
+    var stacked = !!opts.breakdown, barMode = stacked && mode === 'monthly';
+    var posTop = values.slice(), negBot = [0];
+    if (stacked) opts.breakdown.forEach(function(bd, i){
+      posTop.push(Math.max(bd.dds, 0) + Math.max(bd.showroom, 0));
+      negBot.push(Math.min(bd.dds, 0) + Math.min(bd.showroom, 0));
+    });
+    var maxVal = Math.max.apply(null, posTop.concat([0]));
+    var minVal = Math.min.apply(null, values.concat(negBot, [0]));
     var span = Math.max(maxVal - minVal, 1);
     var niceMax = Math.ceil((maxVal + span*0.15) / 5) * 5 || 5;
     var niceMin = minVal < 0 ? Math.floor((minVal - span*0.15) / 5) * 5 : 0;
     var range = niceMax - niceMin || 1;
-    var x = function(i){ return labels.length > 1 ? padL + (plotW * i) / (labels.length - 1) : padL + plotW/2; };
+    var x = barMode
+      ? function(i){ return padL + plotW * (i + 0.5) / labels.length; }
+      : function(i){ return labels.length > 1 ? padL + (plotW * i) / (labels.length - 1) : padL + plotW/2; };
     var y = function(v){ return padT + plotH - (plotH * (v - niceMin)) / range; };
 
     var gridLines = '', axisLabels = '';
@@ -905,7 +926,7 @@
     }
     // With 10 months on a narrow screen the labels would collide, so thin them: every n-th point (counting back
     // from the newest month) gets its month label / value label, n being the smallest step that leaves room.
-    var kPx = (wrap.clientWidth || W) / W, gapPx = (labels.length > 1 ? plotW / (labels.length - 1) : plotW) * kPx;
+    var kPx = (wrap.clientWidth || W) / W, gapPx = (barMode ? plotW / labels.length : (labels.length > 1 ? plotW / (labels.length - 1) : plotW)) * kPx;
     var maxChars = function(arr){ return arr.reduce(function(m, v){ return Math.max(m, String(v).length); }, 1); };
     var xStep = Math.max(1, Math.ceil((maxChars(labels) * axisFont * 0.58 * kPx + 6) / gapPx));
     var vStep = Math.max(1, Math.ceil((maxChars(values.map(fmtV)) * ptFont * 0.6 * kPx + 6) / gapPx));
@@ -926,6 +947,40 @@
     var zeroY = y(0);
     var areaD = points.length ? (pathD + ' L ' + points[points.length-1][0] + ',' + zeroY + ' L ' + points[0][0] + ',' + zeroY + ' Z') : '';
 
+    var purpleC = cssVar('--purple'), tealC = cssVar('--teal');
+    var curve = function(pts){   // smooth path through pts, same easing as the total line
+      var d = 'M ' + pts[0][0] + ',' + pts[0][1];
+      for (var k = 1; k < pts.length; k++){ var mx = (pts[k-1][0] + pts[k][0]) / 2; d += ' C ' + mx + ',' + pts[k-1][1] + ' ' + mx + ',' + pts[k][1] + ' ' + pts[k][0] + ',' + pts[k][1]; }
+      return d;
+    };
+    var seriesSvg = '<path d="' + areaD + '" fill="url(#grad-' + containerId + ')" stroke="none"/>' +
+      '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    if (stacked && !barMode && points.length > 1){
+      var ddsPts = opts.breakdown.map(function(bd, i){ return [x(i), y(bd.dds)]; });
+      var back = '';
+      for (var kk = ddsPts.length - 1; kk > 0; kk--){ var mx2 = (ddsPts[kk][0] + ddsPts[kk-1][0]) / 2; back += ' C ' + mx2 + ',' + ddsPts[kk][1] + ' ' + mx2 + ',' + ddsPts[kk-1][1] + ' ' + ddsPts[kk-1][0] + ',' + ddsPts[kk-1][1]; }
+      var last = points.length - 1;
+      seriesSvg =
+        '<path d="' + curve(ddsPts) + ' L ' + ddsPts[last][0] + ',' + zeroY + ' L ' + ddsPts[0][0] + ',' + zeroY + ' Z" fill="' + purpleC + '" fill-opacity=".28" stroke="none"/>' +
+        '<path d="' + curve(points) + ' L ' + ddsPts[last][0] + ',' + ddsPts[last][1] + back + ' Z" fill="' + tealC + '" fill-opacity=".34" stroke="none"/>' +
+        '<path d="' + curve(ddsPts) + '" fill="none" stroke="' + purpleC + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>' +
+        '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    } else if (barMode){
+      var bw = Math.min(58, (plotW / labels.length) * 0.56), segs = '';
+      opts.breakdown.forEach(function(bd, i){
+        var cx0 = x(i), pos = 0, neg = 0;
+        [[bd.dds, purpleC], [bd.showroom, tealC]].forEach(function(sg){
+          var v = sg[0], y0, y1;
+          if (v >= 0){ y0 = y(pos); y1 = y(pos + v); pos += v; } else { y0 = y(neg); y1 = y(neg + v); neg += v; }
+          var top = Math.min(y0, y1), h = Math.abs(y1 - y0);
+          if (h < 0.5) return;
+          var gap = h > 4 ? 1 : 0;   // 2px surface gap between stacked segments
+          segs += '<rect x="' + (cx0 - bw/2) + '" y="' + (top + gap) + '" width="' + bw + '" height="' + Math.max(h - gap * 2, 0.5) + '" rx="2" fill="' + sg[1] + '" fill-opacity=".85"/>';
+        });
+      });
+      seriesSvg = segs;
+    }
+
     /* ---- peak emphasis: biggest step up (cumulative) or biggest single value (monthly) ---- */
     var peakIdx = -1, peakDelta = -Infinity;
     if (mode === 'monthly'){
@@ -936,7 +991,7 @@
         if (d > peakDelta){ peakDelta = d; peakIdx = pi; }
       }
     }
-    var showPeakBadge = !opts.noPeak && peakIdx > 0 && peakIdx < points.length - 1;
+    var showPeakBadge = !opts.noPeak && !barMode && peakIdx > 0 && peakIdx < points.length - 1;
 
     var dots = '', endLabels = '', guide = '';
     points.forEach(function(p, i){
@@ -946,13 +1001,13 @@
       var r = isPeak ? 7 : (isEnd ? 5.5 : 4);
       if (isSel){
         guide = '<line x1="' + p[0] + '" y1="' + (padT - 10) + '" x2="' + p[0] + '" y2="' + zeroY + '" stroke="' + color + '" stroke-width="2" stroke-dasharray="4,4" opacity="0.45"/>';
-        dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r + 6) + '" fill="none" stroke="' + color + '" stroke-width="2.5" opacity="0.5"/>';
+        if (!barMode) dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r + 6) + '" fill="none" stroke="' + color + '" stroke-width="2.5" opacity="0.5"/>';
       }
-      dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + color + '" stroke="var(--surface)" stroke-width="' + (isPeak ? 2.5 : 2) + '"/>';
+      if (!barMode) dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + color + '" stroke="var(--surface)" stroke-width="' + (isPeak ? 2.5 : 2) + '"/>';
       var ly = p[1] - 14 - 16*(scale-1);
-      var anchor = i === 0 ? 'start' : (i === points.length - 1 ? 'end' : 'middle');
+      var anchor = barMode ? 'middle' : (i === 0 ? 'start' : (i === points.length - 1 ? 'end' : 'middle'));
       if ((lastIdx - i) % vStep !== 0 && !isSel) return;
-      endLabels += '<text x="' + p[0] + '" y="' + ly + '" text-anchor="' + anchor + '" class="pt-label" style="font-size:' + ptFont + 'px" fill="' + color + '">' + fmtV(values[i]) + '</text>';
+      endLabels += '<text x="' + p[0] + '" y="' + ly + '" text-anchor="' + anchor + '" class="pt-label" style="font-size:' + ptFont + 'px" fill="' + (barMode ? ink : color) + '">' + fmtV(values[i]) + '</text>';
     });
 
     var peakBadge = '';
@@ -978,8 +1033,7 @@
         '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W-padR) + '" y2="' + zeroY + '" stroke="var(--border)" stroke-width="1.5"/>' +
         axisLabels + xLabels +
         guide +
-        '<path d="' + areaD + '" fill="url(#grad-' + containerId + ')" stroke="none"/>' +
-        '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+        seriesSvg +
         dots + endLabels + peakBadge +
         '<g class="hover-dot"><circle r="' + (8*scale) + '" fill="' + color + '" stroke="var(--surface)" stroke-width="3"/></g>' +
         '<rect class="hover-zone' + (drillKey ? '' : ' no-drill') + '" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/>' +
@@ -1004,6 +1058,7 @@
           row('--orange', t('ch_total'), values[i]) +
           row('--purple', 'DDS', bd.dds) +
           row('--teal', 'Showroom', bd.showroom) +
+          '<div class="rt-hint">' + (opts.shareLabel || '') + ' ' + ((bd.dds + bd.showroom) > 0 ? (bd.showroom / (bd.dds + bd.showroom) * 100).toFixed(1) + '%' : '–') + '</div>' +
           (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
         return true;
       },
@@ -1064,6 +1119,22 @@
     showroom: {colorVar:'--teal',   softVar:'--teal-soft',   seriesKey:'showroom'}
   };
 
+  // "All" view only: what the stacked layers mean, plus the newest month's Showroom share and its move vs the month before.
+  function renderMergedLegend(bd, shareLabel){
+    var el = document.getElementById('mergedLegend');
+    if (!bd || !bd.length){ el.hidden = true; el.innerHTML = ''; return; }
+    var share = function(b){ var tot = b.dds + b.showroom; return tot > 0 ? b.showroom / tot * 100 : null; };
+    var cur = share(bd[bd.length - 1]), prev = bd.length > 1 ? share(bd[bd.length - 2]) : null, delta = '';
+    if (cur !== null && prev !== null){
+      var d = Math.round((cur - prev) * 10) / 10;
+      delta = d === 0 ? '' : '<em class="' + (d > 0 ? 'up' : 'down') + '">' + (d > 0 ? '▲' : '▼') + Math.abs(d).toFixed(1) + '</em>';
+    }
+    el.hidden = false;
+    el.innerHTML = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
+      '<span class="tl-item"><i class="tl-sw" style="background:var(--teal)"></i>Showroom</span>' +
+      (document.querySelector('input[name="merged-mode"]:checked').value === 'monthly' ? '' : '<span class="tl-item"><i class="tl-ln"></i>' + t('ch_total') + '</span>') +
+      (cur === null ? '' : '<span class="tl-share">' + shareLabel + ' <b>' + cur.toFixed(1) + '%</b>' + delta + '</span>');
+  }
   function renderMergedChart(){
     if (!monthDefs.length) return;
     var meta = mergedChannelMeta[drill.channel];
@@ -1078,7 +1149,9 @@
       var ddsVals = seriesFor('dds', mode, start, end).values;
       var srVals = seriesFor('showroom', mode, start, end).values;
       chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
+      chartOpts.shareLabel = t(mode === 'monthly' ? 'sr_share_new' : 'sr_share_cum');
     }
+    renderMergedLegend(chartOpts.breakdown, chartOpts.shareLabel);
     renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
     document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
     var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
