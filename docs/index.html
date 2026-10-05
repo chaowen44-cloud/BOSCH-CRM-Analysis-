@@ -1386,7 +1386,7 @@
     var tot = chatStoreTotals(rows);
     // Header average: both channels under "All"; only the picked channel when the filter is DDS or Showroom.
     var avgChans = chatStoreState.channel === 'all' ? ['dds', 'showroom'] : [chatStoreState.channel], chanName = {dds: 'DDS', showroom: 'Showroom'};
-    document.getElementById('chatRateAvgHead').innerHTML = t('rate_avg') + avgChans.map(function(c){
+    document.getElementById('chatRateAvgHead').innerHTML = t('rate_avg') + (currentLang === 'zh' ? '：' : ':') + avgChans.map(function(c){
       return '<b>' + chanName[c] + ' ' + fmtRate(chatChannelAvg[c]) + '</b>';
     }).join('');
     document.getElementById('chatStoreTableFoot').innerHTML =
