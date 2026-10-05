@@ -297,7 +297,7 @@
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
   /* engagement rate column: channel averages sit once in the header; each store shows only its gap to its own channel's average */
   .th-avg{display:block; margin-top:4px; font-size:10px; font-weight:500; color:rgba(255,255,255,.55)}
-  .th-avg b{font-weight:500; color:inherit; margin-left:10px}
+  .th-avg b{font-weight:500; color:inherit}
   /* the gap sits in the cell's bottom-right corner, smaller than the rate, so the rates stay in one tidy column and the gaps in another */
   .rate-td{position:relative; padding-right:70px !important}
   .rate-delta{position:absolute; right:18px; bottom:6px; font-size:10px; font-weight:600; line-height:1; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -1386,9 +1386,9 @@
     var tot = chatStoreTotals(rows);
     // Header average: both channels under "All"; only the picked channel when the filter is DDS or Showroom.
     var avgChans = chatStoreState.channel === 'all' ? ['dds', 'showroom'] : [chatStoreState.channel], chanName = {dds: 'DDS', showroom: 'Showroom'};
-    document.getElementById('chatRateAvgHead').innerHTML = t('rate_avg') + (currentLang === 'zh' ? '：' : ':') + avgChans.map(function(c){
+    document.getElementById('chatRateAvgHead').innerHTML = t('rate_avg') + (currentLang === 'zh' ? '：' : ': ') + avgChans.map(function(c){
       return '<b>' + chanName[c] + ' ' + fmtRate(chatChannelAvg[c]) + '</b>';
-    }).join('');
+    }).join(' / ');
     document.getElementById('chatStoreTableFoot').innerHTML =
       '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
       '<td class="st-num st-cum">' + tot.windows + '</td>' +
