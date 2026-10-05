@@ -755,6 +755,11 @@
     navLinks.forEach(function(a, i){ a.classList.toggle('active', i === activeIdx); });
   }, {passive:true});
 
+  /* ---------- always start at the top on reload ---------- */
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e){}
+  window.scrollTo(0, 0);
+  window.addEventListener('load', function(){ window.scrollTo(0, 0); });
+
   /* ---------- back-to-top ---------- */
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var toTopBtn = document.getElementById('toTop');
