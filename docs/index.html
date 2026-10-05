@@ -295,25 +295,6 @@
   .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
   .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
-  /* chat usage rate: an inline bar per store on a fixed 0-100% scale, with the current subtotal's rate as a reference tick */
-  .rate-th{min-width:250px}
-  .rate-cell{display:flex; align-items:center; justify-content:flex-end; gap:10px}
-  .rate-track{position:relative; flex:1 1 auto; min-width:90px; max-width:220px; height:8px; border-radius:999px; background:var(--border)}
-  .rate-fill{position:absolute; left:0; top:0; bottom:0; border-radius:999px; min-width:0}
-  .rate-avg{position:absolute; top:-5px; bottom:-5px; width:2px; margin-left:-1px; border-radius:1px; background:var(--ink); opacity:.55}
-  .rate-val{min-width:50px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink)}
-  .rate-legend{display:inline-flex; align-items:center; gap:14px; margin-left:auto; font-size:12px; color:var(--muted); flex-wrap:wrap}
-  .rate-legend-item{display:inline-flex; align-items:center; gap:6px; white-space:nowrap}
-  .rate-legend-tick{width:2px; height:12px; border-radius:1px; background:var(--ink); opacity:.55}
-  .rate-sub{display:none; font-size:10.5px; font-weight:500; color:var(--muted)}
-  /* on a phone the bar is what matters: drop the two count columns and show "windows / members" under the % instead */
-  @media (max-width:600px){
-    #chatStoreTable .col-count{display:none}
-    .rate-th{min-width:0}
-    .rate-track{min-width:60px}
-    .rate-sub{display:block}
-    .rate-legend{margin-left:0}
-  }
   .store-card{scroll-margin-top:70px}
   .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
   .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
@@ -587,8 +568,6 @@
               <div class="sort-dd-group">
                 <div class="sort-dd-title" data-i18n="sort_field">排序欄位</div>
                 <button type="button" class="sort-dd-item" data-key="windows"><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span><span class="chk">✓</span></button>
-                <button type="button" class="sort-dd-item" data-key="members"><span data-i18n="cum_members">累積會員</span><span class="chk">✓</span></button>
-                <button type="button" class="sort-dd-item" data-key="rate"><span data-i18n="usage_rate">使用率</span><span class="chk">✓</span></button>
               </div>
               <div class="sort-dd-group">
                 <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
@@ -619,19 +598,13 @@
           <button type="button" data-ch="showroom">Showroom</button>
         </div>
         <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select id="chatStoreMonth" aria-label="Month"></select></label>
-        <span class="rate-legend">
-          <span class="rate-legend-item" data-i18n="rate_formula">使用率 = 聊天視窗數 ÷ 累積會員</span>
-          <span class="rate-legend-item"><span class="rate-legend-tick"></span><span id="chatRateAvgLabel"></span></span>
-        </span>
       </div>
       <div class="store-table-wrap">
         <table class="store-table" id="chatStoreTable">
           <thead>
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
-              <th class="num col-count" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span></th>
-              <th class="num col-count" data-sort-key="members"><span class="th-sort"></span><span data-i18n="cum_members">累積會員</span></th>
-              <th class="num rate-th" data-sort-key="rate"><span class="th-sort"></span><span data-i18n="usage_rate">使用率</span></th>
+              <th class="num" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span></th>
             </tr>
           </thead>
           <tbody id="chatStoreTableBody"></tbody>
@@ -711,7 +684,7 @@
       across_members:"全台零售櫃位(包含DDS & Showroom)",
       chat_windows:"聊天視窗數", usage_rate:"使用率", chat_badge:"一對一聊天",
       draft_flag:"零售會員數據已連接即時資料",
-      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"聊天視窗數(累積)", rate_formula:"使用率 = 聊天視窗數 ÷ 累積會員", rate_avg:"平均", synced_at:"更新於",
+      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"聊天視窗數(累積)", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
     },
     en: {
@@ -736,7 +709,7 @@
       across_members:"Nationwide retail counters (DDS & Showroom included)",
       chat_windows:"Chat Windows", usage_rate:"Usage Rate", chat_badge:"1-on-1 Chat",
       draft_flag:"Retail membership data is live",
-      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", chat_store_none:"No store-level chat data for this month", chat_windows_cum:"Chat Windows (Cum.)", rate_formula:"Usage rate = chat windows ÷ cumulative members", rate_avg:"Average", synced_at:"updated",
+      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", chat_store_none:"No store-level chat data for this month", chat_windows_cum:"Chat Windows (Cum.)", synced_at:"updated",
       data_unavailable:"Couldn't load live data right now — try reloading the page"
     }
   };
@@ -1333,30 +1306,14 @@
   var chatStoreSort = {key:'windows', dir:null};
   var chatStoreState = {channel:'all', month:null};
   function chatStoreMonths(){ return monthDefs.filter(function(r){ return chatStoresByMonth[r.m]; }).map(function(r){ return r.m; }); }
-  // Each row also carries the store's cumulative members for the same month (matched by store name from
-  // the member By Store data) and its usage rate = chat windows / those members; rate is null when the
-  // store has no members that month. Rows without a rate always sort last.
   function currentChatStoreRows(){
-    var m = chatStoreState.month, members = {};
-    (storesByMonth[m] || []).forEach(function(s){ members[s.name] = s.cum; });
-    var rows = (chatStoresByMonth[m] || []).map(function(s){
-      var mem = members[s.name] || 0;
-      return {name: s.name, channel: s.channel, windows: s.windows, members: mem, rate: mem ? s.windows / mem * 100 : null};
-    });
+    var rows = chatStoresByMonth[chatStoreState.month] || [];
     if (chatStoreState.channel !== 'all') rows = rows.filter(function(s){ return s.channel === chatStoreState.channel; });
     if (chatStoreSort.dir){
-      var k = chatStoreSort.key, sign = chatStoreSort.dir === 'asc' ? 1 : -1;
-      rows = rows.slice().sort(function(a,b){
-        if (a[k] === null || b[k] === null) return (a[k] === null) - (b[k] === null);
-        return sign * (a[k] - b[k]);
-      });
+      var k = chatStoreSort.key;
+      rows = rows.slice().sort(function(a,b){ return chatStoreSort.dir === 'asc' ? a[k] - b[k] : b[k] - a[k]; });
     }
     return rows;
-  }
-  function fmtRate(r){ return r === null ? '–' : r.toFixed(1) + '%'; }
-  function chatStoreTotals(rows){
-    var w = rows.reduce(function(a, r){ return a + r.windows; }, 0), mem = rows.reduce(function(a, r){ return a + r.members; }, 0);
-    return {windows: w, members: mem, rate: mem ? w / mem * 100 : null};
   }
   // Any month can be picked (a month whose tab has no by-store block shows an empty-state row);
   // it opens on the newest month that has data. Sheet values are cumulative, so they're shown as-is.
@@ -1373,42 +1330,26 @@
     if (!chatStoreState.month) return;
     var rows = currentChatStoreRows();
     var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
-    var barColor = {dds:'var(--purple)', showroom:'var(--teal)'};
-    var tot = chatStoreTotals(rows);
-    var avgTick = tot.rate === null ? '' : '<span class="rate-avg" style="left:' + Math.min(tot.rate, 100) + '%"></span>';
-    var rateCell = function(rate, color, w, mem){
-      var tip = w + ' / ' + mem;
-      var fill = rate === null ? '' : '<span class="rate-fill" style="width:' + Math.min(rate, 100) + '%; background:' + color + '"></span>';
-      return '<td class="st-num" title="' + tip + '"><div class="rate-cell"><span class="rate-track">' + fill + avgTick + '</span>' +
-        '<span class="rate-val">' + fmtRate(rate) + '<span class="rate-sub">' + tip + '</span></span></div></td>';
-    };
-    document.getElementById('chatRateAvgLabel').textContent = t('rate_avg') + ' ' + fmtRate(tot.rate);
     document.getElementById('chatStoreTableBody').innerHTML = rows.length ? rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
-        '<td class="st-num st-cum col-count">' + r.windows + '</td>' +
-        '<td class="st-num st-monthly col-count">' + r.members + '</td>' +
-        rateCell(r.rate, barColor[r.channel], r.windows, r.members) + '</tr>';
-    }).join('') : '<tr><td class="store-empty" colspan="4">' + t('chat_store_none') + '</td></tr>';
+        '<td class="st-num st-cum">' + r.windows + '</td></tr>';
+    }).join('') : '<tr><td class="store-empty" colspan="2">' + t('chat_store_none') + '</td></tr>';
+    var sum = rows.reduce(function(a, r){ return a + r.windows; }, 0);
     document.getElementById('chatStoreTableFoot').innerHTML =
       '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
-      '<td class="st-num st-cum col-count">' + tot.windows + '</td>' +
-      '<td class="st-num st-monthly col-count">' + tot.members + '</td>' +
-      rateCell(tot.rate, 'var(--muted)', tot.windows, tot.members) + '</tr>';
+      '<td class="st-num st-cum">' + sum + '</td></tr>';
     document.querySelectorAll('#chatStoreChannelSeg button').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-ch') === chatStoreState.channel);
     });
     var dd = document.getElementById('chatSortDd'), arrow = chatStoreSort.dir === 'asc' ? '↑' : '↓';
     dd.classList.toggle('active', !!chatStoreSort.dir);
-    var chatKeyLabel = {windows:'chat_windows', members:'cum_members', rate:'usage_rate'};
-    dd.querySelector('.sort-dd-label').textContent = chatStoreSort.dir ? t(chatKeyLabel[chatStoreSort.key]) : t('sort_default');
+    dd.querySelector('.sort-dd-label').textContent = chatStoreSort.dir ? t('chat_windows') : t('sort_default');
     dd.querySelector('.sort-dd-arrow').textContent = chatStoreSort.dir ? arrow : '';
     dd.querySelectorAll('.sort-dd-item').forEach(function(item){
-      item.classList.toggle('active', item.hasAttribute('data-key')
-        ? !!chatStoreSort.dir && chatStoreSort.key === item.getAttribute('data-key')
-        : chatStoreSort.dir === item.getAttribute('data-dir'));
+      item.classList.toggle('active', item.hasAttribute('data-key') ? !!chatStoreSort.dir : chatStoreSort.dir === item.getAttribute('data-dir'));
     });
     document.querySelectorAll('#chatStoreTable th[data-sort-key]').forEach(function(th){
-      th.querySelector('.th-sort').textContent = chatStoreSort.dir && th.getAttribute('data-sort-key') === chatStoreSort.key ? arrow : '';
+      th.querySelector('.th-sort').textContent = chatStoreSort.dir ? arrow : '';
     });
   }
   document.querySelectorAll('#chatStoreChannelSeg button').forEach(function(b){
@@ -1659,10 +1600,9 @@
     if (!chatStoreState.month || btn.disabled) return;
     var rows = currentChatStoreRows();
     var chName = {dds:'DDS', showroom:'Showroom'};
-    var lines = [[t('csv_channel'), t('store_name'), t('chat_windows_cum'), t('cum_members'), t('usage_rate')]];
-    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.windows, r.members, fmtRate(r.rate)]); });
-    var tot = chatStoreTotals(rows);
-    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), tot.windows, tot.members, fmtRate(tot.rate)]);
+    var lines = [[t('csv_channel'), t('store_name'), t('chat_windows_cum')]];
+    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.windows]); });
+    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), rows.reduce(function(a, r){ return a + r.windows; }, 0)]);
     var csv = '\ufeff' + lines.map(function(l){ return l.map(csvCell).join(','); }).join('\r\n') + '\r\n';
     var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
     btn.disabled = true;
