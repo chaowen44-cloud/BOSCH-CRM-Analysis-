@@ -548,7 +548,7 @@
         </div>
         <div class="metric-row">
           <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" data-chat="windows" data-ch="dds">–</span></div>
-          <div class="metric-box"><span class="k" data-i18n="usage_rate">使用率</span><span class="v num" style="color:var(--purple)" data-chat="rate" data-ch="dds">–</span></div>
+          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--purple)" data-chat="rate" data-ch="dds">–</span></div>
         </div>
         <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="dds" style="width:0; background:var(--purple)"></div></div>
       </div>
@@ -559,7 +559,7 @@
         </div>
         <div class="metric-row">
           <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" data-chat="windows" data-ch="showroom">–</span></div>
-          <div class="metric-box"><span class="k" data-i18n="usage_rate">使用率</span><span class="v num" style="color:var(--teal)" data-chat="rate" data-ch="showroom">–</span></div>
+          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--teal)" data-chat="rate" data-ch="showroom">–</span></div>
         </div>
         <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="showroom" style="width:0; background:var(--teal)"></div></div>
       </div>
@@ -629,7 +629,7 @@
 
     <!-- ---- store chat usage rate, top 5 per channel (rate = store's chat windows / its cumulative members) ---- -->
     <div class="chart-card" id="chatRateCard">
-      <div class="chart-head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="chat_rate_top5">店櫃聊天使用率 Top 5</b>
+      <div class="chart-head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="chat_rate_top5">店櫃聊天互動率 Top 5</b>
         <label class="df-field rank-month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select id="chatRateMonth" aria-label="Month"></select></label>
       </div>
       <div class="rank-grid">
@@ -642,7 +642,7 @@
           <ol class="rank-list" data-list="showroom"></ol>
         </div>
       </div>
-      <div class="rank-note" data-i18n="chat_rate_note">使用率 = 該店聊天視窗數(累積) ÷ 該店累積會員</div>
+      <div class="rank-note" data-i18n="chat_rate_note">互動率 = 該店聊天視窗數(累積) ÷ 該店累積會員</div>
     </div>
 
     <div class="footnote">
@@ -679,7 +679,7 @@
       sort_field:"排序欄位", sort_short_shipped:"已出貨", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
-      chat_rate_top5:"店櫃聊天使用率 Top 5", chat_rate_note:"使用率 = 該店聊天視窗數(累積) ÷ 該店累積會員", rate_avg:"平均",
+      chat_rate_top5:"店櫃聊天互動率 Top 5", chat_rate_note:"互動率 = 該店聊天視窗數(累積) ÷ 該店累積會員", rate_avg:"平均",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
@@ -690,7 +690,7 @@
       kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
       total_tags:"標籤使用總數",
       across_members:"全台零售櫃位(包含DDS & Showroom)",
-      chat_windows:"聊天視窗數", usage_rate:"使用率", chat_badge:"一對一聊天",
+      chat_windows:"聊天視窗數", usage_rate:"互動率", chat_badge:"一對一聊天",
       draft_flag:"零售會員數據已連接即時資料",
       data_wait:"資料載入中…", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"聊天視窗數(累積)", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
@@ -704,7 +704,7 @@
       sort_field:"Sort by", sort_short_shipped:"Shipped", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
-      chat_rate_top5:"Store Chat Usage Rate — Top 5", chat_rate_note:"Usage rate = the store's chat windows (cum.) ÷ its cumulative members", rate_avg:"Average",
+      chat_rate_top5:"Store Chat Engagement Rate — Top 5", chat_rate_note:"Engagement rate = the store's chat windows (cum.) ÷ its cumulative members", rate_avg:"Average",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       kicker1:"Retail Membership", h1_1:"Retail Store & Showroom Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
@@ -715,7 +715,7 @@
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
       across_members:"Nationwide retail counters (DDS & Showroom included)",
-      chat_windows:"Chat Windows", usage_rate:"Usage Rate", chat_badge:"1-on-1 Chat",
+      chat_windows:"Chat Windows", usage_rate:"Engagement Rate", chat_badge:"1-on-1 Chat",
       draft_flag:"Retail membership data is live",
       data_wait:"Loading data…", chat_store_none:"No store-level chat data for this month", chat_windows_cum:"Chat Windows (Cum.)", synced_at:"updated",
       data_unavailable:"Couldn't load live data right now — try reloading the page"
@@ -1281,7 +1281,7 @@
 
   /* ---------- CRM 1-on-1 chat trend (single card, DDS/Showroom switch) ---------- */
   // 1-on-1 chat windows per month: the sum of that month tab's "1-on-1 Chat (by store)" rows per channel
-  // (see applyMonthDocs). Only months with chat data are present. Usage rate = chat windows / that
+  // (see applyMonthDocs). Only months with chat data are present. Engagement rate = chat windows / that
   // month's cumulative members.
   var chatByMonth = {};
   function chatMonths(){ return monthDefs.filter(function(r){ return chatByMonth[r.m]; }).map(function(r){ return r.m; }); }
