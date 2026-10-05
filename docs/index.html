@@ -306,9 +306,8 @@
   .trend-legend .tl-ln{width:16px; height:3px; border-radius:2px; background:var(--orange); flex:none}
   .trend-legend .tl-share{margin-left:auto; white-space:nowrap}
   .trend-legend .tl-share b{color:var(--ink); font-weight:600}
-  .trend-legend .tl-share em{font-style:normal; font-weight:600; margin-left:4px}
-  .trend-legend .tl-share em.up{color:var(--up)}
-  .trend-legend .tl-share em.down{color:var(--down)}
+  .trend-legend .tl-share em{font-style:normal; font-weight:500; font-size:11px; margin-left:3px}
+
   /* engagement rate column: channel averages sit once in the header; each store shows only its gap to its own channel's average */
   .th-avg{display:block; margin-top:4px; font-size:10px; font-weight:500; color:rgba(255,255,255,.55)}
   .th-avg b{font-weight:500; color:inherit}
@@ -672,7 +671,7 @@
       sort_field:"排序欄位", sort_short_shipped:"已出貨", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
-      rate_avg:"平均", sr_share_cum:"Showroom 占比", sr_share_new:"Showroom 占新增", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
+      rate_avg:"平均", sr_share_cum:"占比", sr_share_new:"新增占比", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
@@ -697,7 +696,7 @@
       sort_field:"Sort by", sort_short_shipped:"Shipped", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
-      rate_avg:"Average", sr_share_cum:"Showroom share", sr_share_new:"Showroom share of net-add", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
+      rate_avg:"Average", sr_share_cum:"Share", sr_share_new:"Share of net-add", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       kicker1:"Retail Membership", h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
@@ -1058,7 +1057,7 @@
           row('--orange', t('ch_total'), values[i]) +
           row('--purple', 'DDS', bd.dds) +
           row('--teal', 'Showroom', bd.showroom) +
-          '<div class="rt-hint">' + (opts.shareLabel || '') + ' ' + ((bd.dds + bd.showroom) > 0 ? (bd.showroom / (bd.dds + bd.showroom) * 100).toFixed(1) + '%' : '–') + '</div>' +
+          '<div class="rt-hint">' + (opts.shareLabel || '') + (currentLang === 'zh' ? '：' : ': ') + ((bd.dds + bd.showroom) > 0 ? 'DDS ' + (bd.dds / (bd.dds + bd.showroom) * 100).toFixed(1) + '% / Showroom ' + (bd.showroom / (bd.dds + bd.showroom) * 100).toFixed(1) + '%' : '–') + '</div>' +
           (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
         return true;
       },
@@ -1123,17 +1122,17 @@
   function renderMergedLegend(bd, shareLabel){
     var el = document.getElementById('mergedLegend');
     if (!bd || !bd.length){ el.hidden = true; el.innerHTML = ''; return; }
-    var share = function(b){ var tot = b.dds + b.showroom; return tot > 0 ? b.showroom / tot * 100 : null; };
-    var cur = share(bd[bd.length - 1]), prev = bd.length > 1 ? share(bd[bd.length - 2]) : null, delta = '';
-    if (cur !== null && prev !== null){
-      var d = Math.round((cur - prev) * 10) / 10;
-      delta = d === 0 ? '' : '<em class="' + (d > 0 ? 'up' : 'down') + '">' + (d > 0 ? '▲' : '▼') + Math.abs(d).toFixed(1) + '</em>';
-    }
+    var shareOf = function(b){ var tot = b.dds + b.showroom; return tot > 0 ? {dds: b.dds / tot * 100, showroom: b.showroom / tot * 100} : null; };
+    var cur = shareOf(bd[bd.length - 1]), prev = bd.length > 1 ? shareOf(bd[bd.length - 2]) : null;
+    var part = function(ch, name){
+      var d = cur && prev ? Math.round((cur[ch] - prev[ch]) * 10) / 10 : 0;
+      return name + ' <b>' + cur[ch].toFixed(1) + '%</b>' + (d === 0 ? '' : '<em>' + (d > 0 ? '▲' : '▼') + Math.abs(d).toFixed(1) + '</em>');
+    };
     el.hidden = false;
     el.innerHTML = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
       '<span class="tl-item"><i class="tl-sw" style="background:var(--teal)"></i>Showroom</span>' +
       (document.querySelector('input[name="merged-mode"]:checked').value === 'monthly' ? '' : '<span class="tl-item"><i class="tl-ln"></i>' + t('ch_total') + '</span>') +
-      (cur === null ? '' : '<span class="tl-share">' + shareLabel + ' <b>' + cur.toFixed(1) + '%</b>' + delta + '</span>');
+      (cur === null ? '' : '<span class="tl-share">' + shareLabel + (currentLang === 'zh' ? '：' : ': ') + part('dds', 'DDS') + ' / ' + part('showroom', 'Showroom') + '</span>');
   }
   function renderMergedChart(){
     if (!monthDefs.length) return;
