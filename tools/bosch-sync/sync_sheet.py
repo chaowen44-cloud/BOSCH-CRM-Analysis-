@@ -9,7 +9,8 @@ store rows start at row 8 and run until column A is blank or a section header
 ("Total Retail", "1-on-1 ...") begins. Blank or non-numeric cells -> 0.
 Writes <out_dir>/<YYYYMM>.json shaped {dds:{cum,monthly,shipped}, showroom:{...}, stores:[...]},
 plus chat:{dds,showroom} (1-on-1 chat windows) and tags (total tags used) for months whose tab
-has a "1-on-1 Chat" / "Total Tags Used" block.
+has a "1-on-1 Chat" / "Total Tags Used" block, and chatStores:[{name,windows}, ...] for months whose
+tab has a "1-on-1 Chat (by store)" block (store names in column A, chat windows in column B).
 """
 import base64, json, os, re, sys
 import openpyxl
@@ -26,10 +27,15 @@ def triple(row):
     return {'cum': num(row[1]), 'monthly': num(row[2]), 'shipped': num(row[3])}
 
 
+def is_chat_by_store(text):
+    return text.lower().startswith('1-on-1') and 'by store' in text.lower()
+
+
 def chat_block(rows):
     """The optional "1-on-1 Chat" block below the store list: DDS / Showroom chat windows in column B."""
     label = lambda r: '' if r[0] is None else str(r[0]).strip()
-    start = next((i for i, r in enumerate(rows) if label(r).lower().startswith('1-on-1')), None)
+    start = next((i for i, r in enumerate(rows)
+                  if label(r).lower().startswith('1-on-1') and not is_chat_by_store(label(r))), None)
     if start is None:
         return None
     found = {}
@@ -38,6 +44,26 @@ def chat_block(rows):
         if key and key not in found:
             found[key] = num(r[1])
     return found if len(found) == 2 else None
+
+
+def chat_stores_block(rows):
+    """The optional "1-on-1 Chat (by store)" block: one row per store, chat windows in column B.
+    Its header row (blank column A, "Chat Windows" in B) is skipped; the list ends at a blank row
+    or the next section header."""
+    label = lambda r: '' if r[0] is None else str(r[0]).strip()
+    start = next((i for i, r in enumerate(rows) if is_chat_by_store(label(r))), None)
+    if start is None:
+        return None
+    i = start + 1
+    while i < len(rows) and label(rows[i]) == '':
+        i += 1
+    stores = []
+    for r in rows[i:]:
+        name = label(r)
+        if name == '' or name == 'Total Retail' or name.lower().startswith(('1-on-1', 'total tags used')):
+            break
+        stores.append({'name': name, 'windows': num(r[1])})
+    return stores or None
 
 
 def tags_block(rows):
@@ -79,6 +105,9 @@ def main(src, out_dir):
         chat = chat_block(rows)
         if chat:
             doc['chat'] = chat
+        chat_stores = chat_stores_block(rows)
+        if chat_stores:
+            doc['chatStores'] = chat_stores
         tags = tags_block(rows)
         if tags is not None:
             doc['tags'] = tags

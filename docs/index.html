@@ -260,21 +260,21 @@
   @media (max-width:480px){
     main, .section{grid-template-columns:minmax(0,1fr)}
     .shared-filter-label{white-space:normal}
-    #bystore .store-card-head{padding:14px 16px; gap:8px}
-    #bystore .store-card-head .label{white-space:nowrap}
-    #bystore .store-card-head .right{flex-wrap:nowrap; min-width:0; gap:8px}
-    #bystore .store-card-head .left{flex:none}
-    #bystore .store-sort-dd{display:flex; min-width:0; flex:0 1 auto}
-    #bystore .store-sort-dd .sort-dd-btn{min-width:0; max-width:100%; padding:7px 12px}
-    #bystore .store-sort-dd .sort-dd-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
-    #bystore #storeRefreshBtn, #bystore .export-btn, #bystore .csv-btn{flex:none}
-    #bystore .export-btn .export-label, #bystore .csv-btn .export-label{display:none}
+    .store-card .store-card-head{padding:14px 16px; gap:8px}
+    .store-card .store-card-head .label{white-space:nowrap}
+    .store-card .store-card-head .right{flex-wrap:nowrap; min-width:0; gap:8px}
+    .store-card .store-card-head .left{flex:none}
+    .store-card .store-sort-dd{display:flex; min-width:0; flex:0 1 auto}
+    .store-card .store-sort-dd .sort-dd-btn{min-width:0; max-width:100%; padding:7px 12px}
+    .store-card .store-sort-dd .sort-dd-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+    .store-card .store-refresh-btn, .store-card .export-btn, .store-card .csv-btn{flex:none}
+    .store-card .export-btn .export-label, .store-card .csv-btn .export-label{display:none}
     /* four controls don't fit beside the title on a phone: give them their own row under it */
-    #bystore .store-card-head{flex-wrap:wrap}
-    #bystore .store-card-head .right{flex:1 1 100%; justify-content:flex-end}
+    .store-card .store-card-head{flex-wrap:wrap}
+    .store-card .store-card-head .right{flex:1 1 100%; justify-content:flex-end}
   }
   @media (max-width:360px){
-    #bystore #storeRefreshBtn span{display:none}
+    .store-card .store-refresh-btn span{display:none}
   }
   .store-sort-dd .sort-dd-btn{background:var(--surface); border:1px solid var(--border); color:var(--ink); border-radius:999px; padding:7px 14px; font-size:12.5px}
   .store-sort-dd .sort-dd-btn:hover{background:var(--bg)}
@@ -293,6 +293,8 @@
   .store-card.collapsed .store-card-head .right{opacity:0; visibility:hidden}
   @media (prefers-reduced-motion: reduce){ .store-body, .store-caret svg, .store-card-head .right{transition:none} }
   .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
+  .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
+  .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
   .store-card{scroll-margin-top:70px}
   .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
   .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
@@ -461,7 +463,7 @@
           </button>
         </div>
         <div class="right">
-          <span class="sort-dd store-sort-dd">
+          <span class="sort-dd store-sort-dd" id="storeSortDd">
             <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><span class="sort-dd-arrow"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="sort-dd-menu">
               <div class="sort-dd-group">
@@ -477,7 +479,7 @@
               </div>
             </div>
           </span>
-          <button type="button" class="refresh-btn" id="storeRefreshBtn">
+          <button type="button" class="refresh-btn store-refresh-btn" id="storeRefreshBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
             <span data-i18n="refresh">重整</span>
           </button>
@@ -493,7 +495,7 @@
       </div>
       <div class="store-body" id="storeBody"><div class="store-body-inner">
       <div class="store-table-wrap">
-        <table class="store-table">
+        <table class="store-table" id="storeTable">
           <thead>
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
@@ -551,6 +553,68 @@
       </div>
     </div>
 
+    <!-- ---- 1-on-1 Chat by store (sheet block "1-on-1 Chat (by store)"); same layout and controls as the member By Store card ---- -->
+    <div class="store-card" id="chatstore" hidden>
+      <div class="store-card-head">
+        <div class="left">
+          <button type="button" class="store-toggle" id="chatStoreToggle" aria-expanded="true" aria-controls="chatStoreBody">
+            <span class="label" data-i18n="by_store_label">BY STORE</span>
+            <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+        </div>
+        <div class="right">
+          <span class="sort-dd store-sort-dd" id="chatSortDd">
+            <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><span class="sort-dd-arrow"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="sort-dd-menu">
+              <div class="sort-dd-group">
+                <div class="sort-dd-title" data-i18n="sort_field">排序欄位</div>
+                <button type="button" class="sort-dd-item" data-key="windows"><span data-i18n="chat_windows">聊天視窗數</span><span class="chk">✓</span></button>
+              </div>
+              <div class="sort-dd-group">
+                <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
+                <button type="button" class="sort-dd-item" data-dir="desc"><span data-i18n="sort_desc">由多至少</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-dir="asc"><span data-i18n="sort_asc">由少至多</span><span class="chk">✓</span></button>
+              </div>
+            </div>
+          </span>
+          <button type="button" class="refresh-btn store-refresh-btn" id="chatStoreRefreshBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            <span data-i18n="refresh">重整</span>
+          </button>
+          <button type="button" class="refresh-btn export-btn" data-export="chatstore" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+            <span class="export-label" data-i18n="export_img">匯出圖片</span>
+          </button>
+          <button type="button" class="refresh-btn csv-btn" id="chatStoreCsvBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15l3 3 3-3"/></svg>
+            <span class="export-label" data-i18n="export_csv">匯出 CSV</span>
+          </button>
+        </div>
+      </div>
+      <div class="store-body" id="chatStoreBody"><div class="store-body-inner">
+      <div class="store-filter">
+        <div class="seg" id="chatStoreChannelSeg">
+          <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
+          <button type="button" data-ch="dds">DDS</button>
+          <button type="button" data-ch="showroom">Showroom</button>
+        </div>
+        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select id="chatStoreMonth" aria-label="Month"></select></label>
+      </div>
+      <div class="store-table-wrap">
+        <table class="store-table" id="chatStoreTable">
+          <thead>
+            <tr>
+              <th data-i18n="store_name">店櫃名稱</th>
+              <th class="num" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows">聊天視窗數</span></th>
+            </tr>
+          </thead>
+          <tbody id="chatStoreTableBody"></tbody>
+          <tfoot id="chatStoreTableFoot"></tfoot>
+        </table>
+      </div>
+      </div></div>
+    </div>
+
     <div class="chart-card">
       <div class="chart-head"><span class="swatch" id="crmSwatch" style="background:var(--orange)"></span><b data-i18n="crm_trend">一對一聊天趨勢</b></div>
       <div class="chart-filter" id="crmFilter">
@@ -593,7 +657,7 @@
   (function(){ var l = document.createElement('link'); l.rel = 'icon'; l.type = 'image/png';
     l.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAQ8UlEQVR42uVbe2wUZdf/PbOzbLu9UKSlgvQieQvlWqBKodxKiwGqxiC+MQjGyB+AARET9MMYLkYjXhIIxQsBAwbQcFHkIkVA0gIlENoAZbfYFiItKq2029uWbXd3Zn7fH+5MZnsRKS0v7/dNMtl2Z3aec37nOuecR+ABHyQFANHZZSEE8X/pICmRtJC05OXlyXe7Py8vT9bvJyn1NH2ip5gGIAkhVABsc80O4NHA9/r6+t/VQghPWxpJWgBoQgitu2mVu5lxM6Fa4LuRAB4H8DIAW3Nz85CbN28OrqurY3NzswAASZLYv39/ERcXV06yDIAXwE4AN4QQDiGEYjIfHdiHRwMCjFOXEMl/AZitadq/nU7nmEuXLsklJSUoLCxEdXU1bt68CY8nWNA2mw0JCQl47LHHMGLECKSkpCAlJUUZPXr0JVmW9wH4QQhx3aRhojuBuB/mZdPf2STzS0tLfVu2bGFmZiatVisBKIHTD0A3i45ONXCPAkCRJIlTp07lpk2bePnyZR/JfJLZHa39wDWApGSS+FMA/sfpdGZt3rwZO3bsgNvtVgBIAERsbKxISUnB0KFDMXjwYCQnJyM8PFx/DoQQ8Hq9KC0thdPpREVFBYqKinDr1i0dGM1ms8lz587FokWLMH78+JMAPhZCnGhLy4OSuhUAioqKrCTX//7771y8eDElSdIlrSUmJnLx4sXMzc1lTU0N7/VoaGjg8ePHuWLFCg4ePJgBn6IAUObPn0+n00mS63Va9M8Hwbwl8DmZpOOrr75idHS0GiCO6enp3Lx5M2/fvh3EkKZp9Pv9VBTlb0+/309VVYN+29TUxH379jEzM1PXCMVms6k5OTkk6SA52UxbjyUwelwmuayhocH98ssvE4APAAcNGsQvv/ySPp/PIFxnStO0e9YATdOM35u/279/P5OTk3UgfM899xyvXr3qJrnMlHeInmBeDvydc+PGDT7++OMEoFosFi5YsIBVVVVBjHeF6buBYTaPVatW0WazEYAaHR3NK1eukGSO7hy7FQST5DeWlJQwMjLSC0CLiIjg7t27DcL8fn+3Mn43IA4fPsykpCQC0EJCQryHDh0iyY1mmrvL4Ukkc5xOJ8PCwnwAOGLECObn5wdJXLfzngDC/FwzEJWVlZwwYYJhEgEQcgI0W7vF25N8/Y8//tAlz9TUVFZUVBiEkWznuHry0JnX166treXkyZMJgCEhId6rV6+S5Ov3FR1M3n6ix+OpS0hI8AFQk5OTWVlZGUSI/ulyufjRRx9x+fLlBkD3own6b1tbW7l69WquWLGCv/32W4dr19bWctKkSbpP8JWWltaRnNil6BBwehaSYSTLXnrpJQJQw8LCeObMmSD0dQKKioo4evRoI6s7cOBA0PX7AaCxsZGhoaEEwCFDhvDHH38Meraufbdu3WJCQgIBqJmZmVQUpSzAg+WenKLJ42/Ytm0bAfhlWeaePXs6ZP7QoUOMiorSVZCyLPPIkSPdBkBTUxPj4+MpyzIB0GKxcMeOHR3Skpuby4iICALwv/POOyS54Z7SZpPqZ9bU1Pj69u3rB8BXX321wwUPHz7MXr16GZK3WCwE0E5K9wvAgAEDgt4bZFk2QGjrE9auXUsA7NWrl9/hcPhIZv5jU9i7d68OwOnXXnuNAJSBAwfy9u3bhgfWVc7pdOpoMzExkYsWLeoxAAYOHEgAXLJkCWfPnm2AbTY1PTp4vV6mp6cTgDJr1iySPG3m7Z9If/q1a9coy7IiSRK3bNkSFOdVVWVtbS3HjBlDAIyJiWFZWRkrKysNCXU3AHFxcQTAzz//nG6321g7NjaWFRUVBl36eseOHaMkSQSgBGiZflctIGkJvOAU6NKfMGECW1tbqapqkPSXLVtGAIyIiDDygbNnz/Y4AB9++CFJ8vz584yOjiYAZmdnG87QTONTTz1FIYSSlZVFkgUkrZ0CYMr2ksrLy1W73a4B0HTpm/Pys2fPUpIkSpJkEKSqKgsLCw0ADh8+bCRGuunc66kz1NjYaADw6aefGsDs3LmTeiF127Zt7egMaIFmtVq1c+fOqSSTOs0SA+gIkiu++OILDYAvMTGRtbW1QQSpqsqnn36aADhx4kSDSZJBAOTm5nZb4tPc3BwEAEl6vV6qqmr4gyFDhtDtdgcB6PP59CzR9/bbb2skVwR4NJIjMxJKoCT9wp49e4QQQsrOzkbfvn2haRo0TYMkSTh9+jSOHz8OIQRWr14NIQQ0rX0toqWlBS0tLXC73fB4PF0679y5Y3x2dEiShJUrV8Jut6OsrAy7d+826NE0DVarFXPmzAEA6cCBA6K2tvaFAI9KUFFUr6iQHFlWVjby3LlzGknp2WefBRlcpt+6dSv8fj+mTp2KrKwsaJoGiyXYrIQQWLZsGSIjIzsEpwtZKWpqagDAeJ4kSdA0DePGjcOMGTNw4MABfP3111iwYIFxDQCmT58OWZala9euaZcvXx5JcqQQwhFURTJ5/+d37dpFAEq/fv1YW1sb5Miqq6sZGxtLAEExWHc6ugkEUO7WU3/mxx9/bEQkna59+/YZSdilS5fa5QYjR44kAGXdunUk+byZZxkA8vPzRSBVnHv58mUCYEpKCh555BGQNLTgzJkz+PPPPxEWFoYpU6YY0u5IYi+88AJGjRoFn8/X4T3/VPKyLKO+vh5bt26Fx+MJepYk/WXBWVlZePTRR1FdXY28vDyMHj0aJKGqKmRZxvjx4+FwOHjq1CmuXLlyLskf8vPzRVBfQAhBkpaLFy8KABg+fDiEEFAUxVi0oKAAQgiMHTsW8fHxRkGzrZkAwJIlS5CRkdEtr+SapuH7779vB4Bu73369EFaWhoOHjyIo0eP4s033wwyg6FDhwIAbt++LVpaWix2u515eXl/gUhS5OfnayT73LlzZ/itW7cAQEpKSmqHdGFhIUgiNTUVQgioqtqpdN1uNxRFgdfrhaIoXTr9fj8URUF9fX2HIJt9wtixYwEAFRUV8Pv9Bs0AMGrUKACQfv31VzidzuEk+wR4FhIA8d5772kAoqurqwffuHEDAKTk5GQDZR1pl8sFABg0aNBdpSZJEmRZ7pazrZNt63ABYMSIEQCA6upqVFZWGiYEAJGRkQAgNTQ0wO12DwYQHeBZBIXBqqoqKspfEcJct9cfXFdXBwAYNmxYp/b/nzr69+8PAPB4PKitrQ26ZrfbYbPZAABerzcoDJoBEE1NTUJV1XaOCABcLhcaGxsBAKGhoQ9jFxoAoKoq3G530LWIiAjY7XZdaEHteamt2v63Hl3VRjPHlCSJbR+k/x8WFmZI3uv1PrQaYLFYdJsPcsh6M5Z/3ciOAJATEhKELMtBTOoAxMXFISYmBgBQXl4etOjDcOh2b7PZEBUVFXTN4/EY/NhsNmEO/xIArlmzRgJQGxsbW56YmAgAWmlpqcEkSVitVsTGxgIAysrK7kqQqqpdDn8dnXeT/JUrVwxnmJCQEGTSLS0tCPQxYLPZygHUBnimJIRgRkaGJISoj4qKKomPjwcA7erVq+1ibSCewul0GurWmRZERUVBlmXYbLYuhz+r1QpZlhEdHd2pjevfFxcXAwASEhIQEhISlMEGrmmJiYkYMmRIiRCiPsBzUG9fAFCHDh3KkydP4vr160EvHQCQmpoKAHA4HKipqUFMTEynLzs7duyAw+GAz+frsnPVU2GXy4WGhoZ2ZkcSFosFTU1NOH/+PABg4sSJhgbq95SUlAAABgwYwOjoaDWQ/HVYCnt++/btBKD079+fjY2NQS8WN27coN1uJwB+++23D8XLkKZpPHjwoHFfQUFBu/5koCagfPDBB+1ehiTTkBIAXHviiSc8vXr1ElVVVdRTX90MEhMTMXPmTAghsH37dkMFOzKDkJAQhIeHd8tpt9s7zAb1LHXnzp0QQmDEiBEYN26cQY8QAuXl5XA6nQQgUlJSPACumXmWAzdqJIUQwqGqqiMtLS2toKBAPXHihCUrK8sAQJIkzJs3D/v370deXh4uXLiAcePGwe/3BxFIElu3bsX06dON393P0dTUhIyMDFRVVRk2r2kaZFmG0+nEsWPHQBILFy6E1WoNcppHjx6F2+3WBg0aZBkzZowjUAsQ7SZKzCWxjRs3agB8SUlJ7cpMra2tRkU2KyuLqqoaMwHmkthPP/3UbSWx1tZWxsfHtyuJaZrGuXPnEgDj4+ON0r1eulMUhVOmTKEQwvf6668bJbGioiLr3xZFHQ6HarPZNADa/v372xUbjxw5QiEEhRDcuXOnUcF90EXRvXv3Gutt3LixHZ2nT5+mLMsaAO3w4cN/XxTVHUNAEwoC0x9KRkaG4ejMJWe9GBkdHc0LFy6QJM+dO/fAyuLXr19nv379CIBPPvkkPR6PQaO+5uzZsymEUNLT0+n1ev++LN62MRKQpmKxWHjw4MEgj69pGm/duqUPL3Hs2LFsbGxkaWlpjwPw2WefUVEUZmRkEACtVqshAHNj5MyZM3ovUQkMcdy9MdK2NTZv3jwCUJKSktjY2GiEFl0LcnNzjYblM888w+3btxvhqqdaYytWrOD8+fOpv7u07Q+qqkq/368DpKSnp9Pv9/+z1ljb5mh5ebnPbrf7AXDVqlUd9uW/+eYbA4QH2Ry1WCwMTIkZAtH7Exs2bNAbqP6TJ0/eW3O0bXt806ZNBOCPiIgwmh36Qvrnrl279IGlHmuPx8XFUZZlw/nqzLcVyMWLFxkZGUkA/mXLlt17e7yjAYmZM2cSgJqQkGBMaLRFPTc311BTAPzhhx+6dUAiLCyMAGi3243I03ZAoqGhgWlpaQSgDhs2jC6Xq2sDEm1HZK5du1YXExPjA6BOnDiRdXV1HaJfWVnJpUuX8pVXXmFxcfF9zw7pALS0tPCNN97gwoULefHixaDn6mu73W5OnTqVANTIyEjfhQsXuj4i09GQ1C+//MKQkBAvAE6bNo319fX/8SEp/bO5udnoVwLwBnKX+xuS6mhM7tChQ8Zk6LRp04zhSPOY3P1Mh96NaXMY1oF3uVy65AnAt2HDBpLMWbNmzf2PyXU0KHno0CFdE7Rhw4bx559/7rEJ0b+Tvj6YNX78eH2Q2htgfiMABAoePTMqe+XKFX04QQ0NDeXatWvZ2toaNM3ZExqgm5mqqly/fj3Dw8MJQI2KimJA7XMAY99Rj8wLG8PSxcXF7lmzZhkmMXnyZB49erRDors6LK0nNebf5+fnc/r06YbKjxkzhmfPnu3ZYenOxuX9fr/j3XffpSzLxrj8jBkzeOTIkXbhTx91Nduy+TSPy+v2bT7y8vI4Z84cmvr76vLly1lfX/9gxuU7iQ5WkusLCwuZnZ1t3hqjTZo0iZ988gkvXrxIr9fbJQ24evUqN2zYoKe1xoaJzMxM/XX7vjdMdOuWmdzc3KycnBycOHECmqYpACSLxSKGDx8u0tLSkJycjJSUFPTu3RuhoaGIiIgw6vYtLS3weDy4fPkySkpK4HA4UFxcTI/HozMvT5o0CUuXLsWLL774n90y01HaHPg7m2T+qVOnfG+99ZZ5Y0O7TVOyLLNPnz7s06eP+V0iaNMUACYlJXHp0qX87rvvfHfu3Gm3aeqh6E+StJjDDsl/kXzL5XJdOHDggH/dunWcOXMmU1NT2bt3704Ln+Hh4Rw1ahRnzJjB999/n3v27PFXVVVdIPlWYCse9BDXXfYuuhuIgCrS9J2xcbKlpcXmdDqHuFyuwQwU5gL1PUqSJCIiIsqTk5PL+vbtG7Rx0kxvQN0fro2TnSRO/xVbZx+Eefz/2zx9t4QKD9H2+f8FsJn78BB1YFQAAAAASUVORK5CYII='; document.head.appendChild(l); })();
 </script>
-<script type="application/json" id="liveData">{"syncedAt":"2026-10-01T09:24:51Z","months":{"202603":{"dds":{"cum":34,"monthly":34,"shipped":0},"showroom":{"cum":16,"monthly":16,"shipped":0},"stores":[{"name":"Showroom- Taipei","cum":9,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":3,"monthly":3,"shipped":0},{"name":"Showroom- Hsinchu","cum":2,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":2,"monthly":2,"shipped":0},{"name":"SOGO- 復興","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 忠孝","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 天母","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 新竹","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 板橋","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 桃園","cum":3,"monthly":3,"shipped":0},{"name":"FEDS- 新竹","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":0,"monthly":0,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":6,"monthly":6,"shipped":0},{"name":"SKM- 台南西門","cum":0,"monthly":0,"shipped":0},{"name":"特力- 南崁","cum":0,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":1,"monthly":1,"shipped":0},{"name":"夢時代- 高雄","cum":7,"monthly":7,"shipped":0},{"name":"義享天地- 高雄","cum":1,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":0,"monthly":0,"shipped":0},{"name":"漢神洲際- 台中","cum":0,"monthly":0,"shipped":0}]},"202604":{"dds":{"cum":243,"monthly":208,"shipped":8},"showroom":{"cum":37,"monthly":22,"shipped":1},"stores":[{"name":"Showroom- Taipei","cum":20,"monthly":11,"shipped":0},{"name":"Showroom- Taichung","cum":8,"monthly":6,"shipped":1},{"name":"Showroom- Hsinchu","cum":5,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":4,"monthly":3,"shipped":0},{"name":"SOGO- 復興","cum":5,"monthly":1,"shipped":0},{"name":"SOGO- 忠孝","cum":20,"monthly":16,"shipped":4},{"name":"SOGO- 天母","cum":16,"monthly":12,"shipped":0},{"name":"SOGO- 新竹","cum":51,"monthly":50,"shipped":0},{"name":"FEDS- 板橋","cum":42,"monthly":42,"shipped":0},{"name":"FEDS- 桃園","cum":15,"monthly":12,"shipped":2},{"name":"FEDS- 新竹","cum":2,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":5,"monthly":4,"shipped":0},{"name":"FEDS- 台中","cum":18,"monthly":18,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":17,"monthly":11,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":10,"shipped":1},{"name":"特力- 南崁","cum":1,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":4,"monthly":3,"shipped":0},{"name":"夢時代- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"義享天地- 高雄","cum":7,"monthly":6,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":15,"monthly":15,"shipped":0},{"name":"漢神洲際- 台中","cum":5,"monthly":5,"shipped":0}]},"202605":{"dds":{"cum":316,"monthly":74,"shipped":23},"showroom":{"cum":42,"monthly":5,"shipped":3},"stores":[{"name":"Showroom- Taipei","cum":23,"monthly":3,"shipped":0},{"name":"Showroom- Taichung","cum":10,"monthly":2,"shipped":2},{"name":"Showroom- Hsinchu","cum":5,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":7,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":24,"monthly":1,"shipped":4},{"name":"SOGO- 天母","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 新竹","cum":55,"monthly":4,"shipped":2},{"name":"FEDS- 板橋","cum":55,"monthly":12,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":6,"shipped":3},{"name":"FEDS- 新竹","cum":2,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":18,"monthly":13,"shipped":0},{"name":"FEDS- 台中","cum":29,"monthly":11,"shipped":4},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":19,"monthly":2,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":0,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":1,"shipped":0},{"name":"南紡- 台南","cum":8,"monthly":4,"shipped":4},{"name":"夢時代- 高雄","cum":12,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":26,"monthly":11,"shipped":2},{"name":"漢神洲際- 台中","cum":7,"monthly":3,"shipped":2}]},"202606":{"dds":{"cum":349,"monthly":22,"shipped":27},"showroom":{"cum":47,"monthly":3,"shipped":4},"stores":[{"name":"Showroom- Taipei","cum":25,"monthly":2,"shipped":0},{"name":"Showroom- Taichung","cum":11,"monthly":1,"shipped":3},{"name":"Showroom- Hsinchu","cum":7,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":9,"monthly":0,"shipped":0},{"name":"SOGO- 忠孝","cum":26,"monthly":2,"shipped":4},{"name":"SOGO- 天母","cum":19,"monthly":1,"shipped":0},{"name":"SOGO- 新竹","cum":57,"monthly":2,"shipped":2},{"name":"FEDS- 板橋","cum":57,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":0,"shipped":3},{"name":"FEDS- 新竹","cum":3,"monthly":1,"shipped":2},{"name":"FEDS- 竹北","cum":19,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":31,"monthly":2,"shipped":4},{"name":"SKM- 信義A8","cum":3,"monthly":1,"shipped":0},{"name":"SKM- 台中中港","cum":20,"monthly":0,"shipped":1},{"name":"SKM- 台南西門","cum":11,"monthly":1,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":9,"monthly":0,"shipped":5},{"name":"夢時代- 高雄","cum":16,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":11,"monthly":3,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":27,"monthly":0,"shipped":1},{"name":"漢神洲際- 台中","cum":8,"monthly":2,"shipped":2}]},"202607":{"dds":{"cum":467,"monthly":107,"shipped":48},"showroom":{"cum":60,"monthly":19,"shipped":6},"stores":[{"name":"Showroom- Taipei","cum":34,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":14,"monthly":3,"shipped":5},{"name":"Showroom- Hsinchu","cum":7,"monthly":7,"shipped":1},{"name":"Showroom- Kaohsiung","cum":5,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":16,"monthly":9,"shipped":0},{"name":"SOGO- 忠孝","cum":35,"monthly":6,"shipped":4},{"name":"SOGO- 天母","cum":20,"monthly":0,"shipped":0},{"name":"SOGO- 新竹","cum":62,"monthly":5,"shipped":2},{"name":"FEDS- 板橋","cum":61,"monthly":4,"shipped":0},{"name":"FEDS- 桃園","cum":23,"monthly":2,"shipped":3},{"name":"FEDS- 新竹","cum":5,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":20,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":36,"monthly":5,"shipped":4},{"name":"SKM- 信義A8","cum":5,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":30,"monthly":7,"shipped":1},{"name":"SKM- 台南西門","cum":15,"monthly":4,"shipped":3},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":40,"monthly":31,"shipped":23},{"name":"夢時代- 高雄","cum":22,"monthly":6,"shipped":1},{"name":"義享天地- 高雄","cum":15,"monthly":4,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":28,"monthly":2,"shipped":1},{"name":"漢神洲際- 台中","cum":32,"monthly":17,"shipped":5}]},"202608":{"dds":{"cum":687,"monthly":216,"shipped":105},"showroom":{"cum":87,"monthly":18,"shipped":13},"stores":[{"name":"Showroom- Taipei","cum":44,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":17,"monthly":3,"shipped":7},{"name":"Showroom- Hsinchu","cum":20,"monthly":4,"shipped":5},{"name":"Showroom- Kaohsiung","cum":6,"monthly":2,"shipped":1},{"name":"SOGO- 復興","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":41,"monthly":8,"shipped":5},{"name":"SOGO- 天母","cum":32,"monthly":12,"shipped":6},{"name":"SOGO- 新竹","cum":67,"monthly":2,"shipped":5},{"name":"SOGO- 大巨蛋","cum":11,"monthly":10,"shipped":1},{"name":"FEDS- 板橋","cum":64,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":24,"monthly":0,"shipped":7},{"name":"FEDS- 新竹","cum":6,"monthly":1,"shipped":0},{"name":"FEDS- 竹北","cum":27,"monthly":7,"shipped":1},{"name":"FEDS- 台中","cum":45,"monthly":9,"shipped":14},{"name":"SKM- 信義A8","cum":33,"monthly":28,"shipped":1},{"name":"SKM- 台中中港","cum":47,"monthly":18,"shipped":3},{"name":"SKM- 台南西門","cum":24,"monthly":8,"shipped":6},{"name":"特力- 南崁","cum":15,"monthly":13,"shipped":0},{"name":"南紡- 台南","cum":60,"monthly":19,"shipped":35},{"name":"夢時代- 高雄","cum":49,"monthly":26,"shipped":4},{"name":"義享天地- 高雄","cum":23,"monthly":8,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":33,"monthly":4,"shipped":1},{"name":"漢神洲際- 台中","cum":68,"monthly":39,"shipped":15}]},"202609":{"dds":{"cum":870,"monthly":192,"shipped":128},"showroom":{"cum":135,"monthly":48,"shipped":20},"stores":[{"name":"Showroom- Taipei","cum":81,"monthly":37,"shipped":4},{"name":"Showroom- Taichung","cum":20,"monthly":3,"shipped":10},{"name":"Showroom- Hsinchu","cum":23,"monthly":3,"shipped":5},{"name":"Showroom- Kaohsiung","cum":11,"monthly":5,"shipped":1},{"name":"SOGO- 復興","cum":22,"monthly":3,"shipped":1},{"name":"SOGO- 忠孝","cum":56,"monthly":15,"shipped":6},{"name":"SOGO- 天母","cum":54,"monthly":22,"shipped":8},{"name":"SOGO- 新竹","cum":70,"monthly":5,"shipped":7},{"name":"SOGO- 大巨蛋","cum":25,"monthly":15,"shipped":2},{"name":"FEDS- 板橋","cum":78,"monthly":15,"shipped":0},{"name":"FEDS- 桃園","cum":30,"monthly":6,"shipped":7},{"name":"FEDS- 新竹","cum":9,"monthly":3,"shipped":0},{"name":"FEDS- 竹北","cum":35,"monthly":8,"shipped":1},{"name":"FEDS- 台中","cum":66,"monthly":20,"shipped":20},{"name":"SKM- 信義A8","cum":40,"monthly":7,"shipped":1},{"name":"SKM- 台中中港","cum":50,"monthly":4,"shipped":4},{"name":"SKM- 台南西門","cum":40,"monthly":17,"shipped":7},{"name":"特力- 南崁","cum":18,"monthly":3,"shipped":1},{"name":"南紡- 台南","cum":63,"monthly":4,"shipped":36},{"name":"夢時代- 高雄","cum":64,"monthly":15,"shipped":6},{"name":"義享天地- 高雄","cum":34,"monthly":11,"shipped":2},{"name":"漢神巨蛋- 高雄","cum":38,"monthly":6,"shipped":2},{"name":"漢神洲際- 台中","cum":78,"monthly":13,"shipped":17}],"chat":{"dds":114,"showroom":55},"tags":2579}},"sheetModifiedAt":"2026-10-01T08:16:48.973Z"}</script>
+<script type="application/json" id="liveData">{"syncedAt":"2026-10-05T09:40:35Z","months":{"202603":{"dds":{"cum":34,"monthly":34,"shipped":0},"showroom":{"cum":16,"monthly":16,"shipped":0},"stores":[{"name":"Showroom- Taipei","cum":9,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":3,"monthly":3,"shipped":0},{"name":"Showroom- Hsinchu","cum":2,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":2,"monthly":2,"shipped":0},{"name":"SOGO- 復興","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 忠孝","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 天母","cum":4,"monthly":4,"shipped":0},{"name":"SOGO- 新竹","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 板橋","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 桃園","cum":3,"monthly":3,"shipped":0},{"name":"FEDS- 新竹","cum":0,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":1,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":0,"monthly":0,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":6,"monthly":6,"shipped":0},{"name":"SKM- 台南西門","cum":0,"monthly":0,"shipped":0},{"name":"特力- 南崁","cum":0,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":1,"monthly":1,"shipped":0},{"name":"夢時代- 高雄","cum":7,"monthly":7,"shipped":0},{"name":"義享天地- 高雄","cum":1,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":0,"monthly":0,"shipped":0},{"name":"漢神洲際- 台中","cum":0,"monthly":0,"shipped":0}]},"202604":{"dds":{"cum":243,"monthly":208,"shipped":8},"showroom":{"cum":37,"monthly":22,"shipped":1},"stores":[{"name":"Showroom- Taipei","cum":20,"monthly":11,"shipped":0},{"name":"Showroom- Taichung","cum":8,"monthly":6,"shipped":1},{"name":"Showroom- Hsinchu","cum":5,"monthly":2,"shipped":0},{"name":"Showroom- Kaohsiung","cum":4,"monthly":3,"shipped":0},{"name":"SOGO- 復興","cum":5,"monthly":1,"shipped":0},{"name":"SOGO- 忠孝","cum":20,"monthly":16,"shipped":4},{"name":"SOGO- 天母","cum":16,"monthly":12,"shipped":0},{"name":"SOGO- 新竹","cum":51,"monthly":50,"shipped":0},{"name":"FEDS- 板橋","cum":42,"monthly":42,"shipped":0},{"name":"FEDS- 桃園","cum":15,"monthly":12,"shipped":2},{"name":"FEDS- 新竹","cum":2,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":5,"monthly":4,"shipped":0},{"name":"FEDS- 台中","cum":18,"monthly":18,"shipped":0},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":17,"monthly":11,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":10,"shipped":1},{"name":"特力- 南崁","cum":1,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":4,"monthly":3,"shipped":0},{"name":"夢時代- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"義享天地- 高雄","cum":7,"monthly":6,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":15,"monthly":15,"shipped":0},{"name":"漢神洲際- 台中","cum":5,"monthly":5,"shipped":0}]},"202605":{"dds":{"cum":316,"monthly":74,"shipped":23},"showroom":{"cum":42,"monthly":5,"shipped":3},"stores":[{"name":"Showroom- Taipei","cum":23,"monthly":3,"shipped":0},{"name":"Showroom- Taichung","cum":10,"monthly":2,"shipped":2},{"name":"Showroom- Hsinchu","cum":5,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":7,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":24,"monthly":1,"shipped":4},{"name":"SOGO- 天母","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 新竹","cum":55,"monthly":4,"shipped":2},{"name":"FEDS- 板橋","cum":55,"monthly":12,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":6,"shipped":3},{"name":"FEDS- 新竹","cum":2,"monthly":0,"shipped":0},{"name":"FEDS- 竹北","cum":18,"monthly":13,"shipped":0},{"name":"FEDS- 台中","cum":29,"monthly":11,"shipped":4},{"name":"SKM- 信義A8","cum":2,"monthly":0,"shipped":0},{"name":"SKM- 台中中港","cum":19,"monthly":2,"shipped":1},{"name":"SKM- 台南西門","cum":10,"monthly":0,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":1,"shipped":0},{"name":"南紡- 台南","cum":8,"monthly":4,"shipped":4},{"name":"夢時代- 高雄","cum":12,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":8,"monthly":1,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":26,"monthly":11,"shipped":2},{"name":"漢神洲際- 台中","cum":7,"monthly":3,"shipped":2}]},"202606":{"dds":{"cum":349,"monthly":22,"shipped":27},"showroom":{"cum":47,"monthly":3,"shipped":4},"stores":[{"name":"Showroom- Taipei","cum":25,"monthly":2,"shipped":0},{"name":"Showroom- Taichung","cum":11,"monthly":1,"shipped":3},{"name":"Showroom- Hsinchu","cum":7,"monthly":0,"shipped":1},{"name":"Showroom- Kaohsiung","cum":4,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":9,"monthly":0,"shipped":0},{"name":"SOGO- 忠孝","cum":26,"monthly":2,"shipped":4},{"name":"SOGO- 天母","cum":19,"monthly":1,"shipped":0},{"name":"SOGO- 新竹","cum":57,"monthly":2,"shipped":2},{"name":"FEDS- 板橋","cum":57,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":21,"monthly":0,"shipped":3},{"name":"FEDS- 新竹","cum":3,"monthly":1,"shipped":2},{"name":"FEDS- 竹北","cum":19,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":31,"monthly":2,"shipped":4},{"name":"SKM- 信義A8","cum":3,"monthly":1,"shipped":0},{"name":"SKM- 台中中港","cum":20,"monthly":0,"shipped":1},{"name":"SKM- 台南西門","cum":11,"monthly":1,"shipped":2},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":9,"monthly":0,"shipped":5},{"name":"夢時代- 高雄","cum":16,"monthly":4,"shipped":1},{"name":"義享天地- 高雄","cum":11,"monthly":3,"shipped":0},{"name":"漢神巨蛋- 高雄","cum":27,"monthly":0,"shipped":1},{"name":"漢神洲際- 台中","cum":8,"monthly":2,"shipped":2}]},"202607":{"dds":{"cum":467,"monthly":107,"shipped":48},"showroom":{"cum":60,"monthly":19,"shipped":6},"stores":[{"name":"Showroom- Taipei","cum":34,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":14,"monthly":3,"shipped":5},{"name":"Showroom- Hsinchu","cum":7,"monthly":7,"shipped":1},{"name":"Showroom- Kaohsiung","cum":5,"monthly":0,"shipped":0},{"name":"SOGO- 復興","cum":16,"monthly":9,"shipped":0},{"name":"SOGO- 忠孝","cum":35,"monthly":6,"shipped":4},{"name":"SOGO- 天母","cum":20,"monthly":0,"shipped":0},{"name":"SOGO- 新竹","cum":62,"monthly":5,"shipped":2},{"name":"FEDS- 板橋","cum":61,"monthly":4,"shipped":0},{"name":"FEDS- 桃園","cum":23,"monthly":2,"shipped":3},{"name":"FEDS- 新竹","cum":5,"monthly":2,"shipped":0},{"name":"FEDS- 竹北","cum":20,"monthly":1,"shipped":0},{"name":"FEDS- 台中","cum":36,"monthly":5,"shipped":4},{"name":"SKM- 信義A8","cum":5,"monthly":2,"shipped":0},{"name":"SKM- 台中中港","cum":30,"monthly":7,"shipped":1},{"name":"SKM- 台南西門","cum":15,"monthly":4,"shipped":3},{"name":"特力- 南崁","cum":2,"monthly":0,"shipped":0},{"name":"南紡- 台南","cum":40,"monthly":31,"shipped":23},{"name":"夢時代- 高雄","cum":22,"monthly":6,"shipped":1},{"name":"義享天地- 高雄","cum":15,"monthly":4,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":28,"monthly":2,"shipped":1},{"name":"漢神洲際- 台中","cum":32,"monthly":17,"shipped":5}]},"202608":{"dds":{"cum":687,"monthly":216,"shipped":105},"showroom":{"cum":87,"monthly":18,"shipped":13},"stores":[{"name":"Showroom- Taipei","cum":44,"monthly":9,"shipped":0},{"name":"Showroom- Taichung","cum":17,"monthly":3,"shipped":7},{"name":"Showroom- Hsinchu","cum":20,"monthly":4,"shipped":5},{"name":"Showroom- Kaohsiung","cum":6,"monthly":2,"shipped":1},{"name":"SOGO- 復興","cum":18,"monthly":2,"shipped":0},{"name":"SOGO- 忠孝","cum":41,"monthly":8,"shipped":5},{"name":"SOGO- 天母","cum":32,"monthly":12,"shipped":6},{"name":"SOGO- 新竹","cum":67,"monthly":2,"shipped":5},{"name":"SOGO- 大巨蛋","cum":11,"monthly":10,"shipped":1},{"name":"FEDS- 板橋","cum":64,"monthly":2,"shipped":0},{"name":"FEDS- 桃園","cum":24,"monthly":0,"shipped":7},{"name":"FEDS- 新竹","cum":6,"monthly":1,"shipped":0},{"name":"FEDS- 竹北","cum":27,"monthly":7,"shipped":1},{"name":"FEDS- 台中","cum":45,"monthly":9,"shipped":14},{"name":"SKM- 信義A8","cum":33,"monthly":28,"shipped":1},{"name":"SKM- 台中中港","cum":47,"monthly":18,"shipped":3},{"name":"SKM- 台南西門","cum":24,"monthly":8,"shipped":6},{"name":"特力- 南崁","cum":15,"monthly":13,"shipped":0},{"name":"南紡- 台南","cum":60,"monthly":19,"shipped":35},{"name":"夢時代- 高雄","cum":49,"monthly":26,"shipped":4},{"name":"義享天地- 高雄","cum":23,"monthly":8,"shipped":1},{"name":"漢神巨蛋- 高雄","cum":33,"monthly":4,"shipped":1},{"name":"漢神洲際- 台中","cum":68,"monthly":39,"shipped":15}]},"202609":{"dds":{"cum":870,"monthly":192,"shipped":128},"showroom":{"cum":135,"monthly":48,"shipped":20},"stores":[{"name":"Showroom- Taipei","cum":81,"monthly":37,"shipped":4},{"name":"Showroom- Taichung","cum":20,"monthly":3,"shipped":10},{"name":"Showroom- Hsinchu","cum":23,"monthly":3,"shipped":5},{"name":"Showroom- Kaohsiung","cum":11,"monthly":5,"shipped":1},{"name":"SOGO- 復興","cum":22,"monthly":3,"shipped":1},{"name":"SOGO- 忠孝","cum":56,"monthly":15,"shipped":6},{"name":"SOGO- 天母","cum":54,"monthly":22,"shipped":8},{"name":"SOGO- 新竹","cum":70,"monthly":5,"shipped":7},{"name":"SOGO- 大巨蛋","cum":25,"monthly":15,"shipped":2},{"name":"FEDS- 板橋","cum":78,"monthly":15,"shipped":0},{"name":"FEDS- 桃園","cum":30,"monthly":6,"shipped":7},{"name":"FEDS- 新竹","cum":9,"monthly":3,"shipped":0},{"name":"FEDS- 竹北","cum":35,"monthly":8,"shipped":1},{"name":"FEDS- 台中","cum":66,"monthly":20,"shipped":20},{"name":"SKM- 信義A8","cum":40,"monthly":7,"shipped":1},{"name":"SKM- 台中中港","cum":50,"monthly":4,"shipped":4},{"name":"SKM- 台南西門","cum":40,"monthly":17,"shipped":7},{"name":"特力- 南崁","cum":18,"monthly":3,"shipped":1},{"name":"南紡- 台南","cum":63,"monthly":4,"shipped":36},{"name":"夢時代- 高雄","cum":64,"monthly":15,"shipped":6},{"name":"義享天地- 高雄","cum":34,"monthly":11,"shipped":2},{"name":"漢神巨蛋- 高雄","cum":38,"monthly":6,"shipped":2},{"name":"漢神洲際- 台中","cum":78,"monthly":13,"shipped":17}],"chat":{"dds":114,"showroom":55},"chatStores":[{"name":"Showroom- Taipei","windows":50},{"name":"Showroom- Taichung","windows":10},{"name":"Showroom- Hsinchu","windows":10},{"name":"Showroom- Kaohsiung","windows":3},{"name":"SOGO- 復興","windows":1},{"name":"SOGO- 忠孝","windows":20},{"name":"SOGO- 天母","windows":20},{"name":"SOGO- 新竹","windows":4},{"name":"SOGO- 大巨蛋","windows":10},{"name":"FEDS- 板橋","windows":2},{"name":"FEDS- 桃園","windows":3},{"name":"FEDS- 新竹","windows":7},{"name":"FEDS- 竹北","windows":1},{"name":"FEDS- 台中","windows":20},{"name":"SKM- 信義A8","windows":0},{"name":"SKM- 台中中港","windows":30},{"name":"SKM- 台南西門","windows":3},{"name":"特力- 南崁","windows":2},{"name":"南紡- 台南","windows":1},{"name":"夢時代- 高雄","windows":30},{"name":"義享天地- 高雄","windows":3},{"name":"漢神巨蛋- 高雄","windows":0},{"name":"漢神洲際- 台中","windows":4}],"tags":2579}},"sheetModifiedAt":"2026-10-05T09:34:12.162Z"}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 (function(){
@@ -621,7 +685,7 @@
       across_members:"全台零售櫃位(包含DDS & Showroom)",
       chat_windows:"聊天視窗數", usage_rate:"使用率", chat_badge:"一對一聊天",
       draft_flag:"零售會員數據已連接即時資料",
-      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", synced_at:"更新於",
+      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", chat_store_none:"此月份尚無門市聊天數據", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
     },
     en: {
@@ -646,7 +710,7 @@
       across_members:"Nationwide retail counters (DDS & Showroom included)",
       chat_windows:"Chat Windows", usage_rate:"Usage Rate", chat_badge:"1-on-1 Chat",
       draft_flag:"Retail membership data is live",
-      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", synced_at:"updated",
+      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", chat_store_none:"No store-level chat data for this month", synced_at:"updated",
       data_unavailable:"Couldn't load live data right now — try reloading the page"
     }
   };
@@ -667,13 +731,14 @@
     var toTop = document.getElementById('toTop');
     toTop.title = dict[lang].to_top; toTop.setAttribute('aria-label', dict[lang].to_top);
     // On phones the export buttons are icon-only, so give them a tooltip / accessible name.
-    document.querySelectorAll('#bystore .export-btn, #bystore .csv-btn').forEach(function(btn){
+    document.querySelectorAll('.store-card .export-btn, .store-card .csv-btn').forEach(function(btn){
       var name = dict[lang][btn.classList.contains('csv-btn') ? 'export_csv' : 'export_img'];
       btn.title = name; btn.setAttribute('aria-label', name);
     });
     renderKpis();
     renderMergedChart();
     renderStoreTable();
+    renderChatStoreTable();
     renderCrmChart();
   }
   document.querySelectorAll('.lang-toggle button').forEach(function(b){
@@ -1126,7 +1191,7 @@
   }
 
   function updateSortIndicators(){
-    var dd = document.querySelector('.store-sort-dd');
+    var dd = document.getElementById('storeSortDd');
     dd.classList.toggle('active', !!storeSort.dir);
     var arrow = storeSort.dir === 'asc' ? '↑' : '↓';
     dd.querySelector('.sort-dd-label').textContent = storeSort.dir ? t(sortKeyLabel[storeSort.key]) : t('sort_default');
@@ -1137,17 +1202,21 @@
         : storeSort.dir === item.getAttribute('data-dir');
       item.classList.toggle('active', on);
     });
-    document.querySelectorAll('.store-table th[data-sort-key]').forEach(function(th){
+    document.querySelectorAll('#storeTable th[data-sort-key]').forEach(function(th){
       th.querySelector('.th-sort').textContent = storeSort.dir && th.getAttribute('data-sort-key') === storeSort.key ? arrow : '';
     });
   }
 
-  function setStoreExpanded(open){
-    document.getElementById('bystore').classList.toggle('collapsed', !open);
-    document.getElementById('storeToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+  function setStoreExpanded(open, card){
+    card = card || document.getElementById('bystore');
+    card.classList.toggle('collapsed', !open);
+    card.querySelector('.store-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
   }
-  document.getElementById('storeToggle').addEventListener('click', function(){
-    setStoreExpanded(document.getElementById('bystore').classList.contains('collapsed'));
+  document.querySelectorAll('.store-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card = btn.closest('.store-card');
+      setStoreExpanded(card.classList.contains('collapsed'), card);
+    });
   });
 
   function setDrill(channel, month, fromChart){
@@ -1175,14 +1244,15 @@
     item.addEventListener('click', function(e){
       e.stopPropagation();
       var dd = item.closest('.sort-dd');
+      var isChat = dd.id === 'chatSortDd', st = isChat ? chatStoreSort : storeSort;
       if (item.hasAttribute('data-key')){
-        storeSort.key = item.getAttribute('data-key');
-        storeSort.dir = storeSort.dir || 'desc';
+        st.key = item.getAttribute('data-key');
+        st.dir = st.dir || 'desc';
       } else {
-        storeSort.dir = item.getAttribute('data-dir');
+        st.dir = item.getAttribute('data-dir');
       }
       dd.classList.remove('open');
-      renderStoreTable();
+      if (isChat) renderChatStoreTable(); else renderStoreTable();
     });
   });
   document.addEventListener('click', function(){
@@ -1229,6 +1299,69 @@
     });
   }
   var crmState = {channel:'all', start:null, end:'latest'};
+
+  /* ---------- 1-on-1 chat by store (same controls as the member By Store table) ---------- */
+  // From each month tab's "1-on-1 Chat (by store)" block; only months where it's filled in are present.
+  var chatStoresByMonth = {}; // m (int) -> [{name, channel, windows}, ...]
+  var chatStoreSort = {key:'windows', dir:null};
+  var chatStoreState = {channel:'all', month:null};
+  function chatStoreMonths(){ return monthDefs.filter(function(r){ return chatStoresByMonth[r.m]; }).map(function(r){ return r.m; }); }
+  function currentChatStoreRows(){
+    var rows = chatStoresByMonth[chatStoreState.month] || [];
+    if (chatStoreState.channel !== 'all') rows = rows.filter(function(s){ return s.channel === chatStoreState.channel; });
+    if (chatStoreSort.dir){
+      var k = chatStoreSort.key;
+      rows = rows.slice().sort(function(a,b){ return chatStoreSort.dir === 'asc' ? a[k] - b[k] : b[k] - a[k]; });
+    }
+    return rows;
+  }
+  function refreshChatStoreMonths(){
+    var ms = chatStoreMonths(), sel = document.getElementById('chatStoreMonth');
+    document.getElementById('chatstore').hidden = !ms.length;
+    if (!ms.length) return;
+    if (ms.indexOf(chatStoreState.month) < 0) chatStoreState.month = ms[ms.length - 1];
+    sel.innerHTML = ms.slice().reverse().map(function(m){ return '<option value="' + m + '">' + ymLabel(m) + '</option>'; }).join('');
+    sel.value = String(chatStoreState.month);
+  }
+  function renderChatStoreTable(){
+    if (!chatStoreState.month) return;
+    var rows = currentChatStoreRows();
+    var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
+    document.getElementById('chatStoreTableBody').innerHTML = rows.length ? rows.map(function(r){
+      return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
+        '<td class="st-num st-cum">' + r.windows + '</td></tr>';
+    }).join('') : '<tr><td class="store-empty" colspan="2">' + t('chat_store_none') + '</td></tr>';
+    var sum = rows.reduce(function(a, r){ return a + r.windows; }, 0);
+    document.getElementById('chatStoreTableFoot').innerHTML =
+      '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
+      '<td class="st-num st-cum">' + sum + '</td></tr>';
+    document.querySelectorAll('#chatStoreChannelSeg button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-ch') === chatStoreState.channel);
+    });
+    var dd = document.getElementById('chatSortDd'), arrow = chatStoreSort.dir === 'asc' ? '↑' : '↓';
+    dd.classList.toggle('active', !!chatStoreSort.dir);
+    dd.querySelector('.sort-dd-label').textContent = chatStoreSort.dir ? t('chat_windows') : t('sort_default');
+    dd.querySelector('.sort-dd-arrow').textContent = chatStoreSort.dir ? arrow : '';
+    dd.querySelectorAll('.sort-dd-item').forEach(function(item){
+      item.classList.toggle('active', item.hasAttribute('data-key') ? !!chatStoreSort.dir : chatStoreSort.dir === item.getAttribute('data-dir'));
+    });
+    document.querySelectorAll('#chatStoreTable th[data-sort-key]').forEach(function(th){
+      th.querySelector('.th-sort').textContent = chatStoreSort.dir ? arrow : '';
+    });
+  }
+  document.querySelectorAll('#chatStoreChannelSeg button').forEach(function(b){
+    b.addEventListener('click', function(){ chatStoreState.channel = b.getAttribute('data-ch'); renderChatStoreTable(); });
+  });
+  document.getElementById('chatStoreMonth').addEventListener('change', function(){
+    chatStoreState.month = parseInt(this.value, 10); renderChatStoreTable();
+  });
+  document.getElementById('chatStoreRefreshBtn').addEventListener('click', function(){
+    var ms = chatStoreMonths();
+    chatStoreSort = {key:'windows', dir:null};
+    chatStoreState = {channel:'all', month: ms.length ? ms[ms.length - 1] : null};
+    refreshChatStoreMonths();
+    renderChatStoreTable();
+  });
 
   // 4 equal intervals with a "nice" step (1/2/2.5/5 × 10^k) so both axes share gridlines.
   function niceTop(max){
@@ -1424,13 +1557,14 @@
   }
 
   var chartExportMeta = {
-    store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; }
+    store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; },
+    chatstore: function(){ return 'ChatByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[chatStoreState.channel] + '_' + chatStoreState.month; }
   };
   document.querySelectorAll('[data-export]').forEach(function(btn){
     var key = btn.getAttribute('data-export');
     btn.addEventListener('click', function(){
       var card = btn.closest('.chart-card, .store-card');
-      var ignore = '.store-footnote, .export-btn, .csv-btn, #storeRefreshBtn, .store-sort-dd, .store-caret';
+      var ignore = '.store-footnote, .export-btn, .csv-btn, .store-refresh-btn, .store-sort-dd, .store-caret';
       exportCardAsImage(btn, card, 'BOSCH_' + chartExportMeta[key]() + '_' + YEAR + '.png', ignore);
     });
   });
@@ -1458,12 +1592,32 @@
     }).then(function(){ btn.disabled = false; });
   });
 
+  document.getElementById('chatStoreCsvBtn').addEventListener('click', function(){
+    var btn = this;
+    if (!chatStoreState.month || btn.disabled) return;
+    var rows = currentChatStoreRows();
+    var chName = {dds:'DDS', showroom:'Showroom'};
+    var lines = [[t('csv_channel'), t('store_name'), t('chat_windows')]];
+    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.windows]); });
+    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), rows.reduce(function(a, r){ return a + r.windows; }, 0)]);
+    var csv = '\ufeff' + lines.map(function(l){ return l.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+    var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+    btn.disabled = true;
+    saveBlob(blob, 'BOSCH_' + chartExportMeta.chatstore() + '_' + YEAR + '.csv').then(function(){
+      toast(t('csv_saved'));
+    }).catch(function(err){
+      if (err && err.code === 'declined') return;
+      toast(t('export_fail'));
+    }).then(function(){ btn.disabled = false; });
+  });
+
   setLang('en');
 
   /* ---------- live data: embedded in the page (#liveData), rewritten and republished by the hourly Google Sheet sync ---------- */
   // Embedding (not a per-viewer data store) means everyone who can open the link sees identical numbers.
   // Each entry of liveData.months is one calendar month keyed "yyyymm": {dds:{cum,monthly,shipped},
-  // showroom:{...}, stores:[{name,cum,monthly,shipped}, ...]}; sorting by key is chronological.
+  // showroom:{...}, stores:[{name,cum,monthly,shipped}, ...]}, plus optional chat:{dds,showroom}, tags,
+  // chatStores:[{name,windows}, ...]; sorting by key is chronological.
   // KPI cards: latest month in the data vs the month before it.
   var summaryByMonth = {};
   function renderKpis(){
@@ -1493,7 +1647,7 @@
   var dataBooted = false;
   function applyMonthDocs(docs){
     var sorted = docs.slice().sort(function(a, b){ return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
-    var newMonthDefs = [], newStoresByMonth = {}, newSummary = {}, newChat = {}, newTags = {};
+    var newMonthDefs = [], newStoresByMonth = {}, newSummary = {}, newChat = {}, newTags = {}, newChatStores = {};
     sorted.forEach(function(doc, i){
       var v = doc.data();
       if (!v || !v.dds || !v.showroom) return;
@@ -1502,6 +1656,9 @@
       newSummary[m] = {dds: v.dds, showroom: v.showroom};
       if (v.chat) newChat[m] = {dds: v.chat.dds || 0, showroom: v.chat.showroom || 0};
       if (typeof v.tags === 'number') newTags[m] = v.tags;
+      if (v.chatStores && v.chatStores.length) newChatStores[m] = v.chatStores.map(function(s){
+        return {name: s.name, channel: classifyChannel(s.name), windows: s.windows || 0};
+      });
       newStoresByMonth[m] = (v.stores || []).map(function(s){
         return {name: s.name, channel: classifyChannel(s.name), cum: s.cum || 0, monthly: s.monthly || 0, shipped: s.shipped || 0};
       });
@@ -1510,7 +1667,7 @@
       document.getElementById('mergedChart').innerHTML = '<p class="data-wait" data-i18n="data_wait">' + t('data_wait') + '</p>';
       return;
     }
-    monthDefs = newMonthDefs; storesByMonth = newStoresByMonth; summaryByMonth = newSummary; chatByMonth = newChat; tagsByMonth = newTags;
+    monthDefs = newMonthDefs; storesByMonth = newStoresByMonth; summaryByMonth = newSummary; chatByMonth = newChat; tagsByMonth = newTags; chatStoresByMonth = newChatStores;
     firstM = monthDefs[0].m; latestM = monthDefs[monthDefs.length - 1].m;
     YEAR = Math.floor(latestM / 100);
     monthDefs.forEach(function(r, i){ r.label = monthLabel(r.m, i === monthDefs.length - 1); });
@@ -1519,6 +1676,8 @@
     if (!dataBooted){ dataBooted = true; pager.merged = 0; pager.crm = 0; }
     renderKpis();
     renderChatCards();
+    refreshChatStoreMonths();
+    renderChatStoreTable();
     renderMergedChart();
     renderStoreTable();
     renderCrmChart();
@@ -1644,11 +1803,23 @@
     for (; i < rows.length && a(rows[i]) && !isSectionHead(a(rows[i])); i++){
       var s = triple(rows[i]); s.name = a(rows[i]); doc.stores.push(s);
     }
+    var isChatByStore = function(label){ return /^1-on-1/i.test(label) && /by store/i.test(label); };
     var ci = -1;
-    for (var j = 0; j < rows.length; j++) if (/^1-on-1/i.test(a(rows[j]))) { ci = j; break; }
+    for (var j = 0; j < rows.length; j++) if (/^1-on-1/i.test(a(rows[j])) && !isChatByStore(a(rows[j]))) { ci = j; break; }
     if (ci >= 0){
       var cd = find('DDS', ci + 1), cs = find('Showroom', ci + 1);
       if (cd >= 0 && cs >= 0) doc.chat = {dds: n(rows[cd][1]), showroom: n(rows[cs][1])};
+    }
+    // "1-on-1 Chat (by store)" block: one row per store, chat windows in column B; its header row has a blank column A.
+    for (var bi = 0; bi < rows.length; bi++){
+      if (!isChatByStore(a(rows[bi]))) continue;
+      var k3 = bi + 1, cs2 = [];
+      while (k3 < rows.length && !a(rows[k3])) k3++;
+      for (; k3 < rows.length && a(rows[k3]) && !isSectionHead(a(rows[k3])) && !/^Total Tags Used/i.test(a(rows[k3])); k3++){
+        cs2.push({name: a(rows[k3]), windows: n(rows[k3][1])});
+      }
+      if (cs2.length) doc.chatStores = cs2;
+      break;
     }
     // "Total Tags Used" block: the value sits in column B of its "Total Retail" row (the header row
     // above it also starts with "Total Retail" but holds text, so take the first numeric one).
