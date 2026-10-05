@@ -816,21 +816,20 @@
   }
 
   // ‹ › pager: each chart shows up to WINDOW[key] months; offset 0 = the most recent window.
-  var WINDOW = {merged:9};
+  var WINDOW = {merged:10};
   var pager = {merged:0};
 
   // Charts are hand-built SVG with a fixed 1040-wide viewBox, so on a narrow container the whole
   // drawing (labels included) scales down with it. Desktop containers are always wider than the
   // viewBox needs, so this always returns the untouched desktop numbers above 1080px; below that,
   // it grows a scale factor (fed into renderMergedChart) from the chart's real pixel width
-  // so on-screen text stays legible, and trims how many months are shown so points don't crowd.
+  // so on-screen text stays legible.
   function chartProfile(wrapEl){
+    // The member trend always shows 10 months at every screen size; the ‹ › pager only has somewhere to go once there are more.
     if (window.innerWidth > 1080) return {scale:1, merged:WINDOW.merged};
     var cw = (wrapEl && wrapEl.clientWidth) || window.innerWidth;
     var scale = Math.min(3.2, Math.max(1.2, 900 / Math.max(cw, 200)));
-    var narrow = window.innerWidth <= 480;
-    var mid = window.innerWidth <= 860;
-    return {scale:scale, merged: narrow ? 4 : (mid ? 5 : 7)};
+    return {scale:scale, merged:WINDOW.merged};
   }
   function applyWindow(key, n){
     var maxOff = Math.max(0, n - WINDOW[key]);
@@ -899,8 +898,16 @@
       gridLines += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--border)" stroke-width="1"/>';
       axisLabels += '<text x="' + (padL - 8 - 4*(scale-1)) + '" y="' + (yy + 4 + 4*(scale-1)) + '" text-anchor="end" class="axis-label" style="font-size:' + axisFont + 'px">' + fmtAxis(val) + '</text>';
     }
+    // With 10 months on a narrow screen the labels would collide, so thin them: every n-th point (counting back
+    // from the newest month) gets its month label / value label, n being the smallest step that leaves room.
+    var kPx = (wrap.clientWidth || W) / W, gapPx = (labels.length > 1 ? plotW / (labels.length - 1) : plotW) * kPx;
+    var maxChars = function(arr){ return arr.reduce(function(m, v){ return Math.max(m, String(v).length); }, 1); };
+    var xStep = Math.max(1, Math.ceil((maxChars(labels) * axisFont * 0.58 * kPx + 6) / gapPx));
+    var vStep = Math.max(1, Math.ceil((maxChars(values.map(fmtV)) * ptFont * 0.6 * kPx + 6) / gapPx));
+    var lastIdx = labels.length - 1;
     var xLabels = '';
     labels.forEach(function(lab, i){
+      if ((lastIdx - i) % xStep !== 0) return;
       xLabels += '<text x="' + x(i) + '" y="' + (H - 6 - 12*(scale-1)) + '" text-anchor="middle" class="axis-label" style="font-size:' + axisFont + 'px">' + lab + '</text>';
     });
 
@@ -939,6 +946,7 @@
       dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + color + '" stroke="var(--surface)" stroke-width="' + (isPeak ? 2.5 : 2) + '"/>';
       var ly = p[1] - 14 - 16*(scale-1);
       var anchor = i === 0 ? 'start' : (i === points.length - 1 ? 'end' : 'middle');
+      if ((lastIdx - i) % vStep !== 0 && !isSel) return;
       endLabels += '<text x="' + p[0] + '" y="' + ly + '" text-anchor="' + anchor + '" class="pt-label" style="font-size:' + ptFont + 'px" fill="' + color + '">' + fmtV(values[i]) + '</text>';
     });
 
