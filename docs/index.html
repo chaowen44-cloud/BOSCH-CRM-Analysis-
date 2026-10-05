@@ -1276,8 +1276,9 @@
   });
 
   /* ---------- CRM 1-on-1 chat trend (single card, DDS/Showroom switch) ---------- */
-  // 1-on-1 chat windows per month, from each month tab's "1-on-1 Chat" block. Only months where that
-  // block has been filled in are present. Usage rate = chat windows / that month's cumulative members.
+  // 1-on-1 chat windows per month: the sum of that month tab's "1-on-1 Chat (by store)" rows per channel
+  // (see applyMonthDocs). Only months with chat data are present. Usage rate = chat windows / that
+  // month's cumulative members.
   var chatByMonth = {};
   function chatMonths(){ return monthDefs.filter(function(r){ return chatByMonth[r.m]; }).map(function(r){ return r.m; }); }
   function chatRate(win, mem){ return mem ? Math.round(win / mem * 10000) / 100 : 0; }
@@ -1656,11 +1657,16 @@
       var m = parseInt(doc.id, 10);
       newMonthDefs.push({label: null, m: m, cum: {dds: v.dds.cum || 0, showroom: v.showroom.cum || 0}});
       newSummary[m] = {dds: v.dds, showroom: v.showroom};
-      if (v.chat) newChat[m] = {dds: v.chat.dds || 0, showroom: v.chat.showroom || 0};
       if (typeof v.tags === 'number') newTags[m] = v.tags;
-      if (v.chatStores && v.chatStores.length) newChatStores[m] = v.chatStores.map(function(s){
-        return {name: s.name, channel: classifyChannel(s.name), windows: s.windows || 0};
-      });
+      // DDS / Showroom chat totals are the sums of the by-store rows; a sheet "1-on-1 Chat" totals
+      // block is only used for a month that has no by-store block.
+      if (v.chatStores && v.chatStores.length){
+        newChatStores[m] = v.chatStores.map(function(s){
+          return {name: s.name, channel: classifyChannel(s.name), windows: s.windows || 0};
+        });
+        newChat[m] = {dds: 0, showroom: 0};
+        newChatStores[m].forEach(function(s){ newChat[m][s.channel] += s.windows; });
+      } else if (v.chat) newChat[m] = {dds: v.chat.dds || 0, showroom: v.chat.showroom || 0};
       newStoresByMonth[m] = (v.stores || []).map(function(s){
         return {name: s.name, channel: classifyChannel(s.name), cum: s.cum || 0, monthly: s.monthly || 0, shipped: s.shipped || 0};
       });
