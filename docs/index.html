@@ -1287,23 +1287,16 @@
   function chatStoreMonths(){ return monthDefs.filter(function(r){ return chatStoresByMonth[r.m]; }).map(function(r){ return r.m; }); }
   // Each row also gets its engagement rate: chat windows / the store's cumulative members that month
   // (member By Store data, matched by name); null when the store has no members. Null rates sort last.
-  // "YTD" = year to date: the latest month with chat data, counting only windows opened since the end of
-  // the previous year (latest cumulative minus the cumulative at the previous year's last chat month; with
-  // no earlier year in the data it is simply the latest cumulative). Rate = YTD windows / the latest
-  // cumulative members.
+  // Same "Latest (to date)" entry as the member filters: it follows the newest month that has chat data.
   function chatStoreViewMonth(){
     var ms = chatStoreMonths();
-    return chatStoreState.month === 'ytd' ? (ms.length ? ms[ms.length - 1] : null) : chatStoreState.month;
+    return chatStoreState.month === 'latest' ? (ms.length ? ms[ms.length - 1] : null) : chatStoreState.month;
   }
   function currentChatStoreRows(){
     var vm = chatStoreViewMonth(), members = {};
     (storesByMonth[vm] || []).forEach(function(s){ members[s.name] = s.cum; });
     var all = chatStoresByMonth[vm] || [];
-    if (chatStoreState.month === 'ytd'){
-      var prior = chatStoreMonths().filter(function(m){ return Math.floor(m / 100) < Math.floor(vm / 100); }), base = {};
-      if (prior.length) chatStoresByMonth[prior[prior.length - 1]].forEach(function(s){ base[s.name] = s.windows; });
-      all = all.map(function(s){ return {name: s.name, channel: s.channel, windows: Math.max(0, s.windows - (base[s.name] || 0))}; });
-    }
+
     var tot = {dds: {w: 0, m: 0}, showroom: {w: 0, m: 0}};
     all.forEach(function(s){ if (members[s.name]){ tot[s.channel].w += s.windows; tot[s.channel].m += members[s.name]; } });
     chatChannelAvg = {dds: tot.dds.m ? tot.dds.w / tot.dds.m * 100 : null, showroom: tot.showroom.m ? tot.showroom.w / tot.showroom.m * 100 : null};
@@ -1338,15 +1331,15 @@
     rows.forEach(function(r){ w += r.windows; mem += r.members; });
     return {windows: w, rate: mem ? w / mem * 100 : null};
   }
-  // Any month (or YTD) can be picked (a month whose tab has no by-store block shows an empty-state row);
-  // it opens on the newest month that has data. Sheet values are cumulative, so they're shown as-is.
+  // Any month can be picked (a month whose tab has no by-store block shows an empty-state row);
+  // it opens on "Latest (to date)", the newest month that has data. Sheet values are cumulative, so they're shown as-is.
   function refreshChatStoreMonths(){
     var ms = chatStoreMonths(), sel = document.getElementById('chatStoreMonth');
     document.getElementById('chatstore').hidden = !ms.length;
     if (!ms.length) return;
     var all = monthDefs.map(function(r){ return r.m; });
-    if (chatStoreState.month !== 'ytd' && all.indexOf(chatStoreState.month) < 0) chatStoreState.month = ms[ms.length - 1];
-    sel.innerHTML = '<option value="ytd">YTD</option>' +
+    if (chatStoreState.month !== 'latest' && all.indexOf(chatStoreState.month) < 0) chatStoreState.month = 'latest';
+    sel.innerHTML = latestOption() +
       all.slice().reverse().map(function(m){ return '<option value="' + m + '">' + ymLabel(m) + '</option>'; }).join('');
     sel.value = String(chatStoreState.month);
   }
@@ -1389,12 +1382,12 @@
     b.addEventListener('click', function(){ chatStoreState.channel = b.getAttribute('data-ch'); renderChatStoreTable(); });
   });
   document.getElementById('chatStoreMonth').addEventListener('change', function(){
-    chatStoreState.month = this.value === 'ytd' ? 'ytd' : parseInt(this.value, 10); renderChatStoreTable();
+    chatStoreState.month = this.value === 'latest' ? 'latest' : parseInt(this.value, 10); renderChatStoreTable();
   });
   document.getElementById('chatStoreRefreshBtn').addEventListener('click', function(){
     var ms = chatStoreMonths();
     chatStoreSort = {key:'windows', dir:null};
-    chatStoreState = {channel:'all', month: ms.length ? ms[ms.length - 1] : null};
+    chatStoreState = {channel:'all', month: ms.length ? 'latest' : null};
     refreshChatStoreMonths();
     renderChatStoreTable();
   });
@@ -1462,7 +1455,7 @@
 
   var chartExportMeta = {
     store: function(){ return 'ByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[drill.channel] + '_' + drill.month; },
-    chatstore: function(){ return 'ChatByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[chatStoreState.channel] + '_' + (chatStoreState.month === 'ytd' ? 'YTD' : chatStoreState.month); }
+    chatstore: function(){ return 'ChatByStore_' + {all:'All', dds:'DDS', showroom:'Showroom'}[chatStoreState.channel] + '_' + chatStoreViewMonth(); }
   };
   document.querySelectorAll('[data-export]').forEach(function(btn){
     var key = btn.getAttribute('data-export');
