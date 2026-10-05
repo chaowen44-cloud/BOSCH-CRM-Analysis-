@@ -567,7 +567,7 @@
             <div class="sort-dd-menu">
               <div class="sort-dd-group">
                 <div class="sort-dd-title" data-i18n="sort_field">排序欄位</div>
-                <button type="button" class="sort-dd-item" data-key="windows"><span data-i18n="chat_windows">聊天視窗數</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-key="windows"><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span><span class="chk">✓</span></button>
               </div>
               <div class="sort-dd-group">
                 <div class="sort-dd-title" data-i18n="sort_by">排序方式</div>
@@ -604,7 +604,7 @@
           <thead>
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
-              <th class="num" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows">聊天視窗數</span></th>
+              <th class="num" data-sort-key="windows"><span class="th-sort"></span><span data-i18n="chat_windows_cum">聊天視窗數(累積)</span></th>
             </tr>
           </thead>
           <tbody id="chatStoreTableBody"></tbody>
@@ -684,7 +684,7 @@
       across_members:"全台零售櫃位(包含DDS & Showroom)",
       chat_windows:"聊天視窗數", usage_rate:"使用率", chat_badge:"一對一聊天",
       draft_flag:"零售會員數據已連接即時資料",
-      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", chat_store_none:"此月份尚無門市聊天數據", synced_at:"更新於",
+      data_wait:"資料載入中…", chat_none:"此區間尚無一對一聊天數據", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"聊天視窗數(累積)", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
     },
     en: {
@@ -709,7 +709,7 @@
       across_members:"Nationwide retail counters (DDS & Showroom included)",
       chat_windows:"Chat Windows", usage_rate:"Usage Rate", chat_badge:"1-on-1 Chat",
       draft_flag:"Retail membership data is live",
-      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", chat_store_none:"No store-level chat data for this month", synced_at:"updated",
+      data_wait:"Loading data…", chat_none:"No 1-on-1 chat data for this range yet", chat_store_none:"No store-level chat data for this month", chat_windows_cum:"Chat Windows (Cum.)", synced_at:"updated",
       data_unavailable:"Couldn't load live data right now — try reloading the page"
     }
   };
@@ -1314,12 +1314,15 @@
     }
     return rows;
   }
+  // Any month can be picked (a month whose tab has no by-store block shows an empty-state row);
+  // it opens on the newest month that has data. Sheet values are cumulative, so they're shown as-is.
   function refreshChatStoreMonths(){
     var ms = chatStoreMonths(), sel = document.getElementById('chatStoreMonth');
     document.getElementById('chatstore').hidden = !ms.length;
     if (!ms.length) return;
-    if (ms.indexOf(chatStoreState.month) < 0) chatStoreState.month = ms[ms.length - 1];
-    sel.innerHTML = ms.slice().reverse().map(function(m){ return '<option value="' + m + '">' + ymLabel(m) + '</option>'; }).join('');
+    var all = monthDefs.map(function(r){ return r.m; });
+    if (all.indexOf(chatStoreState.month) < 0) chatStoreState.month = ms[ms.length - 1];
+    sel.innerHTML = all.slice().reverse().map(function(m){ return '<option value="' + m + '">' + ymLabel(m) + '</option>'; }).join('');
     sel.value = String(chatStoreState.month);
   }
   function renderChatStoreTable(){
@@ -1596,7 +1599,7 @@
     if (!chatStoreState.month || btn.disabled) return;
     var rows = currentChatStoreRows();
     var chName = {dds:'DDS', showroom:'Showroom'};
-    var lines = [[t('csv_channel'), t('store_name'), t('chat_windows')]];
+    var lines = [[t('csv_channel'), t('store_name'), t('chat_windows_cum')]];
     rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.windows]); });
     lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), rows.reduce(function(a, r){ return a + r.windows; }, 0)]);
     var csv = '\ufeff' + lines.map(function(l){ return l.map(csvCell).join(','); }).join('\r\n') + '\r\n';
