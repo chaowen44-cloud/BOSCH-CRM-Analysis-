@@ -1748,8 +1748,9 @@
     var doc = {dds: triple(rows[di]), showroom: triple(rows[si]), stores: []};
     var i = (ti < 0 ? si : ti) + 1;
     while (i < rows.length && !a(rows[i])) i++;
-    // The store list ends at a blank row or at the next section header (e.g. a "1-on-1 Chat" block below it).
-    var isSectionHead = function(label){ return label === 'Total Retail' || /^1-on-1/i.test(label); };
+    // The store list ends at a blank row or at the next section header (e.g. a "Total Tags Used" or "1-on-1 Chat"
+    // block below it). The gviz CSV export drops blank rows, so the header check is what actually stops it.
+    var isSectionHead = function(label){ return label === 'Total Retail' || /^1-on-1/i.test(label) || /^Total Tags Used/i.test(label); };
     for (; i < rows.length && a(rows[i]) && !isSectionHead(a(rows[i])); i++){
       var s = triple(rows[i]); s.name = a(rows[i]); doc.stores.push(s);
     }
@@ -1765,7 +1766,7 @@
       if (!isChatByStore(a(rows[bi]))) continue;
       var k3 = bi + 1, cs2 = [];
       while (k3 < rows.length && !a(rows[k3])) k3++;
-      for (; k3 < rows.length && a(rows[k3]) && !isSectionHead(a(rows[k3])) && !/^Total Tags Used/i.test(a(rows[k3])); k3++){
+      for (; k3 < rows.length && a(rows[k3]) && !isSectionHead(a(rows[k3])); k3++){
         cs2.push({name: a(rows[k3]), windows: n(rows[k3][1])});
       }
       if (cs2.length) doc.chatStores = cs2;

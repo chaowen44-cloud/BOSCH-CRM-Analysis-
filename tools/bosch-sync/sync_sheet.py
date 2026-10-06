@@ -99,8 +99,8 @@ def main(src, out_dir):
         doc = {'dds': triple(rows[2]), 'showroom': triple(rows[3]), 'stores': []}
         for r in rows[7:]:
             label = '' if r[0] is None else str(r[0]).strip()
-            if label == '' or label == 'Total Retail' or label.lower().startswith('1-on-1'):
-                break  # end of the store list: blank row or the next section (e.g. the 1-on-1 Chat block)
+            if label == '' or label == 'Total Retail' or label.lower().startswith(('1-on-1', 'total tags used')):
+                break  # end of the store list: blank row or the next section (e.g. the Total Tags / 1-on-1 Chat block)
             doc['stores'].append({'name': str(r[0]).strip(), **triple(r)})
         chat = chat_block(rows)
         if chat:
