@@ -204,6 +204,7 @@
 
   /* ---- chat engagement cards ---- */
   .engage-card{border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 24px; display:grid; gap:16px; border:2px solid var(--border)}
+  .engage-card.total{border-color:var(--orange); background:var(--surface)}
   .engage-card.dds{border-color:var(--purple); background:var(--purple-tint)}
   .engage-card.showroom{border-color:var(--teal-bright); background:var(--teal-tint)}
   .engage-head{display:flex; align-items:center; justify-content:space-between}
@@ -579,13 +580,18 @@
       </div>
     </div>
 
-    <div class="ov-card">
-      <div class="label" data-i18n="total_tags">標籤使用總數</div>
-      <div class="bignum num" data-kpi="tags">–</div>
-      <div class="sub" data-i18n="across_members">全台零售櫃位(包含DDS & Showroom)</div>
-    </div>
-
-    <div class="row2">
+    <div class="row3">
+      <div class="engage-card total">
+        <div class="engage-head">
+          <span class="name"><span class="swatch" style="background:var(--orange)"></span>Total Retail</span>
+          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
+        </div>
+        <div class="metric-row">
+          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" style="color:var(--orange)" data-chat="windows" data-ch="total">–</span></div>
+          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--orange)" data-chat="rate" data-ch="total">–</span></div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="total" style="width:0; background:var(--orange)"></div></div>
+      </div>
       <div class="engage-card dds">
         <div class="engage-head">
           <span class="name"><span class="swatch" style="background:var(--purple)"></span>DDS</span>
@@ -1428,14 +1434,13 @@
   // Total tags used: from the "Total Tags Used" block; the card shows the latest month that has it.
   var tagsByMonth = {};
   function renderChatCards(){
-    var tagMonths = monthDefs.filter(function(r){ return tagsByMonth[r.m] !== undefined; });
-    var tm = tagMonths.length ? tagMonths[tagMonths.length - 1].m : null;
-    document.querySelector('[data-kpi="tags"]').textContent = tm ? tagsByMonth[tm].toLocaleString() : '–';
     var ms = chatMonths(), m = ms[ms.length - 1];
-    ['dds', 'showroom'].forEach(function(ch){
+    ['total', 'dds', 'showroom'].forEach(function(ch){
       var q = function(kind){ return document.querySelector('[data-chat="' + kind + '"][data-ch="' + ch + '"]'); };
       if (!m){ q('windows').textContent = '–'; q('rate').textContent = '–'; q('bar').style.width = '0'; return; }
-      var win = chatByMonth[m][ch], rate = chatRate(win, summaryByMonth[m][ch].cum || 0);
+      var win = ch === 'total' ? chatByMonth[m].dds + chatByMonth[m].showroom : chatByMonth[m][ch];
+      var mem = ch === 'total' ? (summaryByMonth[m].dds.cum || 0) + (summaryByMonth[m].showroom.cum || 0) : (summaryByMonth[m][ch].cum || 0);
+      var rate = chatRate(win, mem);
       q('windows').textContent = win.toLocaleString();
       q('rate').textContent = rate.toFixed(2) + '%';
       q('bar').style.width = Math.min(rate, 100) + '%';
