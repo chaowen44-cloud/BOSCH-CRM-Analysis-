@@ -191,6 +191,7 @@
   .tooltip.rich.flip:before{left:auto; right:-6px; border:6px solid transparent; border-right:0; border-left-color:rgba(46,51,64,.78)}
   .rt-title{font-size:12.5px; font-weight:600; margin-bottom:5px}
   .rt-row{display:flex; align-items:center; gap:7px; line-height:1.75}
+  .rt-sw.rt-dash{background:none!important; box-shadow:none; border-radius:0; width:14px; height:0; border-top:2px dashed currentColor}
   .rt-sw{width:10px; height:10px; border-radius:2px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35); flex:none}
   .rt-sub{margin:-3px 0 4px; font-size:10.5px; color:rgba(255,255,255,.6)}
   .rt-hint{margin-top:4px; font-size:10.5px; color:rgba(255,255,255,.6)}
@@ -714,7 +715,7 @@
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
       mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
-      total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", closed_month:"當月結案",
+      total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"全通路會員數", mem_dds:"DDS會員數", mem_sr:"Showroom會員數", pfx_total:"全通路", closed_month:"當月結案",
       trend_suffix:" 會員趨勢", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
       kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
       total_tags:"標籤使用總數",
@@ -739,7 +740,7 @@
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
       mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
-      total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing rate", closed_month:"Closed in month",
+      total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail Members", mem_dds:"DDS Members", mem_sr:"Showroom Members", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Trend", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
@@ -1092,9 +1093,9 @@
       fill: function(i){
         var bd = opts.breakdown && opts.breakdown[i];
         var rateRows = (opts.rates || []).map(function(r){
-          return r.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="background:' + r.color + '"></span>' + r.name + ': ' + r.values[i].toFixed(1) + '%</div>';
+          return r.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="color:' + r.color + '"></span>' + r.name + ': ' + r.values[i].toFixed(1) + '%</div>';
         }).join('') + (opts.countLines || []).map(function(c){
-          return c.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="background:' + c.color + '"></span>' + c.name + ': ' + c.values[i].toLocaleString() + '</div>';
+          return c.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="color:' + c.color + '"></span>' + c.name + ': ' + c.values[i].toLocaleString() + '</div>';
         }).join('');
         if (!bd){
           if (!rateRows){
@@ -1110,9 +1111,9 @@
           return '<div class="rt-row"><span class="rt-sw" style="background:var(' + colorVar + ')"></span>' + name + ': ' + fmtT(v) + '</div>';
         };
         tip.innerHTML = '<div class="rt-title">' + ymLabel(months[i]) + '</div>' +
-          row('--orange', t('ch_total'), values[i]) +
-          row('--purple', 'DDS', bd.dds) +
-          row('--teal', 'Showroom', bd.showroom) + rateRows +
+          row('--orange', t('mem_total'), values[i]) +
+          row('--purple', t('mem_dds'), bd.dds) +
+          row('--teal', t('mem_sr'), bd.showroom) + rateRows +
           (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
         return true;
       },
@@ -1212,7 +1213,7 @@
       var seriesOf = function(ch, color, name, fn){
         return {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
       };
-      var chans = [[drill.channel === 'all' ? 'total' : drill.channel, cssVar(meta.colorVar), drill.channel === 'all' ? t('ch_total') + ' ' : '']];
+      var chans = [[drill.channel === 'all' ? 'total' : drill.channel, cssVar(meta.colorVar), drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + (currentLang === 'zh' ? '' : ' ')]];
       if (mode === 'cumulative'){
         var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
         chartOpts.rates = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('close_rate'), rateOf); });
