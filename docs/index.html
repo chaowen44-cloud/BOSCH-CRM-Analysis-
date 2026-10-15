@@ -169,7 +169,6 @@
   .df-radios{display:flex; align-items:center; gap:18px; margin-left:auto}
   .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
-  .df-check{padding-left:14px; border-left:1px solid var(--border)}
   .tl-dash{width:18px; height:0; border-top:2.4px dashed currentColor; flex:none}
 
   /* ---- shared filter bar: outside any card, drives the trend chart + store table together ---- */
@@ -489,7 +488,6 @@
         <div class="df-radios">
           <label class="df-radio"><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
           <label class="df-radio"><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
-          <label class="df-radio df-check"><input type="checkbox" id="mergedRate"><span data-i18n="close_rate">結案率</span></label>
         </div>
       </div>
       <div class="trend-legend" id="mergedLegend" hidden></div>
@@ -1193,7 +1191,7 @@
     }
     // Closing overlay for the channel on screen (Total Retail in the "All" view).
     // Cumulative view -> closing rate (%, right axis); monthly view -> closed per month (same axis as monthly new members).
-    var showClose = document.getElementById('mergedRate').checked, legendLines = null;
+    var showClose = true, legendLines = null;
     if (showClose){
       var sumOf = function(m, ch, k){
         var sm = summaryByMonth[m]; if (!sm) return null;
@@ -1274,7 +1272,6 @@
   document.querySelectorAll('input[name="merged-mode"]').forEach(function(r){
     r.addEventListener('change', renderMergedChart);
   });
-  document.getElementById('mergedRate').addEventListener('change', renderMergedChart);
 
   /* ---------- by-store table ---------- */
   var storeSort = {key:'cum', dir:null};
