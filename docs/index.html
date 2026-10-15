@@ -169,6 +169,13 @@
   .df-radios{display:flex; align-items:center; gap:18px; margin-left:auto}
   .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
+  .df-check{padding-left:14px; border-left:1px solid var(--border)}
+  .trend-insight{margin:10px 0 2px; padding:10px 14px; border-radius:10px; background:var(--tint-gray); font-size:12.5px; color:var(--ink); display:grid; gap:6px}
+  .trend-insight[hidden]{display:none}
+  .ti-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .ti-row b{font-weight:700}
+  .trend-note{margin:0 0 6px; font-size:11.5px; color:var(--muted)}
+  .tl-dash{width:18px; height:0; border-top:2.4px dashed currentColor; flex:none}
 
   /* ---- shared filter bar: outside any card, drives the trend chart + store table together ---- */
   .shared-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 6px; margin-bottom:2px; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border)}
@@ -486,10 +493,15 @@
         <div class="df-radios">
           <label class="df-radio"><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
           <label class="df-radio"><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
+          <label class="df-radio df-check"><input type="checkbox" id="mergedRate" checked><span data-i18n="close_rate">結案率</span></label>
         </div>
       </div>
       <div class="trend-legend" id="mergedLegend" hidden></div>
       <div class="chart-wrap" id="mergedChart"></div>
+      <div class="trend-insight" id="mergedInsight">
+        <div class="ti-row"><i class="tl-sw" style="background:var(--purple)"></i><b>DDS</b><span data-i18n="insight_dds">百貨活動期間會員招募率低，著重清結案清單；活動結束後為招募黃金期。</span></div>
+        <div class="ti-row"><i class="tl-sw" style="background:var(--teal)"></i><b>Showroom</b><span data-i18n="insight_sr">跟著正常 flow 走。</span></div>
+      </div>
       <div class="pager" data-pager="merged"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
     </div>
 
@@ -700,7 +712,7 @@
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
       mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
-      total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增",
+      total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", closed_month:"當月結案", insight_dds:"百貨活動期間會員招募率低，著重清結案清單；活動結束後為招募黃金期。", insight_sr:"跟著正常 flow 走。", count_note:"虛線為各通路當月結案筆數（結案筆數(累積)的月增量），可與當月新增會員同軸對照；9 月起口徑由「已結案已出貨」改為「結案筆數」。", rate_note:"結案率＝結案筆數(累積) ÷ 零售會員(累積)，對應右側軸。3–8 月來源為「已結案已出貨」，9 月起為「結案筆數」，口徑不同。",
       trend_suffix:" 會員趨勢", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
       kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
       total_tags:"標籤使用總數",
@@ -725,7 +737,7 @@
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
       mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
-      total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add",
+      total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing rate", closed_month:"Closed in month", insight_dds:"During department-store promotions recruitment slows while the team clears the closing list; right after, it is the best recruiting window.", insight_sr:"Follows the normal flow.", count_note:"Dashed lines = closed in the month (monthly change of closed, cum.), on the same axis as monthly new members. From Sep the source changed from 'closed & shipped' to 'closed'.", rate_note:"Closing rate = closed (cum.) ÷ retail members (cum.), right axis. Mar–Aug counts 'closed & shipped'; from Sep it counts 'closed' — not like-for-like.",
       trend_suffix:" Member Trend", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
@@ -921,7 +933,7 @@
     var ink = cssVar('--ink');
     var axisFont = 13 * scale, ptFont = 11 * scale;
     var W = 1040;
-    var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
+    var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1) + (opts.rates && opts.rates.length ? 44 : 0), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
     if (labels.length <= 2){ W = 520; }
     var plotW = W - padL - padR, plotH = H - padT - padB;
     // "All" view (opts.breakdown): cumulative stacks DDS and Showroom as areas under the total line; the monthly
@@ -936,6 +948,7 @@
       posTop.push(Math.max(bd.dds, bd.showroom));
       negBot.push(Math.min(bd.dds, bd.showroom));
     });
+    (opts.countLines || []).forEach(function(c){ c.values.forEach(function(v){ if (v != null) posTop.push(v); }); });
     var maxVal = Math.max.apply(null, posTop.concat([0]));
     var minVal = Math.min.apply(null, values.concat(negBot, [0]));
     var span = Math.max(maxVal - minVal, 1);
@@ -1005,6 +1018,37 @@
         '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
     }
 
+    // Closing-rate overlay (opts.rates): dashed lines on a right-hand % axis whose ticks line up with the grid.
+    var rateSvg = '';
+    if (opts.rates && opts.rates.length && labels.length){
+      var rMax = 20;
+      opts.rates.forEach(function(r){ r.values.forEach(function(v){ if (v != null) rMax = Math.max(rMax, Math.ceil(v / 20) * 20); }); });
+      var ry = function(v){ return padT + plotH - plotH * v / rMax; };
+      for (var rg = 0; rg <= 4; rg++){
+        rateSvg += '<text x="' + (W - padR + 8) + '" y="' + (ry(rMax / 4 * rg) + 4 + 4*(scale-1)) + '" text-anchor="start" class="axis-label" style="font-size:' + (axisFont * 0.92) + 'px">' + (rMax / 4 * rg) + '%</text>';
+      }
+      opts.rates.forEach(function(r){
+        var pts = [];
+        r.values.forEach(function(v, i){ if (v != null) pts.push([x(i), ry(v), v]); });
+        if (!pts.length) return;
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="2.4" stroke-dasharray="7,5" stroke-linecap="round" stroke-linejoin="round"/>';
+        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="3.4" fill="var(--surface)" stroke="' + r.color + '" stroke-width="2"/>'; }).join('');
+        var lp = pts[pts.length - 1];
+        rateSvg += '<text x="' + lp[0] + '" y="' + (lp[1] + 17 + 4*(scale-1)) + '" text-anchor="end" class="pt-label" style="font-size:' + ptFont + 'px" fill="' + r.color + '">' + lp[2].toFixed(1) + '%</text>';
+      });
+    }
+
+    // Monthly view: closed-per-month dashed lines on the same (left) axis, to read against monthly new members.
+    if (opts.countLines && opts.countLines.length){
+      opts.countLines.forEach(function(c){
+        var pts = [];
+        c.values.forEach(function(v, i){ if (v != null) pts.push([x(i), y(v), v]); });
+        if (!pts.length) return;
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + c.color + '" stroke-width="2.4" stroke-dasharray="7,5" stroke-linecap="round" stroke-linejoin="round"/>';
+        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="3.4" fill="var(--surface)" stroke="' + c.color + '" stroke-width="2"/>'; }).join('');
+      });
+    }
+
     var dots = '', endLabels = '', guide = '';
     points.forEach(function(p, i){
       var isEnd = (i === 0 || i === points.length - 1);
@@ -1031,7 +1075,7 @@
         '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W-padR) + '" y2="' + zeroY + '" stroke="var(--border)" stroke-width="1.5"/>' +
         axisLabels + xLabels +
         guide +
-        seriesSvg +
+        seriesSvg + rateSvg +
         dots + endLabels +
         '<g class="hover-dot"><circle r="' + (8*scale) + '" fill="' + color + '" stroke="var(--surface)" stroke-width="3"/></g>' +
         '<rect class="hover-zone' + (drillKey ? '' : ' no-drill') + '" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/>' +
@@ -1045,9 +1089,20 @@
       yOf: function(i){ return points[i][1]; },
       fill: function(i){
         var bd = opts.breakdown && opts.breakdown[i];
+        var rateRows = (opts.rates || []).map(function(r){
+          return r.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="background:' + r.color + '"></span>' + r.name + ': ' + r.values[i].toFixed(1) + '%</div>';
+        }).join('') + (opts.countLines || []).map(function(c){
+          return c.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="background:' + c.color + '"></span>' + c.name + ': ' + c.values[i].toLocaleString() + '</div>';
+        }).join('');
         if (!bd){
-          tip.textContent = labels[i] + ': ' + fmtV(values[i]) + (drillKey ? ' · ' + t('click_drill') : '');
-          return false;
+          if (!rateRows){
+            tip.textContent = labels[i] + ': ' + fmtV(values[i]) + (drillKey ? ' · ' + t('click_drill') : '');
+            return false;
+          }
+          tip.innerHTML = '<div class="rt-title">' + ymLabel(months[i]) + '</div>' +
+            '<div class="rt-row"><span class="rt-sw" style="background:' + color + '"></span>' + Number(fmtV(values[i])).toLocaleString() + '</div>' + rateRows +
+            (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
+          return true;
         }
         var row = function(colorVar, name, v){
           return '<div class="rt-row"><span class="rt-sw" style="background:var(' + colorVar + ')"></span>' + name + ': ' + Number(fmtV(v)).toLocaleString() + '</div>';
@@ -1055,7 +1110,7 @@
         tip.innerHTML = '<div class="rt-title">' + ymLabel(months[i]) + '</div>' +
           row('--orange', t('ch_total'), values[i]) +
           row('--purple', 'DDS', bd.dds) +
-          row('--teal', 'Showroom', bd.showroom) +
+          row('--teal', 'Showroom', bd.showroom) + rateRows +
           (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
         return true;
       },
@@ -1117,13 +1172,18 @@
   };
 
   // "All" view only: colour key for the DDS / Showroom layers (or lines) and the orange total line.
-  function renderMergedLegend(bd){
+  function renderMergedLegend(bd, rates, note){
     var el = document.getElementById('mergedLegend');
-    if (!bd || !bd.length){ el.hidden = true; el.innerHTML = ''; return; }
+    var hasRates = !!(rates && rates.length);
+    if ((!bd || !bd.length) && !hasRates){ el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    el.innerHTML = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
+    var html = '';
+    if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
       '<span class="tl-item"><i class="tl-sw" style="background:var(--teal)"></i>Showroom</span>' +
       '<span class="tl-item"><i class="tl-ln"></i>' + t('ch_total') + '</span>';
+    if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash"></i>' + r.name + '</span>'; }).join('') +
+      '<span class="trend-note" style="flex-basis:100%;margin:0">' + note + '</span>';
+    el.innerHTML = html;
   }
   function renderMergedChart(){
     if (!monthDefs.length) return;
@@ -1140,7 +1200,36 @@
       var srVals = seriesFor('showroom', mode, start, end).values;
       chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
     }
-    renderMergedLegend(chartOpts.breakdown);
+    // Closing overlay: DDS and Showroom in the "All" view, the selected channel otherwise.
+    // Cumulative view -> closing rate (%, right axis); monthly view -> closed per month (same axis as monthly new members).
+    var showClose = document.getElementById('mergedRate').checked, legendLines = null, legendNote = '';
+    document.getElementById('mergedInsight').hidden = !showClose;
+    if (showClose){
+      var sumOf = function(m, ch, k){
+        var sm = summaryByMonth[m]; if (!sm) return null;
+        return ch === 'total' ? (sm.dds[k] || 0) + (sm.showroom[k] || 0) : (sm[ch][k] || 0);
+      };
+      var seriesOf = function(ch, color, name, fn){
+        return {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
+      };
+      var chans = drill.channel === 'all'
+        ? [['dds', cssVar('--purple'), 'DDS '], ['showroom', cssVar('--teal'), 'Showroom ']]
+        : [[drill.channel, cssVar(meta.colorVar), '']];
+      if (mode === 'cumulative'){
+        var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
+        chartOpts.rates = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('close_rate'), rateOf); });
+        legendNote = t('rate_note');
+      } else {
+        var deltaOf = function(ch, m){
+          var pm = prevMonthOf(m), cur = sumOf(m, ch, 'shipped'), prv = pm ? sumOf(pm, ch, 'shipped') : 0;
+          return cur == null ? null : Math.max(cur - (prv || 0), 0);
+        };
+        chartOpts.countLines = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('closed_month'), deltaOf); });
+        legendLines = chartOpts.countLines;
+        legendNote = t('count_note');
+      }
+    }
+    renderMergedLegend(chartOpts.breakdown, chartOpts.rates || legendLines, legendNote);
     renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
     document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
     var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
@@ -1199,6 +1288,7 @@
   document.querySelectorAll('input[name="merged-mode"]').forEach(function(r){
     r.addEventListener('change', renderMergedChart);
   });
+  document.getElementById('mergedRate').addEventListener('change', renderMergedChart);
 
   /* ---------- by-store table ---------- */
   var storeSort = {key:'cum', dir:null};
