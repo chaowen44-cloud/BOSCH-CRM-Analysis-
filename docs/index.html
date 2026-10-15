@@ -1300,16 +1300,16 @@
     var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
     document.getElementById('storeTableBody').innerHTML = rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
-        '<td class="st-num st-monthly">' + nf(r.monthly) + '</td>' +
-        '<td class="st-num st-cum">' + nf(r.cum) + '</td>' +
+        '<td class="st-num st-cum">' + nf(r.monthly) + '</td>' +
+        '<td class="st-num st-monthly">' + nf(r.cum) + '</td>' +
         '<td class="st-num st-shipped">' + nf(r.shipped) + '</td>' +
         '<td class="st-num st-conv">' + (r.hasConv ? nf(r.conv) : '–') + '</td></tr>';
     }).join('');
     var sum = function(k){ return rows.reduce(function(a, r){ return a + r[k]; }, 0); };
     document.getElementById('storeTableFoot').innerHTML =
       '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
-      '<td class="st-num st-monthly">' + nf(sum('monthly')) + '</td>' +
-      '<td class="st-num st-cum">' + nf(sum('cum')) + '</td>' +
+      '<td class="st-num st-cum">' + nf(sum('monthly')) + '</td>' +
+      '<td class="st-num st-monthly">' + nf(sum('cum')) + '</td>' +
       '<td class="st-num st-shipped">' + nf(sum('shipped')) + '</td>' +
       '<td class="st-num st-conv">' + (rows.some(function(r){ return r.hasConv; }) ? nf(sum('conv')) : '–') + '</td></tr>';
 
