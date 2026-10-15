@@ -1750,10 +1750,18 @@
     var di = find('DDS', 0), si = di < 0 ? -1 : find('Showroom', di + 1);
     if (si < 0) return null;
     var ti = find('Summarize', si + 1);
-    var cc = -1; // column of the "轉換筆數" (conversion count) header, if this tab has one
+    var cc = -1; // column of the "轉換筆數" (conversion count) header
     for (var hr = 0; hr < Math.min(rows.length, 12) && cc < 0; hr++)
       for (var hc = 0; hc < rows[hr].length; hc++) if (String(rows[hr][hc]).indexOf('轉換筆數') >= 0){ cc = hc; break; }
-    var triple = function(r){ var o = {cum: n(r[1]), monthly: n(r[2]), shipped: n(r[3])}; if (cc >= 0) o.conv = n(r[cc]); return o; };
+    // gviz blanks text cells in a mostly numeric column, so that header is usually missing from the CSV:
+    // fall back to column K (the sheet's layout) and only count the cell when it holds a number.
+    if (cc < 0) cc = 10;
+    var triple = function(r){
+      var o = {cum: n(r[1]), monthly: n(r[2]), shipped: n(r[3])};
+      var cv = String(r[cc] == null ? '' : r[cc]).replace(/,/g, '').trim();
+      if (cv !== '' && isFinite(cv)) o.conv = Math.round(parseFloat(cv));
+      return o;
+    };
     var doc = {dds: triple(rows[di]), showroom: triple(rows[si]), stores: []};
     var i = (ti < 0 ? si : ti) + 1;
     while (i < rows.length && !a(rows[i])) i++;
