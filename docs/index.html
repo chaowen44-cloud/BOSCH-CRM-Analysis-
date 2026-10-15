@@ -424,22 +424,43 @@
     </div>
 
     <div class="metric-group">
+      <div class="metric-group-label" data-i18n="group_closed">結案率 Closed</div>
+      <div class="row3">
+        <div class="stat-card c-orange">
+          <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
+          <div class="bignum num" data-kpi="close" data-ch="total">–</div>
+          <div class="sub num" data-kpi="closed" data-ch="total"></div>
+        </div>
+        <div class="stat-card c-purple">
+          <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
+          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="close" data-ch="dds">–</div>
+          <div class="sub num" data-kpi="closed" data-ch="dds"></div>
+        </div>
+        <div class="stat-card c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
+          <div class="bignum num" style="color:var(--teal)" data-kpi="close" data-ch="showroom">–</div>
+          <div class="sub num" data-kpi="closed" data-ch="showroom"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-group">
       <div class="metric-group-label" data-i18n="group_conversion">轉換率 Conversion</div>
       <div class="row3">
         <div class="stat-card c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
-          <div class="sub num" data-kpi="shipped" data-ch="total"></div>
+          <div class="sub num" data-kpi="convn" data-ch="total"></div>
         </div>
         <div class="stat-card c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" style="color:var(--purple-deep)" data-kpi="conv" data-ch="dds">–</div>
-          <div class="sub num" data-kpi="shipped" data-ch="dds"></div>
+          <div class="sub num" data-kpi="convn" data-ch="dds"></div>
         </div>
         <div class="stat-card c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
           <div class="bignum num" style="color:var(--teal)" data-kpi="conv" data-ch="showroom">–</div>
-          <div class="sub num" data-kpi="shipped" data-ch="showroom"></div>
+          <div class="sub num" data-kpi="convn" data-ch="showroom"></div>
         </div>
       </div>
     </div>
@@ -675,8 +696,8 @@
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
-      group_members:"會員數", group_conversion:"轉換率", ch_total:"Total Retail",
-      mom:"月增率", conv_sub:"轉換 {c} 筆 · 結案 {s} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
+      group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
+      mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"Total Retail 會員趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增",
       trend_suffix:" 會員趨勢", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
       kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
@@ -700,8 +721,8 @@
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       kicker1:"Retail Membership", h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
-      group_members:"Members", group_conversion:"Conversion", ch_total:"Total Retail",
-      mom:"MoM", conv_sub:"{c} converted · {s} closed", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
+      group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
+      mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add",
       trend_suffix:" Member Trend", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
@@ -1593,7 +1614,9 @@
         momEl.className = 'trend'; momEl.textContent = ''; deltaEl.textContent = '';
       }
       q('conv').textContent = cum && hasConv ? (conv / cum * 100).toFixed(1) + '%' : '–';
-      q('shipped').textContent = (hasConv ? t('conv_sub').replace('{c}', conv.toLocaleString()) : t('closed_sub')).replace('{s}', shipped.toLocaleString());
+      q('close').textContent = cum ? (shipped / cum * 100).toFixed(1) + '%' : '–';
+      q('closed').textContent = t('closed_sub').replace('{s}', shipped.toLocaleString());
+      q('convn').textContent = hasConv ? t('conv_sub').replace('{c}', conv.toLocaleString()) : '';
     });
   }
 
