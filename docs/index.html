@@ -244,6 +244,7 @@
   .st-num{text-align:right; font-variant-numeric:tabular-nums}
   .st-cum{background:var(--tint-pink)}
   .st-monthly{background:var(--tint-pink2)}
+  .st-monthly.rate-td{background:var(--tint-gray)}
   .st-shipped{background:var(--tint-gray); font-weight:600}
   .st-conv{background:var(--tint-gray2); font-weight:600}
   .sort-dd{position:relative; display:inline-block; margin-left:6px; vertical-align:middle}
@@ -501,7 +502,7 @@
       <div class="store-card-head">
         <div class="left">
           <button type="button" class="store-toggle" id="storeToggle" aria-expanded="true" aria-controls="storeBody">
-            <span class="label" data-i18n="by_store_label">BY STORE</span>
+            <span class="label" data-i18n="members_store_label">會員數櫃位明細</span>
             <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
           </button>
         </div>
@@ -603,7 +604,7 @@
       <div class="store-card-head">
         <div class="left">
           <button type="button" class="store-toggle" id="chatStoreToggle" aria-expanded="true" aria-controls="chatStoreBody">
-            <span class="label" data-i18n="by_store_label">BY STORE</span>
+            <span class="label" data-i18n="chat_store_label">對話視窗櫃位明細</span>
             <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
           </button>
         </div>
@@ -692,7 +693,7 @@
       appname:"Retail CRM Management",
       nav_retail:"零售會員", nav_crm:"CRM 系統使用", to_top:"回到頂部",
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與結案明細",
-      by_store_label:"BY STORE", refresh:"重整",
+      by_store_label:"BY STORE", members_store_label:"會員數櫃位明細", chat_store_label:"對話視窗櫃位明細", refresh:"重整",
       store_name:"店櫃名稱", cum_members:"零售會員(累積)", monthly_new:"當月新增", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
@@ -717,7 +718,7 @@
       appname:"Retail CRM Management",
       nav_retail:"Retail Membership", nav_crm:"CRM System Usage", to_top:"Back to top",
       kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Closed Deals",
-      by_store_label:"BY STORE", refresh:"Refresh",
+      by_store_label:"BY STORE", members_store_label:"Members by Store", chat_store_label:"Chat Windows by Store", refresh:"Refresh",
       store_name:"Store", cum_members:"Retail Members (Cum.)", monthly_new:"Monthly New", shipped_cum:"Closed (Cum.)", conv_cum:"Conversions (Cum.)",
       sort_field:"Sort by", sort_short_shipped:"Closed", sort_short_conv:"Conversions", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
