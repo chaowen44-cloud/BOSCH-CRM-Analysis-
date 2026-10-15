@@ -1709,10 +1709,15 @@
         var mEl = q(kind + 'mom'), gEl = q(kind + 'gap');
         if (hasConv && prevHasConv && prevRate > 0){
           var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curRate - prevRate;
-          mEl.className = 'trend ' + dir;
+          mEl.className = 'trend ' + dir; mEl.style.color = '';
           mEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
           gEl.textContent = (gap >= 0 ? '+' : '') + gap.toFixed(1) + 'pp ' + t('vs_prev').replace('{m}', prevName);
-        } else { mEl.className = 'trend'; mEl.textContent = ''; gEl.textContent = ''; }
+        } else {
+          // template only: the numbers appear once there is a comparable previous month
+          mEl.className = 'trend'; mEl.style.color = 'var(--muted)';
+          mEl.innerHTML = '<span>' + t('mom') + '</span>&nbsp;–';
+          gEl.textContent = '– ' + t('vs_prev').replace('{m}', prevName);
+        }
       };
       rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0);
       rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0);
