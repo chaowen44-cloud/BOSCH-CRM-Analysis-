@@ -433,16 +433,22 @@
         <div class="stat-card c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="close" data-ch="total">–</div>
+          <span class="trend" data-kpi="closemom" data-ch="total"></span>
+          <div class="sub num" data-kpi="closegap" data-ch="total"></div>
           <div class="sub num" data-kpi="closed" data-ch="total"></div>
         </div>
         <div class="stat-card c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" style="color:var(--purple-deep)" data-kpi="close" data-ch="dds">–</div>
+          <span class="trend" data-kpi="closemom" data-ch="dds"></span>
+          <div class="sub num" data-kpi="closegap" data-ch="dds"></div>
           <div class="sub num" data-kpi="closed" data-ch="dds"></div>
         </div>
         <div class="stat-card c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
           <div class="bignum num" style="color:var(--teal)" data-kpi="close" data-ch="showroom">–</div>
+          <span class="trend" data-kpi="closemom" data-ch="showroom"></span>
+          <div class="sub num" data-kpi="closegap" data-ch="showroom"></div>
           <div class="sub num" data-kpi="closed" data-ch="showroom"></div>
         </div>
       </div>
@@ -454,16 +460,22 @@
         <div class="stat-card c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
+          <span class="trend" data-kpi="convmom" data-ch="total"></span>
+          <div class="sub num" data-kpi="convgap" data-ch="total"></div>
           <div class="sub num" data-kpi="convn" data-ch="total"></div>
         </div>
         <div class="stat-card c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" style="color:var(--purple-deep)" data-kpi="conv" data-ch="dds">–</div>
+          <span class="trend" data-kpi="convmom" data-ch="dds"></span>
+          <div class="sub num" data-kpi="convgap" data-ch="dds"></div>
           <div class="sub num" data-kpi="convn" data-ch="dds"></div>
         </div>
         <div class="stat-card c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
           <div class="bignum num" style="color:var(--teal)" data-kpi="conv" data-ch="showroom">–</div>
+          <span class="trend" data-kpi="convmom" data-ch="showroom"></span>
+          <div class="sub num" data-kpi="convgap" data-ch="showroom"></div>
           <div class="sub num" data-kpi="convn" data-ch="showroom"></div>
         </div>
       </div>
@@ -1690,6 +1702,20 @@
       }
       q('conv').textContent = cum && hasConv ? (conv / cum * 100).toFixed(1) + '%' : '–';
       q('close').textContent = cum ? (shipped / cum * 100).toFixed(1) + '%' : '–';
+      // month-over-month of a rate: relative change and the point gap vs the previous month; only shown when the
+      // previous month is on the same footing (it carries the conversion column, i.e. the new closed-count definition)
+      var prevHasConv = !!prev && typeof (ch === 'total' ? prev.dds.conv : prev[ch].conv) === 'number';
+      var rateMom = function(kind, curRate, prevRate){
+        var mEl = q(kind + 'mom'), gEl = q(kind + 'gap');
+        if (hasConv && prevHasConv && prevRate > 0){
+          var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curRate - prevRate;
+          mEl.className = 'trend ' + dir;
+          mEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toFixed(1) + 'pp ' + t('vs_prev').replace('{m}', prevName);
+        } else { mEl.className = 'trend'; mEl.textContent = ''; gEl.textContent = ''; }
+      };
+      rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0);
+      rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0);
       q('closed').textContent = t('closed_sub').replace('{s}', shipped.toLocaleString());
       q('convn').textContent = hasConv ? t('conv_sub').replace('{c}', conv.toLocaleString()) : '';
     });
