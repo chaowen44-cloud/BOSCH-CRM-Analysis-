@@ -510,8 +510,8 @@
             <div class="sort-dd-menu">
               <div class="sort-dd-group">
                 <div class="sort-dd-title" data-i18n="sort_field">排序欄位</div>
-                <button type="button" class="sort-dd-item" data-key="cum"><span data-i18n="cum_members">零售會員(累積)</span><span class="chk">✓</span></button>
                 <button type="button" class="sort-dd-item" data-key="monthly"><span data-i18n="monthly_new">當月新增</span><span class="chk">✓</span></button>
+                <button type="button" class="sort-dd-item" data-key="cum"><span data-i18n="cum_members">總會員數(累積)</span><span class="chk">✓</span></button>
                 <button type="button" class="sort-dd-item" data-key="shipped"><span data-i18n="shipped_cum">結案筆數(累積)</span><span class="chk">✓</span></button>
                 <button type="button" class="sort-dd-item" data-key="conv"><span data-i18n="conv_cum">轉換筆數(累積)</span><span class="chk">✓</span></button>
               </div>
@@ -542,8 +542,8 @@
           <thead>
             <tr>
               <th data-i18n="store_name">店櫃名稱</th>
-              <th class="num" data-sort-key="cum"><span class="th-sort"></span><span data-i18n="cum_members">零售會員(累積)</span></th>
               <th class="num" data-sort-key="monthly"><span class="th-sort"></span><span data-i18n="monthly_new">當月新增</span></th>
+              <th class="num" data-sort-key="cum"><span class="th-sort"></span><span data-i18n="cum_members">總會員數(累積)</span></th>
               <th class="num" data-sort-key="shipped"><span class="th-sort"></span><span data-i18n="shipped_cum">結案筆數(累積)</span></th>
               <th class="num" data-sort-key="conv"><span class="th-sort"></span><span data-i18n="conv_cum">轉換筆數(累積)</span></th>
             </tr>
@@ -692,7 +692,7 @@
       nav_retail:"零售會員", nav_crm:"CRM 系統使用", to_top:"回到頂部",
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與結案明細",
       by_store_label:"BY STORE", members_store_label:"會員數櫃位明細", chat_store_label:"對話視窗櫃位明細", refresh:"重整",
-      store_name:"店櫃名稱", cum_members:"零售會員(累積)", monthly_new:"當月新增", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
+      store_name:"店櫃名稱", cum_members:"總會員數(累積)", monthly_new:"當月新增", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
@@ -717,7 +717,7 @@
       nav_retail:"Retail Membership", nav_crm:"CRM System Usage", to_top:"Back to top",
       kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Closed Deals",
       by_store_label:"BY STORE", members_store_label:"Members by Store", chat_store_label:"Chat Windows by Store", refresh:"Refresh",
-      store_name:"Store", cum_members:"Retail Members (Cum.)", monthly_new:"Monthly New", shipped_cum:"Closed (Cum.)", conv_cum:"Conversions (Cum.)",
+      store_name:"Store", cum_members:"Total Members (Cum.)", monthly_new:"Monthly New", shipped_cum:"Closed (Cum.)", conv_cum:"Conversions (Cum.)",
       sort_field:"Sort by", sort_short_shipped:"Closed", sort_short_conv:"Conversions", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
@@ -1300,16 +1300,16 @@
     var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
     document.getElementById('storeTableBody').innerHTML = rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
-        '<td class="st-num st-cum">' + nf(r.cum) + '</td>' +
         '<td class="st-num st-monthly">' + nf(r.monthly) + '</td>' +
+        '<td class="st-num st-cum">' + nf(r.cum) + '</td>' +
         '<td class="st-num st-shipped">' + nf(r.shipped) + '</td>' +
         '<td class="st-num st-conv">' + (r.hasConv ? nf(r.conv) : '–') + '</td></tr>';
     }).join('');
     var sum = function(k){ return rows.reduce(function(a, r){ return a + r[k]; }, 0); };
     document.getElementById('storeTableFoot').innerHTML =
       '<tr><td class="st-name">' + t('subtotal') + ' · ' + rows.length + ' ' + t('stores') + '</td>' +
-      '<td class="st-num st-cum">' + nf(sum('cum')) + '</td>' +
       '<td class="st-num st-monthly">' + nf(sum('monthly')) + '</td>' +
+      '<td class="st-num st-cum">' + nf(sum('cum')) + '</td>' +
       '<td class="st-num st-shipped">' + nf(sum('shipped')) + '</td>' +
       '<td class="st-num st-conv">' + (rows.some(function(r){ return r.hasConv; }) ? nf(sum('conv')) : '–') + '</td></tr>';
 
@@ -1624,10 +1624,10 @@
     if (!monthDefs.length || btn.disabled) return;
     var rows = currentStoreRows();
     var chName = {dds:'DDS', showroom:'Showroom'};
-    var lines = [[t('csv_channel'), t('store_name'), t('cum_members'), t('monthly_new'), t('shipped_cum'), t('conv_cum')]];
-    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.cum, r.monthly, r.shipped, r.hasConv ? r.conv : '']); });
+    var lines = [[t('csv_channel'), t('store_name'), t('monthly_new'), t('cum_members'), t('shipped_cum'), t('conv_cum')]];
+    rows.forEach(function(r){ lines.push([chName[r.channel] || r.channel, r.name, r.monthly, r.cum, r.shipped, r.hasConv ? r.conv : '']); });
     var sum = function(k){ return rows.reduce(function(a, r){ return a + r[k]; }, 0); };
-    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), sum('cum'), sum('monthly'), sum('shipped'), rows.some(function(r){ return r.hasConv; }) ? sum('conv') : '']);
+    lines.push(['', t('subtotal') + ' · ' + rows.length + ' ' + t('stores'), sum('monthly'), sum('cum'), sum('shipped'), rows.some(function(r){ return r.hasConv; }) ? sum('conv') : '']);
     var csv = '\ufeff' + lines.map(function(l){ return l.map(csvCell).join(','); }).join('\r\n') + '\r\n';
     var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
     btn.disabled = true;
