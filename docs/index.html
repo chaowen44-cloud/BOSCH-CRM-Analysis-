@@ -1191,7 +1191,7 @@
       var srVals = seriesFor('showroom', mode, start, end).values;
       chartOpts.breakdown = data.values.map(function(_, i){ return {dds:ddsVals[i], showroom:srVals[i]}; }).slice(w[0], w[1]);
     }
-    // Closing overlay: DDS and Showroom in the "All" view, the selected channel otherwise.
+    // Closing overlay for the channel on screen (Total Retail in the "All" view).
     // Cumulative view -> closing rate (%, right axis); monthly view -> closed per month (same axis as monthly new members).
     var showClose = document.getElementById('mergedRate').checked, legendLines = null;
     if (showClose){
@@ -1202,9 +1202,7 @@
       var seriesOf = function(ch, color, name, fn){
         return {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
       };
-      var chans = drill.channel === 'all'
-        ? [['dds', cssVar('--purple'), 'DDS '], ['showroom', cssVar('--teal'), 'Showroom ']]
-        : [[drill.channel, cssVar(meta.colorVar), '']];
+      var chans = [[drill.channel === 'all' ? 'total' : drill.channel, cssVar(meta.colorVar), drill.channel === 'all' ? t('ch_total') + ' ' : '']];
       if (mode === 'cumulative'){
         var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
         chartOpts.rates = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('close_rate'), rateOf); });
