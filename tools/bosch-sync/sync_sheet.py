@@ -4,7 +4,8 @@ Usage: python3 sync_sheet.py <drive-tool-result.json | file.xlsx> <out_dir>
 
 Each tab named YYYY-MM or YYYYMM (e.g. 2026-09) is one month; other tabs (copies etc.) are ignored.
 The dashed form is what the page's live read needs; the output id is always YYYYMM.
-Per tab: row 3 = DDS, row 4 = Showroom (cols B/C/D = cumulative / monthly new / shipped);
+Per tab: row 3 = DDS, row 4 = Showroom (cols B/C/D = cumulative / monthly new / closed count, kept under the key "shipped"; the optional
+"轉換筆數" column, located by its header, becomes "conv");
 store rows start at row 8 and run until column A is blank or a section header
 ("Total Retail", "1-on-1 ...") begins. Blank or non-numeric cells -> 0.
 Writes <out_dir>/<YYYYMM>.json shaped {dds:{cum,monthly,shipped}, showroom:{...}, stores:[...]},
@@ -23,8 +24,21 @@ def num(v):
         return 0
 
 
-def triple(row):
-    return {'cum': num(row[1]), 'monthly': num(row[2]), 'shipped': num(row[3])}
+def conv_col(rows):
+    """Index of the "轉換筆數" (conversion count) column, found from the header rows (2 and 7); None if absent."""
+    for r in (rows[1], rows[6]):
+        for i, v in enumerate(r):
+            if isinstance(v, str) and '轉換筆數' in v:
+                return i
+    return None
+
+
+def triple(row, cc=None):
+    """cum / monthly new / closed count (column D, still keyed "shipped") and, when the tab has the column, conv."""
+    t = {'cum': num(row[1]), 'monthly': num(row[2]), 'shipped': num(row[3])}
+    if cc is not None and cc < len(row):
+        t['conv'] = num(row[cc])
+    return t
 
 
 def is_chat_by_store(text):
@@ -96,12 +110,13 @@ def main(src, out_dir):
             continue
         month_id = m.group(1) + m.group(2)
         rows = list(wb[name].iter_rows(min_row=1, max_row=wb[name].max_row, values_only=True))
-        doc = {'dds': triple(rows[2]), 'showroom': triple(rows[3]), 'stores': []}
+        cc = conv_col(rows)
+        doc = {'dds': triple(rows[2], cc), 'showroom': triple(rows[3], cc), 'stores': []}
         for r in rows[7:]:
             label = '' if r[0] is None else str(r[0]).strip()
             if label == '' or label == 'Total Retail' or label.lower().startswith(('1-on-1', 'total tags used')):
                 break  # end of the store list: blank row or the next section (e.g. the Total Tags / 1-on-1 Chat block)
-            doc['stores'].append({'name': str(r[0]).strip(), **triple(r)})
+            doc['stores'].append({'name': str(r[0]).strip(), **triple(r, cc)})
         chat = chat_block(rows)
         if chat:
             doc['chat'] = chat
