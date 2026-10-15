@@ -580,39 +580,24 @@
       </div>
     </div>
 
-    <div class="row3">
-      <div class="engage-card total">
-        <div class="engage-head">
-          <span class="name"><span class="swatch" style="background:var(--orange)"></span>Total Retail</span>
-          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
+    <div class="metric-group">
+      <div class="metric-group-label" data-i18n="chat_group">一對一聊天視窗數</div>
+      <div class="row3">
+        <div class="stat-card c-orange">
+          <div class="head"><span class="swatch" style="background:var(--orange)"></span><b>Total Retail</b></div>
+          <div class="bignum num" data-chat="windows" data-ch="total">–</div>
+          <div class="sub num" data-chat="rate" data-ch="total"></div>
         </div>
-        <div class="metric-row">
-          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" style="color:var(--orange)" data-chat="windows" data-ch="total">–</span></div>
-          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--orange)" data-chat="rate" data-ch="total">–</span></div>
+        <div class="stat-card c-purple">
+          <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
+          <div class="bignum num" style="color:var(--purple-deep)" data-chat="windows" data-ch="dds">–</div>
+          <div class="sub num" data-chat="rate" data-ch="dds"></div>
         </div>
-        <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="total" style="width:0; background:var(--orange)"></div></div>
-      </div>
-      <div class="engage-card dds">
-        <div class="engage-head">
-          <span class="name"><span class="swatch" style="background:var(--purple)"></span>DDS</span>
-          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
+        <div class="stat-card c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
+          <div class="bignum num" style="color:var(--teal)" data-chat="windows" data-ch="showroom">–</div>
+          <div class="sub num" data-chat="rate" data-ch="showroom"></div>
         </div>
-        <div class="metric-row">
-          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" data-chat="windows" data-ch="dds">–</span></div>
-          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--purple)" data-chat="rate" data-ch="dds">–</span></div>
-        </div>
-        <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="dds" style="width:0; background:var(--purple)"></div></div>
-      </div>
-      <div class="engage-card showroom">
-        <div class="engage-head">
-          <span class="name"><span class="swatch" style="background:var(--teal-bright)"></span>Showroom</span>
-          <span class="badge" data-i18n="chat_badge">一對一聊天</span>
-        </div>
-        <div class="metric-row">
-          <div class="metric-box"><span class="k" data-i18n="chat_windows">聊天視窗數</span><span class="v num" data-chat="windows" data-ch="showroom">–</span></div>
-          <div class="metric-box"><span class="k" data-i18n="usage_rate">互動率</span><span class="v num" style="color:var(--teal)" data-chat="rate" data-ch="showroom">–</span></div>
-        </div>
-        <div class="bar-track"><div class="bar-fill" data-chat="bar" data-ch="showroom" style="width:0; background:var(--teal)"></div></div>
       </div>
     </div>
 
@@ -726,7 +711,7 @@
       kicker2:"CRM 平台", h2_2:"CRM 系統使用狀況",
       total_tags:"標籤使用總數",
       across_members:"全台零售櫃位(包含DDS & Showroom)",
-      chat_windows:"聊天視窗數", usage_rate:"互動率", chat_badge:"一對一聊天",
+      chat_windows:"聊天視窗數", usage_rate:"互動率", chat_badge:"一對一聊天", chat_group:"一對一聊天視窗數",
       draft_flag:"零售會員數據已連接即時資料",
       data_wait:"資料載入中…", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"聊天視窗數(累積)", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
@@ -751,7 +736,7 @@
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
       across_members:"Nationwide retail counters (DDS & Showroom included)",
-      chat_windows:"Chat Windows", usage_rate:"Engagement Rate", chat_badge:"1-on-1 Chat",
+      chat_windows:"Chat Windows", usage_rate:"Engagement Rate", chat_badge:"1-on-1 Chat", chat_group:"1-on-1 Chat Windows",
       draft_flag:"Retail membership data is live",
       data_wait:"Loading data…", chat_store_none:"No store-level chat data for this month", chat_windows_cum:"Chat Windows (Cum.)", synced_at:"updated",
       data_unavailable:"Couldn't load live data right now — try reloading the page"
@@ -779,6 +764,7 @@
       btn.title = name; btn.setAttribute('aria-label', name);
     });
     renderKpis();
+    renderChatCards();
     renderMergedChart();
     renderStoreTable();
     renderChatStoreTable();
@@ -1437,13 +1423,12 @@
     var ms = chatMonths(), m = ms[ms.length - 1];
     ['total', 'dds', 'showroom'].forEach(function(ch){
       var q = function(kind){ return document.querySelector('[data-chat="' + kind + '"][data-ch="' + ch + '"]'); };
-      if (!m){ q('windows').textContent = '–'; q('rate').textContent = '–'; q('bar').style.width = '0'; return; }
+      if (!m){ q('windows').textContent = '–'; q('rate').textContent = ''; return; }
       var win = ch === 'total' ? chatByMonth[m].dds + chatByMonth[m].showroom : chatByMonth[m][ch];
       var mem = ch === 'total' ? (summaryByMonth[m].dds.cum || 0) + (summaryByMonth[m].showroom.cum || 0) : (summaryByMonth[m][ch].cum || 0);
       var rate = chatRate(win, mem);
       q('windows').textContent = win.toLocaleString();
-      q('rate').textContent = rate.toFixed(2) + '%';
-      q('bar').style.width = Math.min(rate, 100) + '%';
+      q('rate').textContent = t('usage_rate') + ' ' + rate.toFixed(2) + '%';
     });
   }
 
