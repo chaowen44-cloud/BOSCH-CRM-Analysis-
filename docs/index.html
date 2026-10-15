@@ -379,8 +379,8 @@
       <span class="greet-text"><b class="greet-hi">Hi there!</b> <span class="greet-time">Good evening</span></span>
     </div>
     <div class="lang-toggle">
-      <button type="button" data-lang="en" class="active">EN</button>
-      <button type="button" data-lang="zh">中文</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="zh" class="active">中文</button>
     </div>
   </div>
 </div>
@@ -738,7 +738,7 @@
       data_unavailable:"Couldn't load live data right now — try reloading the page"
     }
   };
-  var currentLang = 'en';
+  var currentLang = 'zh';
   var drill = {channel:'all', month:9};
   function t(k){ return dict[currentLang][k] !== undefined ? dict[currentLang][k] : k; }
 
@@ -1659,7 +1659,7 @@
     }).then(function(){ btn.disabled = false; });
   });
 
-  setLang('en');
+  setLang('zh');
 
   /* ---------- live data: embedded in the page (#liveData), rewritten and republished by the hourly Google Sheet sync ---------- */
   // Embedding (not a per-viewer data store) means everyone who can open the link sees identical numbers.
