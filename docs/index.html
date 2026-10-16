@@ -170,6 +170,9 @@
   .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
   .tl-dash{width:18px; height:0; border-top:2.4px dashed currentColor; flex:none}
+  .tl-dash.tl-dot{border-top-style:dotted; border-top-width:3px}
+  .df-check{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
+  .df-check input{width:14px; height:14px; margin:0}
 
   /* ---- shared filter bar: outside any card, drives the trend chart + store table together ---- */
   .shared-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 6px; margin-bottom:2px; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border)}
@@ -501,6 +504,8 @@
       <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--orange)"></span><b id="mergedTitle" data-i18n="total_trend">零售會員數趨勢</b>
         <div class="df-radios">
           <label class="df-field"><select id="mergedMetric" aria-label="Metric"><option value="members" data-i18n="metric_members">會員數</option><option value="conv" data-i18n="metric_conv">轉換率</option></select></label>
+          <label class="df-check" data-members-only><input type="checkbox" id="mergedShowClose" checked><span data-i18n="close_rate">結案率</span></label>
+          <label class="df-check" data-members-only><input type="checkbox" id="mergedShowConv"><span data-i18n="conv_rate">轉換率</span></label>
           <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
           <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
         </div>
@@ -708,7 +713,7 @@
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
       mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"Total Retail 會員數趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
-      trend_suffix:" 會員數趨勢", metric_members:"會員數", metric_conv:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
+      trend_suffix:" 會員數趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
       kicker2:"CRM 平台", h2_2:"CRM 系統使用",
       total_tags:"標籤使用總數",
       across_members:"全台零售櫃位(包含DDS & Showroom)",
@@ -733,7 +738,7 @@
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
       mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
-      trend_suffix:" Member Trend", metric_members:"Members", metric_conv:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
+      trend_suffix:" Member Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
       kicker2:"CRM Platform", h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
       across_members:"Nationwide retail counters (DDS & Showroom included)",
@@ -1029,7 +1034,7 @@
         var pts = [];
         r.values.forEach(function(v, i){ if (v != null) pts.push([x(i), ry(v), v]); });
         if (!pts.length) return;
-        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="1.4" stroke-dasharray="5,4" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 1.4) + '" stroke-dasharray="' + (r.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
         rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.4" fill="var(--surface)" stroke="' + r.color + '" stroke-width="1.3" opacity=".8"/>'; }).join('');
       });
     }
@@ -1040,7 +1045,7 @@
         var pts = [];
         c.values.forEach(function(v, i){ if (v != null) pts.push([x(i), y(v), v]); });
         if (!pts.length) return;
-        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + c.color + '" stroke-width="1.4" stroke-dasharray="5,4" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + c.color + '" stroke-width="' + (c.width || 1.4) + '" stroke-dasharray="' + (c.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
         rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.4" fill="var(--surface)" stroke="' + c.color + '" stroke-width="1.3" opacity=".8"/>'; }).join('');
       });
     }
@@ -1177,7 +1182,7 @@
     if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
       '<span class="tl-item"><i class="tl-sw" style="background:var(--teal)"></i>Showroom</span>' +
       '<span class="tl-item"><i class="tl-ln"></i>' + t('ch_total') + '</span>';
-    if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash"></i>' + r.name + '</span>'; }).join('');
+    if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash' + (r.dash ? ' tl-dot' : '') + '"></i>' + r.name + '</span>'; }).join('');
     el.innerHTML = html;
   }
   // Conversion-rate view of the trend chart: conversion count / cumulative members per month, only for months whose
@@ -1240,27 +1245,43 @@
     }
     // Closing overlay for the channel on screen (Total Retail in the "All" view).
     // Cumulative view -> closing rate (%, right axis); monthly view -> closed per month (same axis as monthly new members).
-    var showClose = true, legendLines = null;
-    if (showClose){
-      var sumOf = function(m, ch, k){
-        var sm = summaryByMonth[m]; if (!sm) return null;
-        return ch === 'total' ? (sm.dds[k] || 0) + (sm.showroom[k] || 0) : (sm[ch][k] || 0);
+    var showClose = document.getElementById('mergedShowClose').checked, showConv = document.getElementById('mergedShowConv').checked;
+    var legendLines = null;
+    var sumOf = function(m, ch, k){
+      var sm = summaryByMonth[m]; if (!sm) return null;
+      return ch === 'total' ? (sm.dds[k] || 0) + (sm.showroom[k] || 0) : (sm[ch][k] || 0);
+    };
+    var hasConvIn = function(m){ var sm = summaryByMonth[m]; return !!sm && typeof sm.dds.conv === 'number' && typeof sm.showroom.conv === 'number'; };
+    var seriesOf = function(ch, color, name, fn, style){
+      var o = {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
+      if (style){ o.dash = style.dash; o.width = style.width; }
+      return o;
+    };
+    var chKey = drill.channel === 'all' ? 'total' : drill.channel;
+    var chColor = cssVar(meta.colorVar), convColor = cssVar('--navy');
+    var chPrefix = drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + ' ';
+    var convStyle = {dash: '1.5,4.5', width: 2};
+    var lines = [];   // dashed overlays on the right-hand % axis (cumulative) or the left axis (monthly counts)
+    if (mode === 'cumulative'){
+      var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
+      var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
+      if (showClose) lines.push(seriesOf(chKey, chColor, chPrefix + t('close_rate'), rateOf));
+      if (showConv) lines.push(seriesOf(chKey, convColor, chPrefix + t('conv_rate'), convRateOf, convStyle));
+      chartOpts.rates = lines;
+    } else {
+      var deltaOf = function(ch, m){
+        var pm = prevMonthOf(m), cur = sumOf(m, ch, 'shipped'), prv = pm ? sumOf(pm, ch, 'shipped') : 0;
+        return cur == null ? null : Math.max(cur - (prv || 0), 0);
       };
-      var seriesOf = function(ch, color, name, fn){
-        return {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
+      var convDeltaOf = function(ch, m){
+        var pm = prevMonthOf(m);
+        if (!hasConvIn(m) || !pm || !hasConvIn(pm)) return null;
+        return Math.max(sumOf(m, ch, 'conv') - sumOf(pm, ch, 'conv'), 0);
       };
-      var chans = [[drill.channel === 'all' ? 'total' : drill.channel, cssVar(meta.colorVar), drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + ' ']];
-      if (mode === 'cumulative'){
-        var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
-        chartOpts.rates = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('close_rate'), rateOf); });
-      } else {
-        var deltaOf = function(ch, m){
-          var pm = prevMonthOf(m), cur = sumOf(m, ch, 'shipped'), prv = pm ? sumOf(pm, ch, 'shipped') : 0;
-          return cur == null ? null : Math.max(cur - (prv || 0), 0);
-        };
-        chartOpts.countLines = chans.map(function(c){ return seriesOf(c[0], c[1], c[2] + t('closed_month'), deltaOf); });
-        legendLines = chartOpts.countLines;
-      }
+      if (showClose) lines.push(seriesOf(chKey, chColor, chPrefix + t('closed_month'), deltaOf));
+      if (showConv) lines.push(seriesOf(chKey, convColor, chPrefix + t('conv_month'), convDeltaOf, convStyle));
+      chartOpts.countLines = lines;
+      legendLines = lines;
     }
     renderMergedLegend(chartOpts.breakdown, chartOpts.rates || legendLines);
     renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
@@ -1318,6 +1339,7 @@
     wrap.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+shapes+labels+'</svg>';
   }
 
+  ['mergedShowClose', 'mergedShowConv'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderMergedChart); });
   document.querySelectorAll('input[name="merged-mode"]').forEach(function(r){
     r.addEventListener('change', renderMergedChart);
   });
