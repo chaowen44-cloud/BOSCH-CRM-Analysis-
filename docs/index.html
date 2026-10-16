@@ -1724,7 +1724,7 @@
           var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curRate - prevRate;
           mEl.className = 'trend ' + dir; mEl.style.color = '';
           mEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
-          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toFixed(1) + 'pp ' + t('vs_prev').replace('{m}', prevName);
+          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toFixed(1) + '% ' + t('vs_prev').replace('{m}', prevName);
         } else { mEl.className = 'trend'; mEl.style.color = ''; mEl.textContent = ''; gEl.textContent = ''; }
       };
       rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0);
