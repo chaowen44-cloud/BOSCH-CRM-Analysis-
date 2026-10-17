@@ -1709,20 +1709,20 @@
       }
       q('conv').textContent = cum && hasConv ? (conv / cum * 100).toFixed(1) + '%' : '–';
       q('close').textContent = cum ? (shipped / cum * 100).toFixed(1) + '%' : '–';
-      // month-over-month of a rate: relative change and the point gap vs the previous month; only shown when the
+      // month-over-month of a rate: relative change of the rate and the count gap vs the previous month; only shown when the
       // previous month is on the same footing (it carries the conversion column, i.e. the new closed-count definition)
       var prevHasConv = !!prev && typeof (ch === 'total' ? prev.dds.conv : prev[ch].conv) === 'number';
-      var rateMom = function(kind, curRate, prevRate){
+      var rateMom = function(kind, curRate, prevRate, curN, prevN){
         var mEl = q(kind + 'mom'), gEl = q(kind + 'gap');
         if (hasConv && prevHasConv && prevRate > 0){
-          var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curRate - prevRate;
+          var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curN - prevN;
           mEl.className = 'trend ' + dir; mEl.style.color = '';
           mEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
-          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toFixed(1) + '% ' + t('vs_prev').replace('{m}', prevName);
+          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toLocaleString() + ' ' + t('vs_prev').replace('{m}', prevName);
         } else { mEl.className = 'trend'; mEl.style.color = ''; mEl.textContent = ''; gEl.textContent = ''; }
       };
-      rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0);
-      rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0);
+      rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0, shipped, pick(prev, ch, 'shipped'));
+      rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0, conv, pick(prev, ch, 'conv'));
     });
   }
 
