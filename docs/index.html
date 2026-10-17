@@ -440,21 +440,18 @@
           <div class="bignum num" data-kpi="close" data-ch="total">–</div>
           <span class="trend" data-kpi="closemom" data-ch="total"></span>
           <div class="sub num" data-kpi="closegap" data-ch="total"></div>
-          <div class="sub num" data-kpi="closed" data-ch="total"></div>
         </div>
         <div class="stat-card c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" style="color:var(--purple-deep)" data-kpi="close" data-ch="dds">–</div>
           <span class="trend" data-kpi="closemom" data-ch="dds"></span>
           <div class="sub num" data-kpi="closegap" data-ch="dds"></div>
-          <div class="sub num" data-kpi="closed" data-ch="dds"></div>
         </div>
         <div class="stat-card c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
           <div class="bignum num" style="color:var(--teal)" data-kpi="close" data-ch="showroom">–</div>
           <span class="trend" data-kpi="closemom" data-ch="showroom"></span>
           <div class="sub num" data-kpi="closegap" data-ch="showroom"></div>
-          <div class="sub num" data-kpi="closed" data-ch="showroom"></div>
         </div>
       </div>
     </div>
@@ -467,21 +464,18 @@
           <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
           <span class="trend" data-kpi="convmom" data-ch="total"></span>
           <div class="sub num" data-kpi="convgap" data-ch="total"></div>
-          <div class="sub num" data-kpi="convn" data-ch="total"></div>
         </div>
         <div class="stat-card c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" style="color:var(--purple-deep)" data-kpi="conv" data-ch="dds">–</div>
           <span class="trend" data-kpi="convmom" data-ch="dds"></span>
           <div class="sub num" data-kpi="convgap" data-ch="dds"></div>
-          <div class="sub num" data-kpi="convn" data-ch="dds"></div>
         </div>
         <div class="stat-card c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
           <div class="bignum num" style="color:var(--teal)" data-kpi="conv" data-ch="showroom">–</div>
           <span class="trend" data-kpi="convmom" data-ch="showroom"></span>
           <div class="sub num" data-kpi="convgap" data-ch="showroom"></div>
-          <div class="sub num" data-kpi="convn" data-ch="showroom"></div>
         </div>
       </div>
     </div>
@@ -1729,8 +1723,6 @@
       };
       rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0);
       rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0);
-      q('closed').textContent = t('closed_sub').replace('{s}', shipped.toLocaleString());
-      q('convn').textContent = hasConv ? t('conv_sub').replace('{c}', conv.toLocaleString()) : '';
     });
   }
 
