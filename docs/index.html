@@ -111,9 +111,9 @@
     padding:7px clamp(14px,2vw,28px);
     display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
   }
-  .page-nav{display:flex; align-items:center; gap:12px}
-  .page-nav a{color:rgba(255,255,255,.62); font-size:13px; font-weight:600; text-decoration:none; padding:4px 14px; border-radius:999px; white-space:nowrap; transition:background .18s, color .18s}
-  .page-nav a.active{color:var(--navy); background:#8FC1E8}
+  .page-nav{display:flex; align-items:center; gap:32px}
+  .page-nav a{color:rgba(255,255,255,.62); font-size:13px; font-weight:600; text-decoration:none; padding:4px 0 5px; border-bottom:2px solid transparent; white-space:nowrap}
+  .page-nav a.active{color:#fff; border-bottom-color:#8FC1E8}
 
   /* ---- layout ---- */
   main{max-width:1280px; margin:0 auto; padding:30px clamp(16px,4vw,40px) 64px; display:grid; gap:40px}
@@ -797,7 +797,7 @@
   navLinks.forEach(function(a){
     a.addEventListener('click', function(e){
       e.preventDefault();
-      // light-blue highlight first, then jump to the section (scroll spy is paused while the jump runs)
+      // highlight the tab first, then jump to the section (scroll spy is paused while the jump runs)
       navLinks.forEach(function(x){ x.classList.toggle('active', x === a); });
       navLock = true; clearTimeout(navLockTimer);
       setTimeout(function(){
