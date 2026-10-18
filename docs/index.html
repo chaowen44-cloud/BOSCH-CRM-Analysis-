@@ -10,6 +10,7 @@
     --ink:#434343;
     --muted:#A3A4A4;
 
+    --c-total:#314D6A; --c-total-soft:#E4EBF2; --c-dds:#5F82A6; --c-dds-soft:#E6EDF4; --c-sr:#A9BDD1; --c-sr-soft:#EEF2F7;
     --orange:#F57721;
     --orange-soft:#FEE3D6;
     --orange-tint:#FFF7F2;
@@ -107,18 +108,18 @@
   .navbar{
     position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
     background:var(--navy);
-    padding:14px clamp(14px,2vw,28px);
+    padding:7px clamp(14px,2vw,28px);
     display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
   }
   .page-nav{display:flex; align-items:center; gap:32px}
   .page-nav a{color:rgba(255,255,255,.62); font-size:13px; font-weight:600; text-decoration:none; padding:4px 0 5px; border-bottom:2px solid transparent; white-space:nowrap}
-  .page-nav a.active{color:#fff; border-bottom-color:var(--orange)}
+  .page-nav a.active{color:#fff; border-bottom-color:#8FC1E8}
 
   /* ---- layout ---- */
   main{max-width:1280px; margin:0 auto; padding:30px clamp(16px,4vw,40px) 64px; display:grid; gap:40px}
-  .section{display:grid; gap:18px; scroll-margin-top:68px} /* nav jumps land just below the sticky nav bar */
+  .section{display:grid; gap:18px; scroll-margin-top:46px} /* nav jumps land just below the sticky nav bar */
   .section-top{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap}
-  .kicker{display:inline-flex; align-items:center; gap:8px; color:var(--orange); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:11.5px}
+  .kicker{display:inline-flex; align-items:center; gap:8px; color:var(--navy); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:11.5px}
   h1{margin:5px 0 0; font-size:clamp(21px,2.4vw,26px); font-weight:600; letter-spacing:-.01em; text-wrap:balance}
   .subtitle{color:var(--muted); font-size:13px; margin:2px 0 0}
 
@@ -128,7 +129,7 @@
 
   .metric-group{display:grid; gap:12px}
   .metric-group-label{font-size:13.5px; font-weight:600; color:var(--ink); opacity:.85; display:flex; align-items:center; gap:9px}
-  .metric-group-label:before{content:""; width:3px; height:14px; background:var(--orange); border-radius:2px}
+  .metric-group-label:before{content:""; width:3px; height:14px; background:var(--navy); border-radius:2px}
 
   /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
   .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
@@ -144,6 +145,17 @@
   .stat-card .head b{font-size:13.5px; font-weight:500; opacity:.85}
   .stat-card .bignum{font-size:clamp(26px,2.8vw,32px); font-weight:600; letter-spacing:-.02em; margin:2px 0}
   .stat-card .sub{font-size:12px; color:var(--muted); font-weight:500}
+  /* KPI groups (members / closing / conversion): single navy hue; channel told apart by card treatment */
+  .stat-card.mono{background:var(--surface); border:1.5px solid var(--navy); box-shadow:0 2px 10px rgba(30,40,60,.06)}
+  .stat-card.mono .swatch{display:none}
+  .stat-card.mono .head b{font-size:13.5px; font-weight:700; opacity:1; color:var(--navy)}
+  .stat-card.mono .bignum{color:var(--navy)}
+  .stat-card.mono.c-teal{background:#F1F5F9}
+  .stat-card.mono.c-orange{background:var(--navy)}
+  .stat-card.mono.c-orange .head b, .stat-card.mono.c-orange .bignum{color:#fff}
+  .stat-card.mono.c-orange .sub{color:rgba(255,255,255,.72)}
+  .stat-card.mono.c-orange .trend.up{color:#7DF0DE}
+  .stat-card.mono.c-orange .trend.down{color:#FFB4A8}
 
   /* ---- charts ---- */
   .chart-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
@@ -166,6 +178,12 @@
   .df-sep{color:var(--muted); font-size:12.5px}
   .df-query{background:var(--blue); color:#fff; border:0; border-radius:8px; padding:7px 18px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit}
   .df-query:hover{opacity:.92}
+  .df-refresh{display:inline-flex; align-items:center; gap:5px; height:30px; padding:0 12px; margin-left:6px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--navy); font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer}
+  .df-refresh svg{width:13px; height:13px}
+  .df-refresh:hover{background:var(--bg)}
+  .df-refresh:disabled{opacity:.6; cursor:wait}
+  .df-refresh.busy svg{animation:dfspin .9s linear infinite}
+  @keyframes dfspin{to{transform:rotate(360deg)}}
   .df-radios{display:flex; align-items:center; gap:18px; margin-left:auto}
   .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
@@ -313,7 +331,7 @@
   .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:-4px 0 8px; font-size:12.5px; color:var(--muted)}
   .trend-legend .tl-item{display:inline-flex; align-items:center; gap:7px}
   .trend-legend .tl-sw{width:10px; height:10px; border-radius:3px; flex:none}
-  .trend-legend .tl-ln{width:16px; height:3px; border-radius:2px; background:var(--orange); flex:none}
+  .trend-legend .tl-ln{width:16px; height:3px; border-radius:2px; background:var(--c-total); flex:none}
 
   /* engagement rate column: channel averages sit once in the header; each store shows only its gap to its own channel's average */
   .th-avg{display:block; margin-top:4px; font-size:10px; font-weight:500; color:rgba(255,255,255,.55)}
@@ -326,7 +344,7 @@
   .rate-delta.up{color:var(--up)}
   .rate-delta.down{color:var(--down)}
   .rate-delta.flat{color:var(--muted)}
-  .store-card{scroll-margin-top:70px}
+  .store-card{scroll-margin-top:48px}
   .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
   .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   .store-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
@@ -403,7 +421,6 @@
   <section class="section" id="retail">
     <div class="section-top">
       <div>
-        <div class="kicker" data-i18n="kicker1">零售會員</div>
         <h1 data-i18n="h1_1">零售門市與展示中心會員表現</h1>
       </div>
     </div>
@@ -411,21 +428,21 @@
     <div class="metric-group">
       <div class="metric-group-label" data-i18n="group_members">會員數 Members</div>
       <div class="row3">
-        <div class="stat-card c-orange">
+        <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="cum" data-ch="total">–</div>
           <span class="trend" data-kpi="mom" data-ch="total"></span>
           <div class="sub num" data-kpi="delta" data-ch="total"></div>
         </div>
-        <div class="stat-card c-purple">
+        <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
-          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="cum" data-ch="dds">–</div>
+          <div class="bignum num" data-kpi="cum" data-ch="dds">–</div>
           <span class="trend" data-kpi="mom" data-ch="dds"></span>
           <div class="sub num" data-kpi="delta" data-ch="dds"></div>
         </div>
-        <div class="stat-card c-teal">
-          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
-          <div class="bignum num" style="color:var(--teal)" data-kpi="cum" data-ch="showroom">–</div>
+        <div class="stat-card mono c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
+          <div class="bignum num" data-kpi="cum" data-ch="showroom">–</div>
           <span class="trend" data-kpi="mom" data-ch="showroom"></span>
           <div class="sub num" data-kpi="delta" data-ch="showroom"></div>
         </div>
@@ -435,21 +452,21 @@
     <div class="metric-group">
       <div class="metric-group-label" data-i18n="group_closed">結案率 Closed</div>
       <div class="row3">
-        <div class="stat-card c-orange">
+        <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="close" data-ch="total">–</div>
           <span class="trend" data-kpi="closemom" data-ch="total"></span>
           <div class="sub num" data-kpi="closegap" data-ch="total"></div>
         </div>
-        <div class="stat-card c-purple">
+        <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
-          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="close" data-ch="dds">–</div>
+          <div class="bignum num" data-kpi="close" data-ch="dds">–</div>
           <span class="trend" data-kpi="closemom" data-ch="dds"></span>
           <div class="sub num" data-kpi="closegap" data-ch="dds"></div>
         </div>
-        <div class="stat-card c-teal">
-          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
-          <div class="bignum num" style="color:var(--teal)" data-kpi="close" data-ch="showroom">–</div>
+        <div class="stat-card mono c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
+          <div class="bignum num" data-kpi="close" data-ch="showroom">–</div>
           <span class="trend" data-kpi="closemom" data-ch="showroom"></span>
           <div class="sub num" data-kpi="closegap" data-ch="showroom"></div>
         </div>
@@ -459,21 +476,21 @@
     <div class="metric-group">
       <div class="metric-group-label" data-i18n="group_conversion">轉換率 Conversion</div>
       <div class="row3">
-        <div class="stat-card c-orange">
+        <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
           <span class="trend" data-kpi="convmom" data-ch="total"></span>
           <div class="sub num" data-kpi="convgap" data-ch="total"></div>
         </div>
-        <div class="stat-card c-purple">
+        <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
-          <div class="bignum num" style="color:var(--purple-deep)" data-kpi="conv" data-ch="dds">–</div>
+          <div class="bignum num" data-kpi="conv" data-ch="dds">–</div>
           <span class="trend" data-kpi="convmom" data-ch="dds"></span>
           <div class="sub num" data-kpi="convgap" data-ch="dds"></div>
         </div>
-        <div class="stat-card c-teal">
-          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
-          <div class="bignum num" style="color:var(--teal)" data-kpi="conv" data-ch="showroom">–</div>
+        <div class="stat-card mono c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
+          <div class="bignum num" data-kpi="conv" data-ch="showroom">–</div>
           <span class="trend" data-kpi="convmom" data-ch="showroom"></span>
           <div class="sub num" data-kpi="convgap" data-ch="showroom"></div>
         </div>
@@ -495,12 +512,13 @@
     </div>
 
     <div class="chart-card">
-      <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--orange)"></span><b id="mergedTitle" data-i18n="total_trend">零售會員數趨勢</b>
+      <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--c-total)"></span><b id="mergedTitle" data-i18n="total_trend">零售會員數趨勢</b>
         <div class="df-radios">
           <label class="df-check" data-members-only><input type="checkbox" id="mergedShowClose"><span data-i18n="close_rate">結案率</span></label>
           <label class="df-check" data-members-only><input type="checkbox" id="mergedShowConv"><span data-i18n="conv_rate">轉換率</span></label>
           <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
           <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
+          <button type="button" class="df-refresh" id="globalRefresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg><span data-i18n="refresh_all">重新整理</span></button>
         </div>
       </div>
       <div class="trend-legend" id="mergedLegend" hidden></div>
@@ -574,27 +592,26 @@
   <section class="section" id="crmusage">
     <div class="section-top">
       <div>
-        <div class="kicker" data-i18n="kicker2">CRM 平台</div>
         <h1 data-i18n="h2_2">CRM 系統使用</h1>
       </div>
     </div>
 
     <div class="metric-group">
-      <div class="metric-group-label" data-i18n="chat_group">一對一對話視窗數</div>
+      <div class="metric-group-label" data-i18n="chat_group">1對1對話視窗數</div>
       <div class="row3">
-        <div class="stat-card c-orange">
+        <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b>Total Retail</b></div>
           <div class="bignum num" data-chat="windows" data-ch="total">–</div>
           <div class="sub num" data-chat="rate" data-ch="total"></div>
         </div>
-        <div class="stat-card c-purple">
+        <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
-          <div class="bignum num" style="color:var(--purple-deep)" data-chat="windows" data-ch="dds">–</div>
+          <div class="bignum num" data-chat="windows" data-ch="dds">–</div>
           <div class="sub num" data-chat="rate" data-ch="dds"></div>
         </div>
-        <div class="stat-card c-teal">
-          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>Showroom</b></div>
-          <div class="bignum num" style="color:var(--teal)" data-chat="windows" data-ch="showroom">–</div>
+        <div class="stat-card mono c-teal">
+          <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
+          <div class="bignum num" data-chat="windows" data-ch="showroom">–</div>
           <div class="sub num" data-chat="rate" data-ch="showroom"></div>
         </div>
       </div>
@@ -605,7 +622,7 @@
       <div class="store-card-head">
         <div class="left">
           <button type="button" class="store-toggle" id="chatStoreToggle" aria-expanded="true" aria-controls="chatStoreBody">
-            <span class="label" data-i18n="chat_store_label">對話視窗數明細</span>
+            <span class="label" data-i18n="chat_store_label">1對1對話視窗明細</span>
             <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
           </button>
         </div>
@@ -694,23 +711,24 @@
       appname:"Retail CRM Management",
       nav_retail:"零售會員", nav_crm:"CRM 系統使用", to_top:"回到頂部",
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與結案明細",
-      by_store_label:"BY STORE", members_store_label:"明細", chat_store_label:"對話視窗數明細", refresh:"重整",
+      refresh_all:"重新整理",
+      by_store_label:"BY STORE", members_store_label:"明細", chat_store_label:"1對1對話視窗明細", refresh:"重整",
       store_name:"店櫃名稱", cum_members:"總會員數(累積)", monthly_new:"當月新增會員數", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
       rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
-      kicker1:"零售會員", h1_1:"零售門市與展示中心會員表現",
+      h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
       mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"Total Retail 會員數趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員數趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
-      kicker2:"CRM 平台", h2_2:"CRM 系統使用",
+      h2_2:"CRM 系統使用",
       total_tags:"標籤使用總數",
       across_members:"全台零售櫃位(包含DDS & Showroom)",
-      chat_windows:"聊天視窗數", usage_rate:"互動率", chat_badge:"一對一聊天", chat_group:"一對一對話視窗數",
+      chat_windows:"聊天視窗數", usage_rate:"互動率", chat_badge:"一對一聊天", chat_group:"1對1對話視窗數",
       draft_flag:"零售會員數據已連接即時資料",
       data_wait:"資料載入中…", chat_store_none:"此月份尚無門市聊天數據", chat_windows_cum:"對話視窗數(累積)", synced_at:"更新於",
       data_unavailable:"目前無法載入即時資料，請重新整理頁面再試一次"
@@ -719,6 +737,7 @@
       appname:"Retail CRM Management",
       nav_retail:"Retail Membership", nav_crm:"CRM System Usage", to_top:"Back to top",
       kicker_bystore:"By Store", h1_bystore:"Store-Level Members & Closed Deals",
+      refresh_all:"Refresh",
       by_store_label:"BY STORE", members_store_label:"Members by Store", chat_store_label:"Chat Windows by Store", refresh:"Refresh",
       store_name:"Store", cum_members:"Total Members (Cum.)", monthly_new:"Monthly New", shipped_cum:"Closed (Cum.)", conv_cum:"Conversions (Cum.)",
       sort_field:"Sort by", sort_short_shipped:"Closed", sort_short_conv:"Conversions", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
@@ -726,13 +745,13 @@
       click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
       rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
-      kicker1:"Retail Membership", h1_1:"Retail Member Performance",
+      h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
       mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
-      kicker2:"CRM Platform", h2_2:"CRM System Usage",
+      h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
       across_members:"Nationwide retail counters (DDS & Showroom included)",
       chat_windows:"Chat Windows", usage_rate:"Engagement Rate", chat_badge:"1-on-1 Chat", chat_group:"1-on-1 Chat Windows",
@@ -985,7 +1004,7 @@
     var zeroY = y(0);
     var areaD = points.length ? (pathD + ' L ' + points[points.length-1][0] + ',' + zeroY + ' L ' + points[0][0] + ',' + zeroY + ' Z') : '';
 
-    var purpleC = cssVar('--purple'), tealC = cssVar('--teal');
+    var purpleC = cssVar('--c-dds'), tealC = cssVar('--c-sr');
     var curve = function(pts){   // smooth path through pts, same easing as the total line
       var d = 'M ' + pts[0][0] + ',' + pts[0][1];
       for (var k = 1; k < pts.length; k++){ var mx = (pts[k-1][0] + pts[k][0]) / 2; d += ' C ' + mx + ',' + pts[k-1][1] + ' ' + mx + ',' + pts[k][1] + ' ' + pts[k][0] + ',' + pts[k][1]; }
@@ -1102,9 +1121,9 @@
           return '<div class="rt-row"><span class="rt-sw" style="background:var(' + colorVar + ')"></span>' + name + ': ' + fmtT(v) + '</div>';
         };
         tip.innerHTML = '<div class="rt-title">' + ymLabel(months[i]) + '</div>' +
-          row('--orange', t('mem_total'), values[i]) +
-          row('--purple', t('mem_dds'), bd.dds) +
-          row('--teal', t('mem_sr'), bd.showroom) + rateRows +
+          row('--c-total', t('mem_total'), values[i]) +
+          row('--c-dds', t('mem_dds'), bd.dds) +
+          row('--c-sr', t('mem_sr'), bd.showroom) + rateRows +
           (drillKey ? '<div class="rt-hint">' + t('click_drill') + '</div>' : '');
         return true;
       },
@@ -1160,9 +1179,9 @@
 
   // The merged trend chart shows whichever channel the shared filter bar has selected.
   var mergedChannelMeta = {
-    all:      {colorVar:'--orange', softVar:'--orange-tint', seriesKey:'total'},
-    dds:      {colorVar:'--purple', softVar:'--purple-soft', seriesKey:'dds'},
-    showroom: {colorVar:'--teal',   softVar:'--teal-soft',   seriesKey:'showroom'}
+    all:      {colorVar:'--c-total', softVar:'--c-total-soft', seriesKey:'total'},
+    dds:      {colorVar:'--c-dds', softVar:'--c-dds-soft', seriesKey:'dds'},
+    showroom: {colorVar:'--c-sr',   softVar:'--c-sr-soft',   seriesKey:'showroom'}
   };
 
   // "All" view only: colour key for the DDS / Showroom layers (or lines) and the orange total line.
@@ -1172,8 +1191,8 @@
     if ((!bd || !bd.length) && !hasRates){ el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
     var html = '';
-    if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--purple)"></i>DDS</span>' +
-      '<span class="tl-item"><i class="tl-sw" style="background:var(--teal)"></i>Showroom</span>' +
+    if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--c-dds)"></i>DDS</span>' +
+      '<span class="tl-item"><i class="tl-sw" style="background:var(--c-sr)"></i>Showroom</span>' +
       '<span class="tl-item"><i class="tl-ln"></i>' + t('ch_total') + '</span>';
     if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash' + (r.dash ? ' tl-dot' : '') + '"></i>' + r.name + '</span>'; }).join('');
     el.innerHTML = html;
@@ -1215,8 +1234,8 @@
     if (mode === 'cumulative'){
       var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
       var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
-      if (showClose) lines.push(seriesOf(chKey, chColor, chPrefix + t('close_rate'), rateOf));
-      if (showConv) lines.push(seriesOf(chKey, convColor, chPrefix + t('conv_rate'), convRateOf, convStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('close_rate'), rateOf));
+      if (showConv) lines.push(seriesOf(chKey, '#F6A66B', chPrefix + t('conv_rate'), convRateOf, convStyle));
       chartOpts.rates = lines;
     } else {
       var deltaOf = function(ch, m){
@@ -1228,8 +1247,8 @@
         if (!hasConvIn(m) || !pm || !hasConvIn(pm)) return null;
         return Math.max(sumOf(m, ch, 'conv') - sumOf(pm, ch, 'conv'), 0);
       };
-      if (showClose) lines.push(seriesOf(chKey, chColor, chPrefix + t('closed_month'), deltaOf));
-      if (showConv) lines.push(seriesOf(chKey, convColor, chPrefix + t('conv_month'), convDeltaOf, convStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('closed_month'), deltaOf));
+      if (showConv) lines.push(seriesOf(chKey, '#F6A66B', chPrefix + t('conv_month'), convDeltaOf, convStyle));
       chartOpts.countLines = lines;
       legendLines = lines;
     }
@@ -1318,7 +1337,7 @@
   function renderStoreTable(){
     if (!monthDefs.length) return;
     var rows = currentStoreRows();
-    var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
+    var dotColor = {dds:'var(--c-dds)', showroom:'var(--c-sr)'};
     document.getElementById('storeTableBody').innerHTML = rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
         '<td class="st-num st-cum">' + nf(r.monthly) + '</td>' +
@@ -1515,7 +1534,7 @@
   function renderChatStoreTable(){
     if (!chatStoreState.month) return;
     var rows = currentChatStoreRows();
-    var dotColor = {dds:'var(--purple)', showroom:'var(--teal-bright)'};
+    var dotColor = {dds:'var(--c-dds)', showroom:'var(--c-sr)'};
     document.getElementById('chatStoreTableBody').innerHTML = rows.length ? rows.map(function(r){
       return '<tr><td class="st-name"><span class="ch-dot" style="background:' + dotColor[r.channel] + '"></span>' + r.name + '</td>' +
         '<td class="st-num st-cum">' + nf(r.windows) + '</td>' +
@@ -1931,8 +1950,9 @@
     return doc.stores.length ? doc : null;
   }
   function nextYm(m){ var y = Math.floor(m / 100), mm = m % 100 + 1; if (mm > 12){ y++; mm = 1; } return y * 100 + mm; }
-  (function loadFromSheet(){
-    if (!window.fetch) return;
+  function loadFromSheet(done){
+    done = done || function(){};
+    if (!window.fetch){ done(); return; }
     var now = new Date(), nowYm = now.getFullYear() * 100 + now.getMonth() + 1;
     var ids = embeddedIds.length ? embeddedIds.slice() : ['202603'];
     // Also try months after the newest known one, so a newly added tab appears without waiting for a sync.
@@ -1962,8 +1982,17 @@
       }
       if (!docs.length) return;
       applyMonthDocs(docs);
-    });
-  })();
+    }).then(done, done);
+  }
+  loadFromSheet();
+  // chart reset: clears the 結案率 / 轉換率 overlays, back to 累積, and resets the shared filter (same as the 明細 重整)
+  document.getElementById('globalRefresh').addEventListener('click', function(){
+    document.getElementById('mergedShowClose').checked = false;
+    document.getElementById('mergedShowConv').checked = false;
+    document.querySelector('input[name="merged-mode"][value="cumulative"]').checked = true;
+    document.getElementById('storeRefreshBtn').click();
+    renderMergedChart();
+  });
 })();
 </script>
 </body></html>
