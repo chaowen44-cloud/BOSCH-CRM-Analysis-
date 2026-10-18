@@ -1718,10 +1718,11 @@
       q('cum').textContent = cum.toLocaleString();
       var momEl = q('mom'), deltaEl = q('delta');
       if (prev && prevCum){
-        var pct = (cum - prevCum) / prevCum * 100, dir = pct >= 0 ? 'up' : 'down';
+        // new members = the Sheet's 當月新增 column (same numbers as the 明細 subtotal), growth = that over last month's cumulative
+        var d = pick(cur, ch, 'monthly');
+        var pct = d / prevCum * 100, dir = pct >= 0 ? 'up' : 'down';
         momEl.className = 'trend ' + dir;
         momEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
-        var d = cum - prevCum;
         deltaEl.textContent = (d >= 0 ? '+' : '') + d.toLocaleString() + ' ' + t('vs_prev').replace('{m}', prevName);
       } else {
         momEl.className = 'trend'; momEl.textContent = ''; deltaEl.textContent = '';
