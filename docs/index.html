@@ -10,7 +10,7 @@
     --ink:#434343;
     --muted:#A3A4A4;
 
-    --c-total:#314D6A; --c-total-soft:#E4EBF2; --c-dds:#234E9A; --c-dds-soft:#E6EDF4; --c-sr:#B5D7F4; --c-sr-soft:#EEF2F7;
+    --c-total:#314D6A; --c-total-soft:#E4EBF2; --c-dds:#234E9A; --c-dds-soft:#E6EDF4; --c-sr:#D9C7A3; --c-sr-soft:#EEF2F7;
     --orange:#F57721;
     --orange-soft:#FEE3D6;
     --orange-tint:#FFF7F2;
@@ -1036,7 +1036,7 @@
       var last = points.length - 1;
       seriesSvg =
         '<path d="' + curve(ddsPts) + ' L ' + ddsPts[last][0] + ',' + zeroY + ' L ' + ddsPts[0][0] + ',' + zeroY + ' Z" fill="' + purpleC + '" fill-opacity=".42" stroke="none"/>' +
-        '<path d="' + curve(points) + ' L ' + ddsPts[last][0] + ',' + ddsPts[last][1] + back + ' Z" fill="' + tealC + '" fill-opacity=".75" stroke="none"/>' +
+        '<path d="' + curve(points) + ' L ' + ddsPts[last][0] + ',' + ddsPts[last][1] + back + ' Z" fill="' + tealC + '" fill-opacity=".6" stroke="none"/>' +
         '<path d="' + curve(ddsPts) + '" fill="none" stroke="' + purpleC + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>' +
         '<path d="' + pathD + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
     }
