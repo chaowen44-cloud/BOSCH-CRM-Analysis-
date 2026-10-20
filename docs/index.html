@@ -127,6 +127,15 @@
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
   .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
 
+  /* KPI view picker: one year / month selector for all KPI groups */
+  .kpi-month-pick{display:inline-flex; align-items:center; gap:2px; margin-left:auto; padding:2px; border:1px solid var(--navy); border-radius:999px}
+  .kpi-year{padding:0 3px 0 4px; font-size:12px; font-weight:700; color:var(--navy)}
+  .kpi-cur{display:inline-flex; align-items:center; justify-content:center; min-width:38px; padding:2px 9px; background:#CFE4F7; border-radius:999px; font-size:12px; font-weight:800; color:var(--navy); white-space:nowrap}
+  .kpi-arrow{border:0; background:transparent; color:var(--navy); width:28px; height:24px; padding:0; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center}
+  .kpi-arrow svg{width:13px; height:13px}
+  .kpi-arrow:hover{background:#E4EDF7}
+  .kpi-arrow:focus-visible{outline:2px solid #8FC1E8; outline-offset:1px}
+  .kpi-arrow:disabled{opacity:.3; cursor:default; background:transparent}
   .metric-group{display:grid; gap:12px}
   .metric-group-label{font-size:13.5px; font-weight:600; color:var(--ink); opacity:.85; display:flex; align-items:center; gap:9px}
   .metric-group-label:before{content:""; width:3px; height:14px; background:var(--navy); border-radius:2px}
@@ -423,6 +432,12 @@
       <div>
         <h1 data-i18n="h1_1">零售門市與展示中心會員表現</h1>
       </div>
+      <div class="kpi-month-pick" id="kpiPick" role="group">
+        <button type="button" class="kpi-arrow" id="kpiPrevArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="kpi-year" id="kpiYear"></span>
+        <span class="kpi-cur" id="kpiCur"></span>
+        <button type="button" class="kpi-arrow" id="kpiNextArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
     </div>
 
     <div class="metric-group">
@@ -593,6 +608,12 @@
     <div class="section-top">
       <div>
         <h1 data-i18n="h2_2">CRM 系統使用</h1>
+      </div>
+      <div class="kpi-month-pick" id="chatPick" role="group">
+        <button type="button" class="kpi-arrow" id="chatPrevArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="kpi-year" id="chatYear"></span>
+        <span class="kpi-cur" id="chatCur"></span>
+        <button type="button" class="kpi-arrow" id="chatNextArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
 
@@ -1462,8 +1483,21 @@
   function chatRate(win, mem){ return mem ? Math.round(win / mem * 10000) / 100 : 0; }
   // Total tags used: from the "Total Tags Used" block; the card shows the latest month that has it.
   var tagsByMonth = {};
+  // 1-on-1 chat has its own month stepper; it only steps through months that carry chat data
+  var chatViewMonth = null;
+  function chatView(){ var ms = chatMonths(); return chatViewMonth && ms.indexOf(chatViewMonth) >= 0 ? chatViewMonth : ms[ms.length - 1]; }
+  ['chatPrevArrow', 'chatNextArrow'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', function(){
+      var m = parseInt(this.getAttribute('data-m'), 10);
+      if (!m) return;
+      var ms = chatMonths();
+      chatViewMonth = m === ms[ms.length - 1] ? null : m;
+      renderChatCards();
+    });
+  });
   function renderChatCards(){
-    var ms = chatMonths(), m = ms[ms.length - 1];
+    var m = chatView();
+    syncPicker('chat', chatMonths(), m);
     ['total', 'dds', 'showroom'].forEach(function(ch){
       var q = function(kind){ return document.querySelector('[data-chat="' + kind + '"][data-ch="' + ch + '"]'); };
       if (!m){ q('windows').textContent = '–'; q('rate').textContent = ''; return; }
@@ -1714,9 +1748,39 @@
   // chatStores:[{name,windows}, ...]; sorting by key is chronological.
   // KPI cards: latest month in the data vs the month before it.
   var summaryByMonth = {};
+  // KPI view month: null follows the newest month in the data
+  var kpiMonth = null;
+  function viewMonth(){ return kpiMonth && summaryByMonth[kpiMonth] ? kpiMonth : latestM; }
+  function kpiMonthText(m){ return currentLang === 'zh' ? (m % 100) + '月' : (MONTH_NAMES[m % 100 - 1] || ('#' + m % 100)); }
+  function kpiFullText(m){ return currentLang === 'zh' ? Math.floor(m / 100) + '年' + (m % 100) + '月' : (MONTH_NAMES[m % 100 - 1] || ('#' + m % 100)) + ' ' + Math.floor(m / 100); }
+  // the month in view shows the month only; the year is added when it differs from the newest data year
+  function kpiShortText(m){ return Math.floor(m / 100) === Math.floor(latestM / 100) ? kpiMonthText(m) : kpiFullText(m); }
+  // Shared year / month stepper: ids = prefix + 'PrevArrow' / 'Year' / 'Cur' / 'NextArrow'; months = months it can step through (ascending)
+  function syncPicker(prefix, months, vm){
+    var cur = document.getElementById(prefix + 'Cur');
+    if (!cur || !months.length || !vm) return;
+    var idx = months.indexOf(vm);
+    var prev = idx > 0 ? months[idx - 1] : null, next = idx >= 0 && idx < months.length - 1 ? months[idx + 1] : null;
+    cur.textContent = kpiMonthText(vm); cur.title = kpiFullText(vm);
+    document.getElementById(prefix + 'Year').textContent = Math.floor(vm / 100);
+    [[prefix + 'PrevArrow', prev, 'prev'], [prefix + 'NextArrow', next, 'next']].forEach(function(x){
+      var b = document.getElementById(x[0]); b.disabled = !x[1]; b.setAttribute('data-m', x[1] || '');
+      b.setAttribute('aria-label', x[1] ? kpiFullText(x[1]) : (currentLang === 'zh' ? (x[2] === 'prev' ? '上一月' : '下一月') : (x[2] === 'prev' ? 'Previous month' : 'Next month')));
+    });
+  }
+  function refreshKpiPicker(){ syncPicker('kpi', monthDefs.map(function(r){ return r.m; }), viewMonth()); }
+  ['kpiPrevArrow', 'kpiNextArrow'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', function(){
+      var m = parseInt(this.getAttribute('data-m'), 10);
+      if (!m) return;
+      kpiMonth = m === latestM ? null : m;
+      renderKpis();
+    });
+  });
   function renderKpis(){
     if (!monthDefs.length) return;
-    var cur = summaryByMonth[latestM], prevM = prevMonthOf(latestM), prev = prevM ? summaryByMonth[prevM] : null;
+    refreshKpiPicker();
+    var vm = viewMonth(), cur = summaryByMonth[vm], prevM = prevMonthOf(vm), prev = prevM ? summaryByMonth[prevM] : null;
     var pick = function(sum, ch, k){ return !sum ? 0 : ch === 'total' ? (sum.dds[k] || 0) + (sum.showroom[k] || 0) : (sum[ch][k] || 0); };
     var prevName = prevM ? (currentLang === 'zh' ? (prevM % 100) + '月' : MONTH_NAMES[prevM % 100 - 1]) : '';
     ['total', 'dds', 'showroom'].forEach(function(ch){
