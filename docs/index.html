@@ -337,7 +337,9 @@
   .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
   /* member trend, "All" view: legend for the stacked DDS / Showroom layers */
-  .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:-4px 0 8px; font-size:12.5px; color:var(--muted)}
+  .chart-subrow{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 16px; margin:-4px 0 8px}
+  .chart-range{margin-left:auto; font-size:12px; color:var(--muted); white-space:nowrap}
+  .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:0; font-size:12.5px; color:var(--muted)}
   .trend-legend .tl-item{display:inline-flex; align-items:center; gap:7px}
   .trend-legend .tl-sw{width:10px; height:10px; border-radius:3px; flex:none}
   .trend-legend .tl-ln{width:16px; height:3px; border-radius:2px; background:var(--c-total); flex:none}
@@ -536,7 +538,10 @@
           <button type="button" class="df-refresh" id="globalRefresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg><span data-i18n="refresh_all">重新整理</span></button>
         </div>
       </div>
-      <div class="trend-legend" id="mergedLegend" hidden></div>
+      <div class="chart-subrow">
+        <div class="trend-legend" id="mergedLegend" hidden></div>
+        <span class="chart-range" id="mergedRange"></span>
+      </div>
       <div class="chart-wrap" id="mergedChart"></div>
       <div class="pager" data-pager="merged"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
     </div>
@@ -743,7 +748,7 @@
       h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
-      mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
+      period:"顯示區間：", mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"Total Retail 會員數趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員數趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
       h2_2:"CRM 系統使用",
@@ -769,7 +774,7 @@
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
-      mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
+      period:"Period:", mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
       h2_2:"CRM System Usage",
@@ -1231,6 +1236,8 @@
     var meta = mergedChannelMeta[drill.channel];
     var mode = document.querySelector('input[name="merged-mode"]:checked').value;
     var start = globalRange.start, end = globalRange.end;
+    var rg = monthRange(start, end);
+    document.getElementById('mergedRange').textContent = t('period') + (currentLang === 'zh' ? '' : ' ') + ymLabel(rg[0]) + ' – ' + ymLabel(rg[1]);
     var data = seriesFor(meta.seriesKey, mode, start, end);
     var profile = chartProfile(document.getElementById('mergedChart'));
     WINDOW.merged = profile.merged;
