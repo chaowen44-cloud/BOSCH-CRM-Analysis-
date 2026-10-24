@@ -1157,8 +1157,8 @@
         var pts = [];
         r.values.forEach(function(v, i){ if (v != null) pts.push([x(i), ry(v), v]); });
         if (!pts.length) return;
-        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 1.4) + '" stroke-dasharray="' + (r.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
-        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.4" fill="var(--surface)" stroke="' + r.color + '" stroke-width="1.3" opacity=".8"/>'; }).join('');
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 1) + '" stroke-dasharray="' + (r.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
+        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2" fill="var(--surface)" stroke="' + r.color + '" stroke-width="1.1" opacity=".8"/>'; }).join('');
       });
     }
 
@@ -1168,8 +1168,8 @@
         var pts = [];
         c.values.forEach(function(v, i){ if (v != null) pts.push([x(i), y(v), v]); });
         if (!pts.length) return;
-        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + c.color + '" stroke-width="' + (c.width || 1.4) + '" stroke-dasharray="' + (c.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
-        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.4" fill="var(--surface)" stroke="' + c.color + '" stroke-width="1.3" opacity=".8"/>'; }).join('');
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + c.color + '" stroke-width="' + (c.width || 1) + '" stroke-dasharray="' + (c.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>';
+        rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2" fill="var(--surface)" stroke="' + c.color + '" stroke-width="1.1" opacity=".8"/>'; }).join('');
       });
     }
 
@@ -1342,7 +1342,7 @@
     var chKey = drill.channel === 'all' ? 'total' : drill.channel;
     var chColor = cssVar(meta.colorVar), convColor = cssVar('--navy');
     var chPrefix = drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + ' ';
-    var convStyle = {dash: '1.5,4.5', width: 3};
+    var convStyle = {dash: '1.5,4.5', width: 1.9};
     var lines = [];   // dashed overlays on the right-hand % axis (cumulative) or the left axis (monthly counts)
     if (mode === 'cumulative'){
       var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
