@@ -10,7 +10,7 @@
     --ink:#434343;
     --muted:#A3A4A4;
 
-    --c-total:#314D6A; --c-total-soft:#E4EBF2; --c-dds:#234E9A; --c-dds-soft:#E6EDF4; --c-sr:#B5D7F4; --c-sr-line:#6FA8DC; --c-sr-soft:#EEF2F7;
+    --c-total:#314D6A; --c-total-soft:#E4EBF2; --c-dds:#234E9A; --c-dds-soft:#B4C6E8; --c-sr:#B5D7F4; --c-sr-line:#6FA8DC; --c-sr-soft:#B9D5F0;
     --orange:#F57721;
     --orange-soft:#FEE3D6;
     --orange-tint:#FFF7F2;
@@ -136,9 +136,24 @@
   .kpi-arrow:hover{background:#E4EDF7}
   .kpi-arrow:focus-visible{outline:2px solid #8FC1E8; outline-offset:1px}
   .kpi-arrow:disabled{opacity:.3; cursor:default; background:transparent}
-  .metric-group{display:grid; gap:12px}
+  .metric-group{display:grid; gap:12px; position:relative}
   .metric-group-label{font-size:13.5px; font-weight:600; color:var(--ink); opacity:.85; display:flex; align-items:center; gap:9px}
   .metric-group-label:before{content:""; width:3px; height:14px; background:var(--navy); border-radius:2px}
+  /* click a rate title (closing / conversion) to read how it is counted */
+  .def-btn{display:inline-flex; align-items:center; gap:6px; background:none; border:0; padding:2px 6px; margin:-2px -6px; font:inherit; color:inherit; cursor:pointer; border-radius:6px}
+  .def-btn:hover, .def-btn[aria-expanded="true"]{background:#E4EDF7}
+  .def-btn:focus-visible{outline:2px solid #8FC1E8; outline-offset:1px}
+  .def-btn svg{width:14px; height:14px; opacity:.6}
+  .def-pop{position:absolute; left:0; top:32px; z-index:15; width:min(460px, calc(100vw - 32px)); padding:12px 14px 8px; background:rgba(46,51,64,.78); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-radius:14px; box-shadow:0 14px 34px rgba(0,0,0,.22); color:#fff; opacity:0; visibility:hidden; transform:translateY(-6px); pointer-events:none; transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s}
+  .def-pop.open{opacity:1; visibility:visible; transform:none; pointer-events:auto; transition:opacity .2s ease, transform .2s ease}
+  .def-pop:before{content:""; position:absolute; top:-7px; left:26px; border:7px solid transparent; border-top:0; border-bottom-color:rgba(46,51,64,.78)}
+  .def-pop h4{margin:0 0 2px; font-size:12.5px; font-weight:700; color:#fff; letter-spacing:.02em}
+  .def-pop .def-intro{margin:0 0 4px; font-size:10.5px; color:rgba(255,255,255,.62)}
+  .def-row{display:grid; grid-template-columns:66px 1fr; gap:10px; align-items:start; padding:8px 0 2px; border-top:1px solid rgba(255,255,255,.14)}
+  .def-ch{display:inline-flex; align-items:center; justify-content:center; height:20px; padding:0 8px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.02em; color:#fff}
+  .def-ch.dds{background:#3F6BC4}
+  .def-ch.sr{background:var(--c-sr-line)}
+  .def-tag{display:inline-block; margin:0 5px 6px 0; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:10.5px; font-weight:500; line-height:1.5}
 
   /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
   .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
@@ -467,7 +482,8 @@
     </div>
 
     <div class="metric-group">
-      <div class="metric-group-label" data-i18n="group_closed">結案率 Closed</div>
+      <div class="metric-group-label"><button type="button" class="def-btn" aria-expanded="false" aria-controls="defPopClosed"><span data-i18n="group_closed">結案率 Closed</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></button></div>
+      <div class="def-pop" id="defPopClosed" role="dialog"></div>
       <div class="row3">
         <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
@@ -491,7 +507,8 @@
     </div>
 
     <div class="metric-group">
-      <div class="metric-group-label" data-i18n="group_conversion">轉換率 Conversion</div>
+      <div class="metric-group-label"><button type="button" class="def-btn" aria-expanded="false" aria-controls="defPopConv"><span data-i18n="group_conversion">轉換率 Conversion</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></button></div>
+      <div class="def-pop" id="defPopConv" role="dialog"></div>
       <div class="row3">
         <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
@@ -748,6 +765,13 @@
       h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
+      def_intro:"結算會員系統中的以下標籤：",
+      def_closed_title:"結案率定義",
+      def_closed_dds:"已結案已出貨/已結案未出貨/至其他通路購買/環境因素無法安裝/無購買意願",
+      def_closed_sr:"未購顧客至其他通路購買/未購顧客環境因素無法安裝/未購顧客暫時無需求/未購顧客無意願參加實體活動/已夠顧客(全)",
+      def_conv_title:"轉換率定義",
+      def_conv_dds:"已結案已出貨/已結案未出貨",
+      def_conv_sr:"已夠顧客(全)",
       period:"顯示區間：", mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"Total Retail 會員數趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員數趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
@@ -774,6 +798,13 @@
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
+      def_intro:"Counted from these tags in the member system:",
+      def_closed_title:"Closing rate definition",
+      def_closed_dds:"已結案已出貨/已結案未出貨/至其他通路購買/環境因素無法安裝/無購買意願",
+      def_closed_sr:"未購顧客至其他通路購買/未購顧客環境因素無法安裝/未購顧客暫時無需求/未購顧客無意願參加實體活動/已夠顧客(全)",
+      def_conv_title:"Conversion rate definition",
+      def_conv_dds:"已結案已出貨/已結案未出貨",
+      def_conv_sr:"已夠顧客(全)",
       period:"Period:", mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Total Retail Member Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
@@ -812,10 +843,56 @@
     renderMergedChart();
     renderStoreTable();
     renderChatStoreTable();
+    renderDefs();
   }
   document.querySelectorAll('.lang-toggle button').forEach(function(b){
     b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); });
   });
+
+  /* ---------- rate definitions: hover (or tap / focus) "結案率" / "轉換率" to see how each channel is counted ---------- */
+  function defTags(s){
+    return s.split('/').map(function(x){ x = x.trim(); return x ? '<span class="def-tag">' + x + '</span>' : ''; }).join('');
+  }
+  function renderDefs(){
+    [['closed', 'defPopClosed'], ['conv', 'defPopConv']].forEach(function(d){
+      var pop = document.getElementById(d[1]);
+      if (!pop) return;
+      pop.innerHTML = '<h4>' + t('def_' + d[0] + '_title') + '</h4>' +
+        '<p class="def-intro">' + t('def_intro') + '</p>' +
+        '<div class="def-row"><span class="def-ch dds">DDS</span><div>' + defTags(t('def_' + d[0] + '_dds')) + '</div></div>' +
+        '<div class="def-row"><span class="def-ch sr">Showroom</span><div>' + defTags(t('def_' + d[0] + '_sr')) + '</div></div>';
+    });
+  }
+  var defTimer = null, canHover = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
+  function closeDefs(){
+    document.querySelectorAll('.def-pop').forEach(function(p){ p.classList.remove('open'); });
+    document.querySelectorAll('.def-btn').forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+  }
+  function closeDefsSoon(){ clearTimeout(defTimer); defTimer = setTimeout(closeDefs, 140); }
+  function openDef(btn){
+    clearTimeout(defTimer);
+    closeDefs();
+    document.getElementById(btn.getAttribute('aria-controls')).classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  document.querySelectorAll('.def-btn').forEach(function(btn){
+    btn.addEventListener('mouseenter', function(){ if (canHover) openDef(btn); });
+    btn.addEventListener('mouseleave', function(){ if (canHover) closeDefsSoon(); });
+    btn.addEventListener('focus', function(){ openDef(btn); });
+    btn.addEventListener('blur', closeDefsSoon);
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (canHover) return;   // mouse users already see it on hover; touch users tap to open / close
+      var pop = document.getElementById(btn.getAttribute('aria-controls'));
+      if (pop.classList.contains('open')) closeDefs(); else openDef(btn);
+    });
+  });
+  document.querySelectorAll('.def-pop').forEach(function(pop){
+    pop.addEventListener('mouseenter', function(){ clearTimeout(defTimer); });
+    pop.addEventListener('mouseleave', function(){ if (canHover) closeDefsSoon(); });
+  });
+  document.addEventListener('click', function(e){ if (!e.target.closest('.def-pop, .def-btn')) closeDefs(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDefs(); });
 
   /* ---------- nav active-state scroll spy ---------- */
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('.page-nav a'));
@@ -1265,13 +1342,13 @@
     var chKey = drill.channel === 'all' ? 'total' : drill.channel;
     var chColor = cssVar(meta.colorVar), convColor = cssVar('--navy');
     var chPrefix = drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + ' ';
-    var convStyle = {dash: '1.5,4.5', width: 2};
+    var convStyle = {dash: '1.5,4.5', width: 3};
     var lines = [];   // dashed overlays on the right-hand % axis (cumulative) or the left axis (monthly counts)
     if (mode === 'cumulative'){
       var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
       var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
       if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('close_rate'), rateOf));
-      if (showConv) lines.push(seriesOf(chKey, '#F6A66B', chPrefix + t('conv_rate'), convRateOf, convStyle));
+      if (showConv) lines.push(seriesOf(chKey, '#E08A00', chPrefix + t('conv_rate'), convRateOf, convStyle));
       chartOpts.rates = lines;
     } else {
       var deltaOf = function(ch, m){
@@ -1284,7 +1361,7 @@
         return Math.max(sumOf(m, ch, 'conv') - sumOf(pm, ch, 'conv'), 0);
       };
       if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('closed_month'), deltaOf));
-      if (showConv) lines.push(seriesOf(chKey, '#F6A66B', chPrefix + t('conv_month'), convDeltaOf, convStyle));
+      if (showConv) lines.push(seriesOf(chKey, '#E08A00', chPrefix + t('conv_month'), convDeltaOf, convStyle));
       chartOpts.countLines = lines;
       legendLines = lines;
     }
