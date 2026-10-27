@@ -231,16 +231,16 @@
   .tooltip.show{opacity:1}
   .tooltip.snap{transition:opacity .15s ease}
   /* multi-series tooltip: card beside the point with a left (or right, when flipped) pointer */
-  .tooltip.rich{background:rgba(46,51,64,.78); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); color:#fff; font-size:12px; font-weight:400; padding:8px 11px; border-radius:8px; transform:translate(16px,-50%); box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .tooltip.rich{background:rgba(46,51,64,.78); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); color:#fff; font-size:14px; font-weight:400; padding:11px 15px; border-radius:10px; transform:translate(0,-50%); transition:opacity .18s ease, left .42s cubic-bezier(.22,1,.36,1), top .42s cubic-bezier(.22,1,.36,1); box-shadow:0 6px 16px rgba(0,0,0,.18)}
   .tooltip.rich:before{content:""; position:absolute; top:calc(50% + var(--arrow-dy, 0px)); left:-6px; margin-top:-6px; border:6px solid transparent; border-left:0; border-right-color:rgba(46,51,64,.78)}
-  .tooltip.rich.flip{transform:translate(calc(-100% - 16px),-50%)}
+  .tooltip.rich.snap{transition:opacity .15s ease}
   .tooltip.rich.flip:before{left:auto; right:-6px; border:6px solid transparent; border-right:0; border-left-color:rgba(46,51,64,.78)}
-  .rt-title{font-size:12.5px; font-weight:600; margin-bottom:5px}
-  .rt-row{display:flex; align-items:center; gap:7px; line-height:1.75}
-  .rt-sw.rt-dash{background:none!important; box-shadow:none; border-radius:0; width:14px; height:0; border-top:2px dashed currentColor}
-  .rt-sw{width:10px; height:10px; border-radius:2px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35); flex:none}
-  .rt-sub{margin:-3px 0 4px; font-size:10.5px; color:rgba(255,255,255,.6)}
-  .rt-hint{margin-top:4px; font-size:10.5px; color:rgba(255,255,255,.6)}
+  .rt-title{font-size:14.5px; font-weight:600; margin-bottom:6px}
+  .rt-row{display:flex; align-items:center; gap:8px; line-height:1.8}
+  .rt-sw.rt-dash{background:none!important; box-shadow:none; border-radius:0; width:16px; height:0; border-top:2px dashed currentColor}
+  .rt-sw{width:12px; height:12px; border-radius:3px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35); flex:none}
+  .rt-sub{margin:-3px 0 5px; font-size:12px; color:rgba(255,255,255,.6)}
+  .rt-hint{margin-top:5px; font-size:12px; color:rgba(255,255,255,.6)}
 
   /* ---- overview cards (CRM usage totals) ---- */
   .ov-card{background:var(--surface); border:2px solid var(--orange); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px 26px}
@@ -1259,12 +1259,13 @@
       return best;
     }
     function show(i){
-      var rect = svgEl.getBoundingClientRect(), k = rect.width / cfg.W;
+      var rect = svgEl.getBoundingClientRect(), z = rect.width / (svgEl.clientWidth || rect.width), k = rect.width / cfg.W / z;
       var entering = !tip.classList.contains('show');
       var rich = cfg.fill(i);
       tip.classList.toggle('rich', rich);
       var px = cfg.xOf(i) * k, py = cfg.yOf(i) * k, ty = py;
-      tip.classList.toggle('flip', rich && px > rect.width * 0.62);
+      var flipped = rich && px > (rect.width / z) * 0.62;
+      tip.classList.toggle('flip', flipped);
       if (rich){
         var half = tip.offsetHeight / 2;
         ty = Math.min(Math.max(py, half + 4), cfg.wrap.clientHeight - half - 4);
@@ -1272,7 +1273,7 @@
       // First appearance: place instantly (no slide in from the last position), then glide from there on.
       if (entering){ tip.classList.add('snap'); mark.classList.add('snap'); }
       tip.style.setProperty('--arrow-dy', (py - ty) + 'px');
-      tip.style.left = px + 'px';
+      tip.style.left = (rich ? px + (flipped ? -(tip.offsetWidth + 14) : 14) : px) + 'px';
       tip.style.top = ty + 'px';
       mark.style.transform = 'translate(' + cfg.xOf(i) + 'px,' + cfg.yOf(i) + 'px)';
       if (entering){ void tip.offsetWidth; tip.classList.remove('snap'); mark.classList.remove('snap'); }
