@@ -1510,8 +1510,7 @@
     if (fromChart){
       setStoreExpanded(true);
       var card = document.getElementById('bystore');
-      var r = card.getBoundingClientRect();
-      if (r.top > window.innerHeight - 120) card.scrollIntoView({behavior:'smooth', block:'start'});
+      requestAnimationFrame(function(){ card.scrollIntoView({behavior:'smooth', block:'start'}); });
     }
   }
 
