@@ -955,7 +955,7 @@
     var y = Math.floor(m / 100), mm = m % 100;
     var label = MONTH_NAMES[mm - 1] || ('#' + mm);
     if (y !== YEAR) label += " '" + String(y).slice(-2);
-    return isLatest ? label + '*' : label;
+    return label;
   }
   function classifyChannel(name){ return /^Showroom/.test(name) ? 'showroom' : 'dds'; }
 
