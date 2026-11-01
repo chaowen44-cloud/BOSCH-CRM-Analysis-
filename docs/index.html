@@ -310,7 +310,8 @@
   .sort-dd-item .chk{opacity:0; font-size:11px; color:var(--up)}
   .sort-dd-item.active .chk{opacity:1}
   .sort-dd-group + .sort-dd-group{margin-top:4px; padding-top:4px; border-top:1px solid rgba(255,255,255,.1)}
-  .th-sort{display:inline-block; margin-right:4px; color:#FFB199}
+  .th-sort{display:inline-block; margin-right:4px; color:#FFB199; cursor:pointer; padding:0 5px; margin-left:-5px; border-radius:6px; user-select:none; transition:background .15s}
+  .th-sort:hover{background:rgba(255,255,255,.16)}
   .th-sort:empty{display:none}
   /* store card's unified sort control sits on a light header, so it takes the neutral pill look instead of the on-dark table-header variant */
   .store-sort-dd{margin-left:0}
@@ -1538,6 +1539,17 @@
         st.dir = item.getAttribute('data-dir');
       }
       dd.classList.remove('open');
+      if (isChat) renderChatStoreTable(); else renderStoreTable();
+    });
+  });
+  // Click the sort arrow in a column header to flip that column between descending and ascending.
+  document.querySelectorAll('th[data-sort-key] .th-sort').forEach(function(arrow){
+    arrow.title = '↑ / ↓';
+    arrow.addEventListener('click', function(e){
+      e.stopPropagation();
+      var th = arrow.closest('th'), isChat = !!arrow.closest('#chatStoreTable');
+      var st = isChat ? chatStoreSort : storeSort;
+      if (st.key === th.getAttribute('data-sort-key') && st.dir) st.dir = st.dir === 'asc' ? 'desc' : 'asc';
       if (isChat) renderChatStoreTable(); else renderStoreTable();
     });
   });
