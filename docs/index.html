@@ -215,6 +215,8 @@
   .df-radio{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-radio input{accent-color:var(--blue); width:14px;height:14px; margin:0}
   .tl-dash{width:18px; height:0; border-top:1.5px dashed currentColor; flex:none}
+  .tl-dash.tl-solid{border-top-style:solid; border-top-width:2px}
+  .rt-sw.rt-solid{border-top-style:solid}
   .tl-dash.tl-dot{border-top-style:dotted; border-top-width:3px}
   .df-check{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink); cursor:pointer; font-weight:500; user-select:none}
   .df-check input{width:14px; height:14px; margin:0}
@@ -415,6 +417,47 @@
   }
   @media (min-width:861px) and (max-width:1080px){
     .row3{grid-template-columns:1fr 1fr}
+  }
+
+  /* ---- compact reading layout for phones & iPad portrait ---- */
+  @media (max-width:860px){
+    main{padding:20px clamp(14px,3vw,28px) 48px; gap:26px}
+    .section{gap:12px}
+    .topbar{padding:14px clamp(14px,3vw,28px)}
+    .logo-chip img{height:30px}
+    .row3:has(.stat-card){grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+    .stat-card{padding:14px 14px 13px; gap:4px; border-radius:16px}
+    .stat-card .head b, .stat-card.mono .head b{font-size:12.5px}
+    .stat-card .bignum{font-size:clamp(22px,4.4vw,28px); margin:0}
+    .stat-card .trend{font-size:11.5px; gap:4px; flex-wrap:wrap}
+    .stat-card .sub{font-size:11px}
+    .metric-group-label{font-size:12.5px}
+    .chart-card{padding:16px 16px 12px}
+  }
+  @media (max-width:640px){
+    /* store tables: fit all columns on screen (headers wrap, tighter cells) instead of side-scrolling */
+    table.store-table{font-size:12px}
+    .store-table thead th, .store-table tbody td, .store-table tfoot td{padding:9px 7px}
+    .store-table thead th:first-child, .store-table tbody td:first-child, .store-table tfoot td:first-child{padding-left:12px}
+    .store-table thead th{white-space:normal; line-height:1.25; font-size:11.5px; vertical-align:bottom}
+    .store-table thead th.rate-th{padding-right:7px}
+    .rate-th .th-avg{margin-right:0; white-space:normal}
+    .st-name{white-space:normal}
+    .store-table .ch-dot{margin-right:6px}
+  }
+  @media (max-width:560px){
+    /* Total Retail on its own line, DDS and Showroom side by side beneath it */
+    /* same 3-across arrangement as desktop, just scaled down */
+    .row3:has(.stat-card){gap:6px}
+    .stat-card{padding:11px 9px 10px; border-radius:13px; border-width:1.5px}
+    .stat-card .head b, .stat-card.mono .head b{font-size:11px}
+    .stat-card .bignum{font-size:20px; letter-spacing:-.03em}
+    .stat-card .trend{font-size:10px; gap:3px}
+    .stat-card .trend .tri{transform:scale(.8)}
+    .stat-card .sub{font-size:9.5px; line-height:1.3}
+    h1{font-size:20px}
+    .page-nav{gap:16px}
+    .page-nav a{font-size:12.5px}
   }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1132,9 +1175,22 @@
 
     var zeroY = y(0);
     var purpleC = cssVar('--c-dds'), tealC = cssVar('--c-sr');
-    var curve = function(pts){   // smooth path through pts
-      var d = 'M ' + pts[0][0] + ',' + pts[0][1];
-      for (var k = 1; k < pts.length; k++){ var mx = (pts[k-1][0] + pts[k][0]) / 2; d += ' C ' + mx + ',' + pts[k-1][1] + ' ' + mx + ',' + pts[k][1] + ' ' + pts[k][0] + ',' + pts[k][1]; }
+    var curve = function(pts){   // smooth path through pts: monotone cubic (Fritsch-Carlson), no overshoot, no kinks
+      var n = pts.length, d = 'M ' + pts[0][0] + ',' + pts[0][1];
+      if (n < 3){ for (var q = 1; q < n; q++) d += ' L ' + pts[q][0] + ',' + pts[q][1]; return d; }
+      var dx = [], sl = [], m = [], k;
+      for (k = 0; k < n - 1; k++){ dx[k] = pts[k+1][0] - pts[k][0]; sl[k] = (pts[k+1][1] - pts[k][1]) / dx[k]; }
+      m[0] = sl[0]; m[n-1] = sl[n-2];
+      for (k = 1; k < n - 1; k++) m[k] = sl[k-1] * sl[k] <= 0 ? 0 : (sl[k-1] + sl[k]) / 2;
+      for (k = 0; k < n - 1; k++){
+        if (sl[k] === 0){ m[k] = 0; m[k+1] = 0; continue; }
+        var a = m[k] / sl[k], b = m[k+1] / sl[k], h = a * a + b * b;
+        if (h > 9){ var t3 = 3 / Math.sqrt(h); m[k] = t3 * a * sl[k]; m[k+1] = t3 * b * sl[k]; }
+      }
+      for (k = 0; k < n - 1; k++){
+        var c = dx[k] / 3;
+        d += ' C ' + (pts[k][0] + c) + ',' + (pts[k][1] + m[k] * c) + ' ' + (pts[k+1][0] - c) + ',' + (pts[k+1][1] - m[k+1] * c) + ' ' + pts[k+1][0] + ',' + pts[k+1][1];
+      }
       return d;
     };
     // Members as bars: one bar per month; in the "All" view DDS and Showroom are stacked (negatives hang below zero).
@@ -1172,7 +1228,7 @@
         var pts = [];
         r.values.forEach(function(v, i){ if (v != null) pts.push([x(i), ry(v), v]); });
         if (!pts.length) return;
-        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 0.9) + '" stroke-dasharray="' + (r.dash || '5,4') + '" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 0.9) + '" stroke-dasharray="' + (r.solid ? 'none' : (r.dash || '5,4')) + '" stroke-linecap="round" stroke-linejoin="round"/>';
         rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.6" fill="var(--surface)" stroke="' + r.color + '" stroke-width="1"/>'; }).join('');
       });
     }
@@ -1220,7 +1276,7 @@
       fill: function(i){
         var bd = opts.breakdown && opts.breakdown[i];
         var rateRows = (opts.rates || []).map(function(r){
-          return r.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="color:' + r.color + '"></span>' + r.name + ': ' + r.values[i].toFixed(1) + '%</div>';
+          return r.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash' + (r.solid ? ' rt-solid' : '') + '" style="color:' + r.color + '"></span>' + r.name + ': ' + r.values[i].toFixed(1) + '%</div>';
         }).join('') + (opts.countLines || []).map(function(c){
           return c.values[i] == null ? '' : '<div class="rt-row"><span class="rt-sw rt-dash" style="color:' + c.color + '"></span>' + c.name + ': ' + c.values[i].toLocaleString() + '</div>';
         }).join('');
@@ -1311,7 +1367,7 @@
     var html = '';
     if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--c-dds)"></i>DDS</span>' +
       '<span class="tl-item"><i class="tl-sw" style="background:var(--c-sr)"></i>Showroom</span>';
-    if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash' + (r.dash ? ' tl-dot' : '') + '"></i>' + r.name + '</span>'; }).join('');
+    if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash' + (r.solid ? ' tl-solid' : (r.dash ? ' tl-dot' : '')) + '"></i>' + r.name + '</span>'; }).join('');
     el.innerHTML = html;
   }
   function renderMergedChart(){
@@ -1342,19 +1398,19 @@
     var hasConvIn = function(m){ var sm = summaryByMonth[m]; return !!sm && typeof sm.dds.conv === 'number' && typeof sm.showroom.conv === 'number'; };
     var seriesOf = function(ch, color, name, fn, style){
       var o = {color: color, name: name, values: data.months.slice(w[0], w[1]).map(function(m){ return fn(ch, m); })};
-      if (style){ o.dash = style.dash; o.width = style.width; }
+      if (style){ o.dash = style.dash; o.width = style.width; o.solid = style.solid; }
       return o;
     };
     var chKey = drill.channel === 'all' ? 'total' : drill.channel;
     var chColor = cssVar(meta.colorVar), convColor = cssVar('--navy');
     var chPrefix = drill.channel === 'all' ? t('pfx_total') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + ' ';
-    var convStyle = null;
+    var convStyle = null, closeStyle = {solid: true, width: 1.1};
     var lines = [];   // dashed overlays on the right-hand % axis (cumulative) or the left axis (monthly counts)
     if (mode === 'cumulative'){
       var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
       var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
-      if (showClose) lines.push(seriesOf(chKey, '#3F4856', chPrefix + t('close_rate'), rateOf));
-      if (showConv) lines.push(seriesOf(chKey, '#7F899A', chPrefix + t('conv_rate'), convRateOf, convStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('close_rate'), rateOf, closeStyle));
+      if (showConv) lines.push(seriesOf(chKey, '#FFB088', chPrefix + t('conv_rate'), convRateOf, convStyle));
       chartOpts.rates = lines;
     } else {
       var deltaOf = function(ch, m){
@@ -1366,8 +1422,8 @@
         if (!hasConvIn(m) || !pm || !hasConvIn(pm)) return null;
         return Math.max(sumOf(m, ch, 'conv') - sumOf(pm, ch, 'conv'), 0);
       };
-      if (showClose) lines.push(seriesOf(chKey, '#3F4856', chPrefix + t('closed_month'), deltaOf));
-      if (showConv) lines.push(seriesOf(chKey, '#7F899A', chPrefix + t('conv_month'), convDeltaOf, convStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('closed_month'), deltaOf, closeStyle));
+      if (showConv) lines.push(seriesOf(chKey, '#FFB088', chPrefix + t('conv_month'), convDeltaOf, convStyle));
       chartOpts.countLines = lines;
       legendLines = lines;
     }
