@@ -156,18 +156,6 @@
   .def-ch.dds{background:#3F6BC4}
   .def-ch.sr{background:var(--c-sr-line)}
   .def-tag{display:inline-block; margin:0 5px 6px 0; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:10.5px; font-weight:500; line-height:1.5}
-  /* light table popover (rate definitions) */
-  .def-pop{width:min(640px, calc(100vw - 32px)); padding:14px 16px 14px; background:#fff; color:var(--ink); border:1px solid var(--border); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:0 16px 38px rgba(30,40,60,.2)}
-  .def-pop:before{border-bottom-color:#fff; filter:drop-shadow(0 -1px 0 var(--border))}
-  .def-pop h4{color:var(--navy); font-size:13px; margin:0 0 10px}
-  .def-table{width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed}
-  .def-table th, .def-table td{border:1px solid #CBD2DA; padding:8px 10px; text-align:center; vertical-align:middle; line-height:1.9}
-  .def-table thead th{background:#EDF0F4; color:var(--navy); font-weight:600}
-  .def-table th:first-child{width:76px}
-  .def-table tbody th{ text-align:left; color:var(--navy); font-weight:700; background:#fff}
-  .def-table td.cur, .def-table thead th.cur{background:#EEF4FB}
-  .def-table thead th.cur{background:#DCE8F6}
-  @media (max-width:520px){ .def-table{font-size:11px} .def-table th, .def-table td{padding:6px 4px} .def-table th:first-child{width:52px} }
 
   /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
   .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
@@ -824,7 +812,13 @@
       h1_1:"零售門市與展示中心會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"累積會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
-      def_title:"結案率／轉換率涵蓋標籤", def_col_closed:"結案率涵蓋標籤", def_col_conv:"轉換率涵蓋標籤",
+      def_intro:"結算會員系統中的以下標籤：",
+      def_closed_title:"結案率定義",
+      def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
+      def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
+      def_conv_title:"轉換率定義",
+      def_conv_dds:"已結單 未出貨/已結單 已出貨",
+      def_conv_sr:"已購顧客(全)",
       period:"顯示區間：", mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"會員成長趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員成長趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
@@ -851,7 +845,13 @@
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Cumulative Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
-      def_title:"Tags covered by Closing / Conversion rate", def_col_closed:"Closing rate tags", def_col_conv:"Conversion rate tags",
+      def_intro:"Counted from these tags in the member system:",
+      def_closed_title:"Closing rate definition",
+      def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
+      def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
+      def_conv_title:"Conversion rate definition",
+      def_conv_dds:"已結單 未出貨/已結單 已出貨",
+      def_conv_sr:"已購顧客(全)",
       period:"Period:", mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Member Growth Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Growth Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
@@ -897,28 +897,17 @@
   });
 
   /* ---------- rate definitions: hover (or tap / focus) "結案率" / "轉換率" to see how each channel is counted ---------- */
-  var DEF_TAGS = {
-    bosch: {
-      closed: ['已結單 未出貨', '已結單 已出貨', '至其他通路購買', '環境因素 無法安裝', '無購買意願'],
-      conv: ['已結單 未出貨', '已結單 已出貨']
-    },
-    ggn: {
-      closed: ['未購顧客- 至其他通路購買', '未購顧客- 環境因素無法安裝', '未購顧客- 暫時無需求', '未購顧客- 無意願參加體驗活動', '已購顧客(全)'],
-      conv: ['已購顧客(全)']
-    }
-  };
-  function defCell(list){ return list.map(function(x){ return '<div>' + x + '</div>'; }).join(''); }
+  function defTags(s){
+    return s.split('/').map(function(x){ x = x.trim(); return x ? '<span class="def-tag">' + x + '</span>' : ''; }).join('');
+  }
   function renderDefs(){
     [['closed', 'defPopClosed'], ['conv', 'defPopConv']].forEach(function(d){
       var pop = document.getElementById(d[1]);
       if (!pop) return;
-      pop.innerHTML = '<h4>' + t('def_title') + '</h4>' +
-        '<table class="def-table"><thead><tr><th></th>' +
-        '<th class="' + (d[0] === 'closed' ? 'cur' : '') + '">' + t('def_col_closed') + '</th>' +
-        '<th class="' + (d[0] === 'conv' ? 'cur' : '') + '">' + t('def_col_conv') + '</th></tr></thead><tbody>' +
-        '<tr><th scope="row">BOSCH</th><td class="' + (d[0] === 'closed' ? 'cur' : '') + '">' + defCell(DEF_TAGS.bosch.closed) + '</td><td class="' + (d[0] === 'conv' ? 'cur' : '') + '">' + defCell(DEF_TAGS.bosch.conv) + '</td></tr>' +
-        '<tr><th scope="row">GGN</th><td class="' + (d[0] === 'closed' ? 'cur' : '') + '">' + defCell(DEF_TAGS.ggn.closed) + '</td><td class="' + (d[0] === 'conv' ? 'cur' : '') + '">' + defCell(DEF_TAGS.ggn.conv) + '</td></tr>' +
-        '</tbody></table>';
+      pop.innerHTML = '<h4>' + t('def_' + d[0] + '_title') + '</h4>' +
+        '<p class="def-intro">' + t('def_intro') + '</p>' +
+        '<div class="def-row"><span class="def-ch dds">DDS</span><div>' + defTags(t('def_' + d[0] + '_dds')) + '</div></div>' +
+        '<div class="def-row"><span class="def-ch sr">Showroom</span><div>' + defTags(t('def_' + d[0] + '_sr')) + '</div></div>';
     });
   }
   var defTimer = null, canHover = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
