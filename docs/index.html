@@ -140,7 +140,6 @@
   .kpi-arrow:disabled{opacity:.3; cursor:default; background:transparent}
   .metric-group{display:grid; gap:12px; position:relative}
   .metric-group-label{font-size:13.5px; font-weight:600; color:var(--ink); opacity:.85; display:flex; align-items:center; gap:9px}
-  .metric-group-label:before{content:""; width:3px; height:14px; background:var(--navy); border-radius:2px}
   /* click a rate title (closing / conversion) to read how it is counted */
   .def-btn{display:inline-flex; align-items:center; gap:6px; background:none; border:0; padding:2px 6px; margin:-2px -6px; font:inherit; color:inherit; cursor:pointer; border-radius:6px}
   .def-btn:hover, .def-btn[aria-expanded="true"]{background:#E4EDF7}
@@ -151,12 +150,65 @@
   .def-pop:before{content:""; position:absolute; top:-7px; left:26px; border:7px solid transparent; border-top:0; border-bottom-color:rgba(46,51,64,.78)}
   .def-pop h4{margin:0 0 2px; font-size:12.5px; font-weight:700; color:#fff; letter-spacing:.02em}
   .def-pop .def-intro{margin:0 0 4px; font-size:10.5px; color:rgba(255,255,255,.62)}
+  .def-formula{margin:2px 0 0; padding:10px 0 4px; border-top:1px solid rgba(255,255,255,.14); font-size:11.5px; font-weight:400; color:rgba(255,255,255,.62); line-height:1.5}
   .def-row{display:grid; grid-template-columns:66px 1fr; gap:10px; align-items:start; padding:8px 0 2px; border-top:1px solid rgba(255,255,255,.14)}
   .def-ch{display:inline-flex; align-items:center; justify-content:center; height:20px; padding:0 8px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.02em; color:#fff}
   .def-ch.dds{background:#3F6BC4}
   .def-ch.sr{background:var(--c-sr-line)}
   .def-tag{display:inline-block; margin:0 5px 6px 0; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:10.5px; font-weight:500; line-height:1.5}
 
+  /* KPI targets: % is the goal, the count is the helper line */
+  .tgt{display:flex; align-items:baseline; justify-content:flex-start; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border)}
+  .tgt-lbl{font-size:12.5px; color:var(--muted); font-weight:500}
+  .tgt-val{font-size:14px; font-weight:700; color:var(--navy); white-space:nowrap}
+  /* wide cards (tablet / desktop): title + big number on the left, month-over-month block on the right, count footer underneath */
+  @media (min-width:561px){
+    .stat-card:has([data-kpi$="mom"]){grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto 1fr auto auto; column-gap:14px; row-gap:0; padding:16px 20px 14px; align-content:stretch; min-height:142px}
+    .stat-card:has([data-kpi$="mom"]) > .head{grid-column:1; grid-row:1; margin-bottom:10px}
+    .stat-card:has([data-kpi$="mom"]) > .bignum{grid-column:1; grid-row:2 / span 2; align-self:center; margin:0}
+    .stat-card:has([data-kpi$="mom"]) > [data-kpi$="mom"]{grid-column:2; grid-row:2; align-self:end; justify-self:start}
+    .stat-card:has([data-kpi$="mom"]) > [data-kpi$="delta"]{grid-column:2; grid-row:3; align-self:start; justify-self:start; margin-top:2px}
+    .stat-card:has([data-kpi="closemom"], [data-kpi="convmom"]) > [data-kpi$="mom"]{grid-row:2 / span 2; align-self:center}
+    .stat-card .mom-block{grid-column:2; grid-row:2 / span 2; align-self:center; justify-self:end; display:grid; gap:4px; justify-items:end; text-align:right}
+    .stat-card .mom-block .trend{font-size:13px}
+    .stat-card .mom-block .sub{font-size:12.5px}
+    .stat-card:has(.mom-block){--tgt-h:40px}
+    .stat-card:has(.mom-block)::after{content:""; grid-column:1 / -1; grid-row:4; height:var(--tgt-h)}
+    .stat-card:has([data-kpi$="mom"]) > .tgt{grid-column:1 / -1; grid-row:4}
+  }
+  @media (max-width:560px){ .tgt{margin-top:4px; padding-top:8px; flex-wrap:wrap; gap:2px 6px} .tgt-lbl{font-size:10px} .tgt-val{font-size:13px} }
+  .stat-card.mono.c-orange .tgt{border-top-color:rgba(255,255,255,.22)}
+  .stat-card.mono.c-orange .tgt-lbl{color:rgba(255,255,255,.72)}
+  .stat-card.mono.c-orange .tgt-val{color:#fff}
+  /* ---- member funnel (left third of the trend row) ---- */
+  .trend-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:18px; align-items:stretch}
+  .trend-row{margin-top:30px}
+  .trend-row > .chart-card, .trend-col > .chart-card{min-width:0}
+  .trend-col{display:contents}
+  /* the shared filter lives inside the trend card, on a single line */
+  .chart-card .shared-filter{margin:6px 0 10px; padding:10px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border); gap:8px; flex-wrap:nowrap; white-space:nowrap}
+  .chart-card .shared-filter .df-field{flex:0 1 auto; min-width:0}
+  .chart-card .shared-filter .shared-filter-label{flex:none}
+  .funnel-card{display:flex; flex-direction:column}
+  .funnel-card .chart-head{margin-bottom:4px}
+  .fn-month{margin-left:auto; padding:3px 10px; border-radius:999px; background:#CFE4F7; color:var(--navy); font-size:12px; font-weight:700; white-space:nowrap}
+  .fn-sub{font-size:12px; color:var(--muted); margin:2px 0 14px}
+  .fn-sub:empty{display:none}
+  .funnel-card .chart-head{margin-bottom:14px}
+  .fn-body{flex:1; display:flex; flex-direction:column; justify-content:center; gap:0; padding:0 0 4px}
+  .fn-stage{position:relative}
+  .fn-shape{display:block; width:100%; height:auto}
+  .fn-content{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:12px; color:#fff}
+  .fn-ico{width:30px; height:30px; display:inline-flex; flex:none; opacity:.95}
+  .fn-ico svg{width:100%; height:100%}
+  .fn-lbl{display:grid; gap:0; line-height:1.15}
+  .fn-name{font-size:13px; font-weight:500; opacity:.92}
+  .fn-val{font-size:27px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  .fn-gap{display:flex; align-items:center; justify-content:center; gap:10px; padding:2px 0 1px; color:#5585B1}
+  .fn-chev{width:22px; height:22px; display:inline-flex}
+  .fn-chev svg{width:100%; height:100%}
+  .fn-rate{font-size:13px; font-weight:700; color:var(--navy)}
+  @media (max-width:860px){ .trend-row{grid-template-columns:1fr} .chart-card .shared-filter{flex-wrap:wrap; white-space:normal} }
   /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
   .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
   .stat-card.c-orange{border-color:var(--orange); background:var(--surface)}
@@ -280,7 +332,6 @@
   .store-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
   .store-card-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px}
   .store-card-head .label{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
-  .store-card-head .label:before{content:""; width:3px; height:14px; background:var(--table-navy); border-radius:2px}
   .refresh-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:500; color:var(--ink); cursor:pointer; font-family:inherit}
   .refresh-btn[hidden]{display:none}
   .refresh-btn:hover{background:var(--bg)}
@@ -358,7 +409,11 @@
   .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
   /* member trend, "All" view: legend for the stacked DDS / Showroom layers */
-  .chart-subrow{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 16px; margin:-4px 0 8px}
+  .chart-subrow{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 16px; margin:30px 0 8px}
+  .chart-controls{margin:0; flex-wrap:wrap; gap:8px 16px; justify-content:flex-end}
+  .chart-controls .df-check, .chart-controls .df-radio{font-size:12px; color:var(--muted); font-weight:400}
+  .chart-controls .df-refresh{height:26px; padding:0 10px; font-size:12px; font-weight:500; color:var(--muted); border-color:var(--border); box-shadow:none}
+  .chart-controls .df-refresh:hover{color:var(--ink); border-color:#CBD2DA}
   .chart-range{margin-left:auto; font-size:12px; color:var(--muted); white-space:nowrap}
   .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:0; font-size:12.5px; color:var(--muted)}
   .trend-legend .tl-item{display:inline-flex; align-items:center; gap:7px}
@@ -494,7 +549,7 @@
   <section class="section" id="retail">
     <div class="section-top">
       <div>
-        <h1 data-i18n="h1_1">零售門市與展示中心會員表現</h1>
+        <h1 data-i18n="h1_1">會員表現</h1>
       </div>
       <div class="kpi-month-pick" id="kpiPick" role="group">
         <button type="button" class="kpi-arrow" id="kpiPrevArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -510,20 +565,26 @@
         <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="cum" data-ch="total">–</div>
-          <span class="trend" data-kpi="mom" data-ch="total"></span>
-          <div class="sub num" data-kpi="delta" data-ch="total"></div>
+          <div class="mom-block">
+            <span class="trend" data-kpi="mom" data-ch="total"></span>
+            <div class="sub num" data-kpi="delta" data-ch="total"></div>
+          </div>
         </div>
         <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" data-kpi="cum" data-ch="dds">–</div>
-          <span class="trend" data-kpi="mom" data-ch="dds"></span>
-          <div class="sub num" data-kpi="delta" data-ch="dds"></div>
+          <div class="mom-block">
+            <span class="trend" data-kpi="mom" data-ch="dds"></span>
+            <div class="sub num" data-kpi="delta" data-ch="dds"></div>
+          </div>
         </div>
         <div class="stat-card mono c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
           <div class="bignum num" data-kpi="cum" data-ch="showroom">–</div>
-          <span class="trend" data-kpi="mom" data-ch="showroom"></span>
-          <div class="sub num" data-kpi="delta" data-ch="showroom"></div>
+          <div class="mom-block">
+            <span class="trend" data-kpi="mom" data-ch="showroom"></span>
+            <div class="sub num" data-kpi="delta" data-ch="showroom"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -578,44 +639,52 @@
       </div>
     </div>
 
-    <!-- ---- Shared filter: drives both the trend chart and the By Store table below ---- -->
-    <div class="shared-filter">
-      <span class="shared-filter-label" data-i18n="shared_filter_label">篩選（同步套用至下方趨勢圖與門市明細）</span>
-      <div class="seg" id="globalChannelSeg">
-        <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
-        <button type="button" data-ch="dds">DDS</button>
-        <button type="button" data-ch="showroom">Showroom</button>
-      </div>
-      <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-start" id="globalStart" aria-label="Start month"></select></label>
-      <span class="df-sep" data-i18n="to">至</span>
-      <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-end" id="globalEnd" aria-label="End month"></select></label>
-      <button type="button" class="df-query" id="globalQuery" data-i18n="query">查詢</button>
+    <div class="trend-row">
+    <div class="chart-card funnel-card" id="funnelCard">
+      <div class="chart-head"><span class="swatch" style="background:var(--c-total)"></span><b data-i18n="funnel_title">全通路會員漏斗</b><span class="fn-month" id="funnelMonth"></span></div>
+      <div class="fn-sub" id="funnelSub"></div>
+      <div class="fn-body" id="funnelBody"></div>
     </div>
-
+    <div class="trend-col">
     <div class="chart-card">
       <div class="chart-head"><span class="swatch" id="mergedSwatch" style="background:var(--c-total)"></span><b id="mergedTitle" data-i18n="total_trend">會員成長趨勢</b>
-        <div class="df-radios">
-          <label class="df-check" data-members-only><input type="checkbox" id="mergedShowClose"><span data-i18n="close_rate">結案率</span></label>
-          <label class="df-check" data-members-only><input type="checkbox" id="mergedShowConv"><span data-i18n="conv_rate">轉換率</span></label>
-          <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
-          <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
-          <button type="button" class="df-refresh" id="globalRefresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg><span data-i18n="refresh_all">重新整理</span></button>
+      </div>
+      <!-- ---- Shared filter: drives both the trend chart and the By Store table below ---- -->
+      <div class="shared-filter">
+        <span class="shared-filter-label" data-i18n="shared_filter_label" title="同步套用至趨勢圖與門市明細">篩選</span>
+        <div class="seg" id="globalChannelSeg">
+          <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
+          <button type="button" data-ch="dds">DDS</button>
+          <button type="button" data-ch="showroom">Showroom</button>
         </div>
+        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-start" id="globalStart" aria-label="Start month"></select></label>
+        <span class="df-sep" data-i18n="to">至</span>
+        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select class="df-end" id="globalEnd" aria-label="End month"></select></label>
+        <button type="button" class="df-query" id="globalQuery" data-i18n="query">查詢</button>
+      </div>
+      <div class="df-radios chart-controls">
+        <label class="df-check" data-members-only><input type="checkbox" id="mergedShowClose"><span data-i18n="close_rate">結案率</span></label>
+        <label class="df-check" data-members-only><input type="checkbox" id="mergedShowConv"><span data-i18n="conv_rate">轉換率</span></label>
+        <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="cumulative" checked><span data-i18n="cumulative">累積</span></label>
+        <label class="df-radio" data-members-only><input type="radio" name="merged-mode" value="monthly"><span data-i18n="monthly">當月新增</span></label>
+        <button type="button" class="df-refresh" id="globalRefresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg><span data-i18n="refresh_all">重新整理</span></button>
       </div>
       <div class="chart-subrow">
         <div class="trend-legend" id="mergedLegend" hidden></div>
-        <span class="chart-range" id="mergedRange"></span>
       </div>
       <div class="chart-wrap" id="mergedChart"></div>
       <div class="pager" data-pager="merged"><button type="button" class="pg-btn pg-prev" aria-label="Earlier months">&#8249;</button><span class="pg-text"></span><button type="button" class="pg-btn pg-next" aria-label="Later months">&#8250;</button></div>
     </div>
+    </div>
+
+    </div>
 
     <!-- ---- By Store drill-down (filtered by the shared control bar above) ---- -->
-    <div class="store-card" id="bystore">
+    <div class="store-card collapsed" id="bystore">
       <div class="store-card-head">
         <div class="left">
-          <button type="button" class="store-toggle" id="storeToggle" aria-expanded="true" aria-controls="storeBody">
-            <span class="label" data-i18n="members_store_label">明細</span>
+          <button type="button" class="store-toggle" id="storeToggle" aria-expanded="false" aria-controls="storeBody">
+            <span class="label" data-i18n="members_store_label">會員明細</span>
             <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
           </button>
         </div>
@@ -708,10 +777,10 @@
     </div>
 
     <!-- ---- 1-on-1 Chat by store (sheet block "1-on-1 Chat (by store)"); same layout and controls as the member By Store card ---- -->
-    <div class="store-card" id="chatstore" hidden>
+    <div class="store-card collapsed" id="chatstore" hidden>
       <div class="store-card-head">
         <div class="left">
-          <button type="button" class="store-toggle" id="chatStoreToggle" aria-expanded="true" aria-controls="chatStoreBody">
+          <button type="button" class="store-toggle" id="chatStoreToggle" aria-expanded="false" aria-controls="chatStoreBody">
             <span class="label" data-i18n="chat_store_label">1對1對話視窗明細</span>
             <span class="store-caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
           </button>
@@ -802,26 +871,29 @@
       nav_retail:"零售會員", nav_crm:"CRM 系統使用", to_top:"回到頂部",
       kicker_bystore:"門市總覽", h1_bystore:"門市會員與結案明細",
       refresh_all:"重新整理",
-      by_store_label:"BY STORE", members_store_label:"明細", chat_store_label:"1對1對話視窗明細", refresh:"重整",
+      by_store_label:"BY STORE", members_store_label:"會員明細", chat_store_label:"1對1對話視窗明細", refresh:"重整",
       store_name:"店櫃名稱", cum_members:"總會員數(累積)", monthly_new:"當月新增會員數", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
       rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
-      h1_1:"零售門市與展示中心會員表現",
+      h1_1:"會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
       group_members:"累積會員數", group_conversion:"轉換率", group_closed:"結案率", ch_total:"Total Retail",
-      def_intro:"結算會員系統中的以下標籤：",
-      def_closed_title:"結案率定義",
+      def_closed_formula:"結案率 = 結案筆數(累積) ÷ 總會員數(累積) × 100%",
+      def_conv_formula:"轉換率 = 轉換筆數(累積) ÷ 總會員數(累積) × 100%",
+      funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
+      delta_up:"較上月增加 {n} 人", delta_down:"較上月減少 {n} 人", vs_last:"較上月", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
+      def_closed_title:"結案率涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
-      def_conv_title:"轉換率定義",
+      def_conv_title:"轉換率涵蓋範圍",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
       period:"顯示區間：", mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"會員成長趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
-      trend_suffix:" 會員成長趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選（同步套用至下方趨勢圖與門市明細）",
+      trend_suffix:" 會員成長趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選",
       h2_2:"CRM 系統使用",
       total_tags:"標籤使用總數",
       across_members:"全台零售櫃位(包含DDS & Showroom)",
@@ -845,16 +917,19 @@
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
       group_members:"Cumulative Members", group_conversion:"Conversion", group_closed:"Closing Rate", ch_total:"Total Retail",
-      def_intro:"Counted from these tags in the member system:",
-      def_closed_title:"Closing rate definition",
+      def_closed_formula:"Closing rate = Closed count (cum.) ÷ Total members (cum.) × 100%",
+      def_conv_formula:"Conversion rate = Converted count (cum.) ÷ Total members (cum.) × 100%",
+      funnel_title:"All-Channel Member Funnel", fn_members:"Total members (cum.)", fn_closed:"Closed", fn_conv:"Converted", fn_unit_m:"", fn_unit_n:"", fn_of:"of members",
+      delta_up:"{n} more than last month", delta_down:"{n} fewer than last month", vs_last:"vs last month", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
+      def_closed_title:"Closing rate coverage",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
-      def_conv_title:"Conversion rate definition",
+      def_conv_title:"Conversion rate coverage",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
       period:"Period:", mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Member Growth Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
-      trend_suffix:" Member Growth Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter (applies to the trend chart and store detail below)",
+      trend_suffix:" Member Growth Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter",
       h2_2:"CRM System Usage",
       total_tags:"Total Tags Used",
       across_members:"Nationwide retail counters (DDS & Showroom included)",
@@ -905,9 +980,9 @@
       var pop = document.getElementById(d[1]);
       if (!pop) return;
       pop.innerHTML = '<h4>' + t('def_' + d[0] + '_title') + '</h4>' +
-        '<p class="def-intro">' + t('def_intro') + '</p>' +
         '<div class="def-row"><span class="def-ch dds">DDS</span><div>' + defTags(t('def_' + d[0] + '_dds')) + '</div></div>' +
-        '<div class="def-row"><span class="def-ch sr">Showroom</span><div>' + defTags(t('def_' + d[0] + '_sr')) + '</div></div>';
+        '<div class="def-row"><span class="def-ch sr">Showroom</span><div>' + defTags(t('def_' + d[0] + '_sr')) + '</div></div>' +
+        '<div class="def-formula">' + t('def_' + d[0] + '_formula') + '</div>';
     });
   }
   var defTimer = null, canHover = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
@@ -1105,8 +1180,10 @@
     var soft = cssVar(softVar);
     var ink = cssVar('--ink');
     var axisFont = 13 * scale, ptFont = 11 * scale;
-    var W = 1040;
-    var H = 290 + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1) + (opts.rates && opts.rates.length ? 44 : 0), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
+    var W = 1040, hBoost = 0;
+    // the member trend sits in the right two thirds beside the funnel on wide screens: draw it at its real width so text and bars stay full size
+    if (containerId === 'mergedChart' && window.innerWidth > 860 && wrap.clientWidth > 300){ W = Math.round(wrap.clientWidth); hBoost = 50; }
+    var H = 290 + hBoost + 70*(scale-1), padL = 54 + 46*(scale-1), padR = 20 + 6*(scale-1) + (opts.rates && opts.rates.length ? 44 : 0), padT = 46 + 44*(scale-1), padB = 32 + 26*(scale-1);
     if (labels.length <= 2){ W = 520; }
     var plotW = W - padL - padR, plotH = H - padT - padB;
     // "All" view (opts.breakdown): cumulative stacks DDS and Showroom as areas under the total line; the monthly
@@ -1359,14 +1436,15 @@
   };
 
   // "All" view only: colour key for the DDS / Showroom layers (or lines) and the orange total line.
-  function renderMergedLegend(bd, rates){
+  function renderMergedLegend(bd, rates, single){
     var el = document.getElementById('mergedLegend');
     var hasRates = !!(rates && rates.length);
-    if ((!bd || !bd.length) && !hasRates){ el.hidden = true; el.innerHTML = ''; return; }
+    if ((!bd || !bd.length) && !hasRates && !single){ el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
     var html = '';
     if (bd && bd.length) html = '<span class="tl-item"><i class="tl-sw" style="background:var(--c-dds)"></i>DDS</span>' +
       '<span class="tl-item"><i class="tl-sw" style="background:var(--c-sr)"></i>Showroom</span>';
+    else if (single) html = '<span class="tl-item"><i class="tl-sw" style="background:' + single.color + '"></i>' + single.name + '</span>';
     if (hasRates) html += rates.map(function(r){ return '<span class="tl-item" style="color:' + r.color + '"><i class="tl-dash' + (r.solid ? ' tl-solid' : (r.dash ? ' tl-dot' : '')) + '"></i>' + r.name + '</span>'; }).join('');
     el.innerHTML = html;
   }
@@ -1376,7 +1454,6 @@
     var mode = document.querySelector('input[name="merged-mode"]:checked').value;
     var start = globalRange.start, end = globalRange.end;
     var rg = monthRange(start, end);
-    document.getElementById('mergedRange').textContent = t('period') + (currentLang === 'zh' ? '' : ' ') + ymLabel(rg[0]) + ' – ' + ymLabel(rg[1]);
     var data = seriesFor(meta.seriesKey, mode, start, end);
     var profile = chartProfile(document.getElementById('mergedChart'));
     WINDOW.merged = profile.merged;
@@ -1427,11 +1504,10 @@
       chartOpts.countLines = lines;
       legendLines = lines;
     }
-    renderMergedLegend(chartOpts.breakdown, chartOpts.rates || legendLines);
+    renderMergedLegend(chartOpts.breakdown, chartOpts.rates || legendLines, drill.channel === 'all' ? null : {name: drill.channel === 'dds' ? 'DDS' : 'Showroom', color: drill.channel === 'dds' ? 'var(--c-dds)' : 'var(--c-sr-line)'});
     renderChart('mergedChart', data.labels.slice(w[0], w[1]), data.values.slice(w[0], w[1]), meta.colorVar, meta.softVar, mode, profile.scale, data.months.slice(w[0], w[1]), drill.channel, chartOpts);
-    document.getElementById('mergedSwatch').style.background = 'var(' + meta.colorVar + ')';
-    var name = drill.channel === 'all' ? t('total_trend') : (drill.channel === 'dds' ? 'DDS' : 'Showroom') + t('trend_suffix');
-    document.getElementById('mergedTitle').textContent = name;
+    // the title stays "Member Growth Trend" whichever channel is selected; the channel shows in the legend below
+    document.getElementById('mergedTitle').textContent = t('total_trend');
   }
 
   /* ---------- funnel (generalized: N stages, proportional taper) ---------- */
@@ -1933,6 +2009,67 @@
       renderKpis();
     });
   });
+  // Cumulative count line under each closing / conversion rate (the numerator of the rate)
+  function renderTarget(kind, ch, n, ok){
+    var gapEl = document.querySelector('[data-kpi="' + kind + 'gap"][data-ch="' + ch + '"]');
+    if (!gapEl) return;
+    var el = gapEl.parentNode.querySelector('.tgt[data-kpi="' + kind + 'tgt"]');
+    if (!el){
+      el = document.createElement('div'); el.className = 'tgt'; el.setAttribute('data-kpi', kind + 'tgt');
+      gapEl.parentNode.appendChild(el);
+    }
+    if (!ok){ el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = '<span class="tgt-lbl">' + t(kind === 'close' ? 'tgt_close' : 'tgt_conv') + '</span><b class="tgt-val num">' + t('tgt_unit').replace('{n}', n.toLocaleString()) + '</b>';
+  }
+  /* ---------- member funnel: total cumulative members > closed > converted (month = the KPI month picker, channel = shared filter) ---------- */
+  function renderFunnelCard(){
+    var body = document.getElementById('funnelBody');
+    if (!body || !monthDefs.length) return;
+    var vm = viewMonth(), cur = summaryByMonth[vm];
+    if (!cur) return;
+    var ch = 'total';   // all channels: DDS + Showroom, independent of the channel filter
+    var pick = function(k){ return ch === 'total' ? (cur.dds[k] || 0) + (cur.showroom[k] || 0) : (cur[ch][k] || 0); };
+    var hasConv = typeof (ch === 'total' ? cur.dds.conv : cur[ch].conv) === 'number';
+    var cum = pick('cum'), closed = pick('shipped'), conv = pick('conv');
+    document.getElementById('funnelMonth').textContent = kpiFullText(vm);
+    document.getElementById('funnelSub').textContent = '';
+    var stages = [
+      {cls: 's1', name: t('fn_members'), v: cum, unit: t('fn_unit_m'), pct: 100},
+      {cls: 's2', name: t('fn_closed'), v: closed, unit: t('fn_unit_n'), pct: cum ? closed / cum * 100 : 0},
+      {cls: 's3', name: t('fn_conv'), v: conv, unit: t('fn_unit_n'), pct: cum ? conv / cum * 100 : 0, off: !hasConv}
+    ];
+    // tapering stages (each stage's bottom edge = the next stage's top edge), icon + name + number inside, rate between stages
+    var ICONS = [
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="4.6" cy="9.6" r="2.2"/><circle cx="19.4" cy="9.6" r="2.2"/><path d="M1.2 17.4c.2-2.1 1.6-3.6 3.6-3.9M22.8 17.4c-.2-2.1-1.6-3.6-3.6-3.9"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 12.4l2.8 2.8L16.4 9"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h3l2.3 11.2a1.6 1.6 0 0 0 1.6 1.3h7.6a1.6 1.6 0 0 0 1.6-1.2L20 8H6.2"/><circle cx="9.6" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>'
+    ];
+    // blend a hex colour towards white (opaque, so the fill and its rounded stroke never double up)
+    var fadeTo = function(hex, k){
+      var n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function(v){ return Math.round(v + (255 - v) * k); });
+      return 'rgb(' + c.join(',') + ')';
+    };
+    var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    var W0 = [100, 84, 66, 52];   // stage top widths (% of the card); the last entry is the bottom of stage 3
+    var COLS = [['#2B4A6C', '#3C6694'], ['#4677A7', '#5A8CBB'], ['#6AA0D6', '#82B4E3']];
+    body.innerHTML = stages.map(function(st, i){
+      var vb = 320, h = 124, pad = 8;
+      var tw = W0[i] / 100 * (vb - pad * 2), bw = W0[i + 1] / 100 * (vb - pad * 2), c = vb / 2;
+      var pts = [[c - tw / 2 + pad, pad], [c + tw / 2 + pad, pad], [c + bw / 2 + pad, h - pad], [c - bw / 2 + pad, h - pad]].map(function(q){ return q[0].toFixed(1) + ',' + q[1]; }).join(' ');
+      var gid = 'fnG' + i;
+      var val = st.off ? '–' : st.v.toLocaleString();
+      var gap = '';
+      if (i){
+        gap = '<div class="fn-gap"><span class="fn-chev">' + CHEV + '</span>' + (st.off ? '' : '<span class="fn-rate">' + t(i === 1 ? 'close_rate' : 'conv_rate') + ' ' + st.pct.toFixed(1) + '%</span>') + '</div>';
+      }
+      return gap + '<div class="fn-stage">' +
+        '<svg class="fn-shape" viewBox="0 0 ' + (vb + pad * 2) + ' ' + h + '" aria-hidden="true"><defs><linearGradient id="' + gid + '" gradientUnits="userSpaceOnUse" x1="0" y1="' + pad + '" x2="0" y2="' + (h - pad) + '"><stop offset="0" stop-color="' + COLS[i][0] + '"/><stop offset="0.5" stop-color="' + COLS[i][1] + '"/><stop offset="1" stop-color="' + fadeTo(COLS[i][1], 0.55) + '"/></linearGradient></defs>' +
+        '<polygon points="' + pts + '" fill="url(#' + gid + ')" stroke="url(#' + gid + ')" stroke-width="14" stroke-linejoin="round"/></svg>' +
+        '<div class="fn-content"><span class="fn-ico">' + ICONS[i] + '</span><span class="fn-lbl"><span class="fn-name">' + st.name + '</span><b class="fn-val">' + val + '</b></span></div></div>';
+    }).join('');
+  }
+
   function renderKpis(){
     if (!monthDefs.length) return;
     refreshKpiPicker();
@@ -1950,8 +2087,8 @@
         var d = pick(cur, ch, 'monthly');
         var pct = d / prevCum * 100, dir = pct >= 0 ? 'up' : 'down';
         momEl.className = 'trend ' + dir;
-        momEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;<span class="pct ' + dir + '">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
-        deltaEl.textContent = (d >= 0 ? '+' : '') + d.toLocaleString() + ' ' + t('vs_prev').replace('{m}', prevName);
+        momEl.innerHTML = '<span>' + t('mom') + '</span>&nbsp;<span class="pct ' + dir + '"><span class="tri ' + dir + '"></span>&nbsp;' + Math.abs(pct).toFixed(1) + '%</span>';
+        deltaEl.textContent = t(d >= 0 ? 'delta_up' : 'delta_down').replace('{n}', Math.abs(d).toLocaleString());
       } else {
         momEl.className = 'trend'; momEl.textContent = ''; deltaEl.textContent = '';
       }
@@ -1965,13 +2102,17 @@
         if (hasConv && prevHasConv && prevRate > 0){
           var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curN - prevN;
           mEl.className = 'trend ' + dir; mEl.style.color = '';
-          mEl.innerHTML = '<span class="tri ' + dir + '"></span><span>' + t('mom') + '</span>&nbsp;<span class="pct ' + dir + '">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
-          gEl.textContent = (gap >= 0 ? '+' : '') + gap.toLocaleString() + ' ' + t('vs_prev').replace('{m}', prevName);
+          mEl.innerHTML = '<span>' + t('vs_last') + '</span>&nbsp;<span class="pct ' + dir + '"><span class="tri ' + dir + '"></span>&nbsp;' + Math.abs(pct).toFixed(1) + '%</span>';
+          gEl.textContent = '';
         } else { mEl.className = 'trend'; mEl.style.color = ''; mEl.textContent = ''; gEl.textContent = ''; }
+        gEl.hidden = true;
       };
       rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0, shipped, pick(prev, ch, 'shipped'));
       rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0, conv, pick(prev, ch, 'conv'));
+      renderTarget('close', ch, shipped, !!cum);
+      renderTarget('conv', ch, conv, !!cum && hasConv);
     });
+    renderFunnelCard();
   }
 
   var dataBooted = false;
