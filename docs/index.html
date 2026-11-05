@@ -643,7 +643,7 @@
 
     <div class="trend-row">
     <div class="chart-card funnel-card" id="funnelCard">
-      <div class="chart-head"><span class="swatch" style="background:var(--c-total)"></span><b data-i18n="funnel_title">全通路會員漏斗</b><span class="fn-month" id="funnelMonth"></span></div>
+      <div class="chart-head"><span class="swatch" style="background:var(--c-total)"></span><b data-i18n="funnel_title">全通路會員漏斗</b></div>
       <div class="fn-sub" id="funnelSub"></div>
       <div class="fn-body" id="funnelBody"></div>
     </div>
@@ -2034,7 +2034,6 @@
     var pick = function(k){ return ch === 'total' ? (cur.dds[k] || 0) + (cur.showroom[k] || 0) : (cur[ch][k] || 0); };
     var hasConv = typeof (ch === 'total' ? cur.dds.conv : cur[ch].conv) === 'number';
     var cum = pick('cum'), closed = pick('shipped'), conv = pick('conv');
-    document.getElementById('funnelMonth').textContent = kpiFullText(vm);
     document.getElementById('funnelSub').textContent = '';
     var stages = [
       {cls: 's1', name: t('fn_members'), v: cum, unit: t('fn_unit_m'), pct: 100},
