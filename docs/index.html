@@ -131,8 +131,8 @@
 
   /* KPI view picker: one year / month selector for all KPI groups */
   .kpi-month-pick{display:inline-flex; align-items:center; gap:2px; margin-left:auto; padding:2px; border:1px solid var(--navy); border-radius:999px}
-  .kpi-year{padding:0 3px 0 4px; font-size:12px; font-weight:700; color:var(--navy)}
-  .kpi-cur{display:inline-flex; align-items:center; justify-content:center; min-width:38px; padding:2px 9px; background:#CFE4F7; border-radius:999px; font-size:12px; font-weight:800; color:var(--navy); white-space:nowrap}
+  .kpi-year{padding:0 3px 0 4px; font-size:13px; font-weight:800; line-height:1.3; color:var(--navy)}
+  .kpi-cur{display:inline-flex; align-items:center; justify-content:center; min-width:38px; padding:2px 9px; background:#CFE4F7; border-radius:999px; font-size:13px; font-weight:800; line-height:1.3; color:var(--navy); white-space:nowrap}
   .kpi-arrow{border:0; background:transparent; color:var(--navy); width:28px; height:24px; padding:0; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center}
   .kpi-arrow svg{width:13px; height:13px}
   .kpi-arrow:hover{background:#E4EDF7}
@@ -175,6 +175,13 @@
     .stat-card:has(.mom-block){--tgt-h:40px}
     .stat-card:has(.mom-block)::after{content:""; grid-column:1 / -1; grid-row:4; height:var(--tgt-h)}
     .stat-card:has([data-kpi$="mom"]) > .tgt{grid-column:1 / -1; grid-row:4}
+  }
+  @media (min-width:561px){
+    .stat-card.chat-card{grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto 1fr auto; column-gap:14px; row-gap:0; padding:16px 20px 14px; align-content:stretch; min-height:142px}
+    .stat-card.chat-card > .head{grid-column:1; grid-row:1; margin-bottom:10px}
+    .stat-card.chat-card > .bignum{grid-column:1; grid-row:2; align-self:center; margin:0}
+    .stat-card.chat-card > [data-chat="delta"]{grid-column:2; grid-row:2; align-self:center; justify-self:end; font-size:13px}
+    .stat-card.chat-card > .tgt{grid-column:1 / -1; grid-row:3}
   }
   @media (max-width:560px){ .tgt{margin-top:4px; padding-top:8px; flex-wrap:wrap; gap:2px 6px} .tgt-lbl{font-size:10px} .tgt-val{font-size:13px} }
   .stat-card.mono.c-orange .tgt{border-top-color:rgba(255,255,255,.22)}
@@ -760,20 +767,23 @@
     <div class="metric-group">
       <div class="metric-group-label" data-i18n="chat_group">1對1對話視窗數</div>
       <div class="row3">
-        <div class="stat-card mono c-orange">
+        <div class="stat-card mono c-orange chat-card">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b>Total Retail</b></div>
           <div class="bignum num" data-chat="windows" data-ch="total">–</div>
-          <div class="sub num" data-chat="rate" data-ch="total"></div>
+          <span class="trend" data-chat="delta" data-ch="total"></span>
+          <div class="tgt" data-chat="rate" data-ch="total"></div>
         </div>
-        <div class="stat-card mono c-purple">
+        <div class="stat-card mono c-purple chat-card">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" data-chat="windows" data-ch="dds">–</div>
-          <div class="sub num" data-chat="rate" data-ch="dds"></div>
+          <span class="trend" data-chat="delta" data-ch="dds"></span>
+          <div class="tgt" data-chat="rate" data-ch="dds"></div>
         </div>
-        <div class="stat-card mono c-teal">
+        <div class="stat-card mono c-teal chat-card">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
           <div class="bignum num" data-chat="windows" data-ch="showroom">–</div>
-          <div class="sub num" data-chat="rate" data-ch="showroom"></div>
+          <span class="trend" data-chat="delta" data-ch="showroom"></span>
+          <div class="tgt" data-chat="rate" data-ch="showroom"></div>
         </div>
       </div>
     </div>
@@ -886,7 +896,7 @@
       def_closed_formula:"結案率 = 結案筆數(累積) ÷ 總會員數(累積) × 100%",
       def_conv_formula:"轉換率 = 轉換筆數(累積) ÷ 總會員數(累積) × 100%",
       funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
-      delta_up:"較上月 +{n} 人", delta_down:"較上月 -{n} 人", vs_last:"較上月", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
+      delta_up:"較上月 +{n} 人", delta_down:"較上月 -{n} 人", vs_last:"較上月", chat_delta_unit:" 個", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
       def_closed_title:"結案率涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
@@ -922,7 +932,7 @@
       def_closed_formula:"Closing rate = Closed count (cum.) ÷ Total members (cum.) × 100%",
       def_conv_formula:"Conversion rate = Converted count (cum.) ÷ Total members (cum.) × 100%",
       funnel_title:"All-Channel Member Funnel", fn_members:"Total members (cum.)", fn_closed:"Closed", fn_conv:"Converted", fn_unit_m:"", fn_unit_n:"", fn_of:"of members",
-      delta_up:"+{n} vs last month", delta_down:"-{n} vs last month", vs_last:"vs last month", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
+      delta_up:"+{n} vs last month", delta_down:"-{n} vs last month", vs_last:"vs last month", chat_delta_unit:"", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
       def_closed_title:"Closing rate coverage",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
@@ -1734,12 +1744,19 @@
     syncPicker('chat', chatMonths(), m);
     ['total', 'dds', 'showroom'].forEach(function(ch){
       var q = function(kind){ return document.querySelector('[data-chat="' + kind + '"][data-ch="' + ch + '"]'); };
-      if (!m){ q('windows').textContent = '–'; q('rate').textContent = ''; return; }
+      if (!m){ q('windows').textContent = '–'; q('rate').textContent = ''; q('delta').textContent = ''; return; }
       var win = ch === 'total' ? chatByMonth[m].dds + chatByMonth[m].showroom : chatByMonth[m][ch];
       var mem = ch === 'total' ? (summaryByMonth[m].dds.cum || 0) + (summaryByMonth[m].showroom.cum || 0) : (summaryByMonth[m][ch].cum || 0);
       var rate = chatRate(win, mem);
       q('windows').textContent = win.toLocaleString();
-      q('rate').textContent = t('usage_rate') + ' ' + rate.toFixed(2) + '%';
+      q('rate').innerHTML = '<span class="tgt-lbl">' + t('usage_rate') + '</span><b class="tgt-val num">' + rate.toFixed(2) + '%</b>';
+      // gap vs the previous month that has chat data (windows are cumulative)
+      var ms = chatMonths(), pm = ms[ms.indexOf(m) - 1], dEl = q('delta');
+      if (pm){
+        var pwin = ch === 'total' ? chatByMonth[pm].dds + chatByMonth[pm].showroom : chatByMonth[pm][ch], d = win - pwin, dir = d >= 0 ? 'up' : 'down';
+        dEl.className = 'trend ' + dir;
+        dEl.innerHTML = '<span>' + t('vs_last') + '</span>&nbsp;<span class="pct ' + dir + '">' + (d >= 0 ? '+' : '-') + Math.abs(d).toLocaleString() + t('chat_delta_unit') + '</span>';
+      } else { dEl.className = 'trend'; dEl.textContent = ''; }
     });
   }
 
