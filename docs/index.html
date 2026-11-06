@@ -394,6 +394,8 @@
     /* four controls don't fit beside the title on a phone: give them their own row under it */
     .store-card .store-card-head{flex-wrap:wrap}
     .store-card .store-card-head .right{flex:1 1 100%; justify-content:flex-end}
+    #chatstore .store-card-head .right{flex-wrap:wrap}
+    #chatstore .head-filter{flex:1 1 100%; justify-content:flex-start}
   }
   @media (max-width:360px){
     .store-card .store-refresh-btn span{display:none}
@@ -414,6 +416,11 @@
   .store-card-head .right{transition:opacity .2s ease}
   .store-card.collapsed .store-card-head .right{opacity:0; visibility:hidden}
   @media (prefers-reduced-motion: reduce){ .store-body, .store-caret svg, .store-card-head .right{transition:none} }
+  .rate-note{display:flex; align-items:center; justify-content:flex-end; gap:6px; margin:2px 22px 12px; font-size:12px; line-height:1.5; color:var(--muted)}
+  .rate-note svg{width:14px; height:14px; flex:none}
+  .rate-note b{font-weight:700}
+  .rate-note .rn-up{color:var(--up)}
+  .rate-note .rn-down{color:var(--down); margin-right:2px}
   .store-footnote{color:var(--muted); font-size:12px; padding:14px 22px 18px; border-top:1px solid var(--border)}
   .store-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 22px 14px}
   .store-empty{color:var(--muted); text-align:center; padding:28px 18px !important}
@@ -443,6 +450,9 @@
   .store-card{scroll-margin-top:48px}
   .store-card-head .left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
   .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .head-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  #chatstore .store-card-head .right{justify-content:flex-end}
+  #chatstore .rate-note{margin-top:4px}
   .store-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; background:var(--bg)}
   .seg button{border:0; background:transparent; padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:500; color:var(--muted); cursor:pointer; font-family:inherit}
@@ -798,6 +808,14 @@
           </button>
         </div>
         <div class="right">
+          <div class="head-filter">
+            <div class="seg" id="chatStoreChannelSeg">
+              <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
+              <button type="button" data-ch="dds">DDS</button>
+              <button type="button" data-ch="showroom">Showroom</button>
+            </div>
+            <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select id="chatStoreMonth" aria-label="Month"></select></label>
+          </div>
           <span class="sort-dd store-sort-dd" id="chatSortDd">
             <button type="button" class="sort-dd-btn" aria-haspopup="true" aria-expanded="false"><span class="sort-dd-label"></span><span class="sort-dd-arrow"></span><svg class="sort-dd-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="sort-dd-menu">
@@ -828,14 +846,7 @@
         </div>
       </div>
       <div class="store-body" id="chatStoreBody"><div class="store-body-inner">
-      <div class="store-filter">
-        <div class="seg" id="chatStoreChannelSeg">
-          <button type="button" data-ch="all" class="active" data-i18n="ch_all_btn">全部</button>
-          <button type="button" data-ch="dds">DDS</button>
-          <button type="button" data-ch="showroom">Showroom</button>
-        </div>
-        <label class="df-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><select id="chatStoreMonth" aria-label="Month"></select></label>
-      </div>
+      <div class="rate-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span><b class="rn-up">▲</b><b class="rn-down">▼</b> <span data-i18n="rate_delta_note">＝ 該店互動率與所屬通路平均的差距，單位為百分點</span></span></div>
       <div class="store-table-wrap">
         <table class="store-table" id="chatStoreTable">
           <thead>
@@ -849,7 +860,6 @@
           <tfoot id="chatStoreTableFoot"></tfoot>
         </table>
       </div>
-      <div class="store-footnote" data-i18n="rate_delta_note">▲▼ = 與該店所屬通路平均互動率的差距（百分點）</div>
       </div></div>
     </div>
 
@@ -887,8 +897,8 @@
       store_name:"店櫃名稱", cum_members:"總會員數(累積)", monthly_new:"當月新增會員數", shipped_cum:"結案筆數(累積)", conv_cum:"轉換筆數(累積)",
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
-      click_drill:"點擊查看門市明細", subtotal:"小計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
-      rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"▲▼ = 與該店所屬通路平均互動率的差距（百分點）",
+      click_drill:"點擊查看門市明細", subtotal:"總計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
+      rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"＝ 該店互動率與所屬通路平均的差距，單位為百分點",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       h1_1:"會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
@@ -896,7 +906,7 @@
       def_closed_formula:"結案率 = 結案筆數(累積) ÷ 總會員數(累積) × 100%",
       def_conv_formula:"轉換率 = 轉換筆數(累積) ÷ 總會員數(累積) × 100%",
       funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
-      delta_up:"較上月 +{n} 人", delta_down:"較上月 -{n} 人", vs_last:"較上月", chat_delta_unit:" 個", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
+      delta_up:"較上月 +{n} 人", delta_down:"較上月 -{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
       def_closed_title:"結案率涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
@@ -923,8 +933,8 @@
       store_name:"Store", cum_members:"Total Members (Cum.)", monthly_new:"Monthly New", shipped_cum:"Closed (Cum.)", conv_cum:"Conversions (Cum.)",
       sort_field:"Sort by", sort_short_shipped:"Closed", sort_short_conv:"Conversions", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
-      click_drill:"click for store breakdown", subtotal:"Subtotal", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
-      rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"▲▼ = gap to the average engagement rate of the store's own channel (percentage points)",
+      click_drill:"click for store breakdown", subtotal:"Total", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
+      rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"= gap between the store's rate and its own channel's average, in percentage points",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
