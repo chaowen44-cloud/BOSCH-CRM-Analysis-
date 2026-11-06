@@ -1498,7 +1498,7 @@
     if (mode === 'cumulative'){
       var rateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c ? sumOf(m, ch, 'shipped') / c * 100 : null; };
       var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
-      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('close_rate'), rateOf, closeStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#F28A50', chPrefix + t('close_rate'), rateOf, closeStyle));
       if (showConv) lines.push(seriesOf(chKey, '#FFB088', chPrefix + t('conv_rate'), convRateOf, convStyle));
       chartOpts.rates = lines;
     } else {
@@ -1511,7 +1511,7 @@
         if (!hasConvIn(m) || !pm || !hasConvIn(pm)) return null;
         return Math.max(sumOf(m, ch, 'conv') - sumOf(pm, ch, 'conv'), 0);
       };
-      if (showClose) lines.push(seriesOf(chKey, '#E8590C', chPrefix + t('closed_month'), deltaOf, closeStyle));
+      if (showClose) lines.push(seriesOf(chKey, '#F28A50', chPrefix + t('closed_month'), deltaOf, closeStyle));
       if (showConv) lines.push(seriesOf(chKey, '#FFB088', chPrefix + t('conv_month'), convDeltaOf, convStyle));
       chartOpts.countLines = lines;
       legendLines = lines;
