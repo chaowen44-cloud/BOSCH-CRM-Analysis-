@@ -612,20 +612,17 @@
         <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="close" data-ch="total">–</div>
-          <span class="trend" data-kpi="closemom" data-ch="total"></span>
-          <div class="sub num" data-kpi="closegap" data-ch="total"></div>
+          <div class="mom-block"><span class="trend" data-kpi="closemom" data-ch="total"></span><div class="sub num" data-kpi="closegap" data-ch="total"></div></div>
         </div>
         <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" data-kpi="close" data-ch="dds">–</div>
-          <span class="trend" data-kpi="closemom" data-ch="dds"></span>
-          <div class="sub num" data-kpi="closegap" data-ch="dds"></div>
+          <div class="mom-block"><span class="trend" data-kpi="closemom" data-ch="dds"></span><div class="sub num" data-kpi="closegap" data-ch="dds"></div></div>
         </div>
         <div class="stat-card mono c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
           <div class="bignum num" data-kpi="close" data-ch="showroom">–</div>
-          <span class="trend" data-kpi="closemom" data-ch="showroom"></span>
-          <div class="sub num" data-kpi="closegap" data-ch="showroom"></div>
+          <div class="mom-block"><span class="trend" data-kpi="closemom" data-ch="showroom"></span><div class="sub num" data-kpi="closegap" data-ch="showroom"></div></div>
         </div>
       </div>
     </div>
@@ -637,20 +634,17 @@
         <div class="stat-card mono c-orange">
           <div class="head"><span class="swatch" style="background:var(--orange)"></span><b data-i18n="ch_total">Total Retail</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="total">–</div>
-          <span class="trend" data-kpi="convmom" data-ch="total"></span>
-          <div class="sub num" data-kpi="convgap" data-ch="total"></div>
+          <div class="mom-block"><span class="trend" data-kpi="convmom" data-ch="total"></span><div class="sub num" data-kpi="convgap" data-ch="total"></div></div>
         </div>
         <div class="stat-card mono c-purple">
           <div class="head"><span class="swatch" style="background:var(--purple)"></span><b>DDS</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="dds">–</div>
-          <span class="trend" data-kpi="convmom" data-ch="dds"></span>
-          <div class="sub num" data-kpi="convgap" data-ch="dds"></div>
+          <div class="mom-block"><span class="trend" data-kpi="convmom" data-ch="dds"></span><div class="sub num" data-kpi="convgap" data-ch="dds"></div></div>
         </div>
         <div class="stat-card mono c-teal">
           <div class="head"><span class="swatch" style="background:var(--teal-bright)"></span><b>SHOWROOM</b></div>
           <div class="bignum num" data-kpi="conv" data-ch="showroom">–</div>
-          <span class="trend" data-kpi="convmom" data-ch="showroom"></span>
-          <div class="sub num" data-kpi="convgap" data-ch="showroom"></div>
+          <div class="mom-block"><span class="trend" data-kpi="convmom" data-ch="showroom"></span><div class="sub num" data-kpi="convgap" data-ch="showroom"></div></div>
         </div>
       </div>
     </div>
@@ -2036,10 +2030,11 @@
   function renderTarget(kind, ch, n, ok){
     var gapEl = document.querySelector('[data-kpi="' + kind + 'gap"][data-ch="' + ch + '"]');
     if (!gapEl) return;
-    var el = gapEl.parentNode.querySelector('.tgt[data-kpi="' + kind + 'tgt"]');
+    var card = gapEl.closest('.stat-card');
+    var el = card.querySelector('.tgt[data-kpi="' + kind + 'tgt"]');
     if (!el){
       el = document.createElement('div'); el.className = 'tgt'; el.setAttribute('data-kpi', kind + 'tgt');
-      gapEl.parentNode.appendChild(el);
+      card.appendChild(el);
     }
     if (!ok){ el.hidden = true; return; }
     el.hidden = false;
@@ -2125,9 +2120,9 @@
           var pct = (curRate - prevRate) / prevRate * 100, dir = pct >= 0 ? 'up' : 'down', gap = curN - prevN;
           mEl.className = 'trend ' + dir; mEl.style.color = '';
           mEl.innerHTML = '<span>' + t('vs_last') + '</span>&nbsp;<span class="pct ' + dir + '"><span class="tri ' + dir + '"></span>&nbsp;' + Math.abs(pct).toFixed(1) + '%</span>';
-          gEl.textContent = '';
-        } else { mEl.className = 'trend'; mEl.style.color = ''; mEl.textContent = ''; gEl.textContent = ''; }
-        gEl.hidden = true;
+          gEl.textContent = (gap >= 0 ? '+' : '-') + t('tgt_unit').replace('{n}', Math.abs(gap).toLocaleString());
+          gEl.hidden = false;
+        } else { mEl.className = 'trend'; mEl.style.color = ''; mEl.textContent = ''; gEl.textContent = ''; gEl.hidden = true; }
       };
       rateMom('close', cum ? shipped / cum * 100 : 0, prevCum ? pick(prev, ch, 'shipped') / prevCum * 100 : 0, shipped, pick(prev, ch, 'shipped'));
       rateMom('conv', cum ? conv / cum * 100 : 0, prevCum ? pick(prev, ch, 'conv') / prevCum * 100 : 0, conv, pick(prev, ch, 'conv'));
