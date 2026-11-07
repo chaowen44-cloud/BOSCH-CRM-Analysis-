@@ -217,6 +217,10 @@
   .fn-chev{width:22px; height:22px; display:inline-flex}
   .fn-chev svg{width:100%; height:100%}
   .fn-rate{font-size:13px; font-weight:700; color:var(--navy)}
+  .fn-name,.fn-val,.fn-rate{font-family:"Roboto Condensed","Arial Narrow","Noto Sans TC",sans-serif}
+  .fn-name{font-size:14.5px; font-weight:500}
+  .fn-val{font-size:31px; letter-spacing:0}
+  .fn-rate{font-size:14.5px}
   @media (max-width:860px){ .trend-row{grid-template-columns:1fr} .chart-card .shared-filter{flex-wrap:wrap; white-space:normal} }
   /* ---- stat card (Total Retail / DDS / Showroom, shared) ---- */
   .stat-card{border-radius:var(--radius); box-shadow:var(--shadow); border:2px solid var(--border); padding:20px 22px; display:grid; gap:7px; align-content:start}
@@ -306,6 +310,13 @@
   .rt-sw{width:12px; height:12px; border-radius:3px; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35); flex:none}
   .rt-sub{margin:-3px 0 5px; font-size:12px; color:rgba(255,255,255,.6)}
   .rt-hint{margin-top:5px; font-size:12px; color:rgba(255,255,255,.6)}
+  .tooltip{font-family:"Roboto Condensed","Arial Narrow","Noto Sans TC",sans-serif}
+  .tooltip.rich{font-size:13px; padding:12px 18px; border-radius:10px}
+  .tooltip .rt-title{font-size:14px; margin-bottom:6px}
+  .tooltip .rt-row{gap:10px; line-height:1.75}
+  .tooltip .rt-sw{width:10px; height:10px}
+  .tooltip .rt-sub,.tooltip .rt-hint{font-size:11.5px}
+  .tooltip .rt-hint{margin-top:8px}
 
   /* ---- overview cards (CRM usage totals) ---- */
   .ov-card{background:var(--surface); border:2px solid var(--orange); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px 26px}
@@ -416,7 +427,8 @@
   .store-card-head .right{transition:opacity .2s ease}
   .store-card.collapsed .store-card-head .right{opacity:0; visibility:hidden}
   @media (prefers-reduced-motion: reduce){ .store-body, .store-caret svg, .store-card-head .right{transition:none} }
-  .rate-note{display:flex; align-items:center; justify-content:flex-end; gap:6px; margin:2px 22px 12px; font-size:12px; line-height:1.5; color:var(--muted)}
+  .rate-notes{display:grid; gap:2px; margin:0 22px 24px}
+  .rate-note{display:flex; align-items:center; justify-content:flex-end; gap:6px; font-size:12px; line-height:1.5; color:var(--muted)}
   .rate-note svg{width:14px; height:14px; flex:none}
   .rate-note b{font-weight:700}
   .rate-note .rn-up{color:var(--up)}
@@ -431,6 +443,8 @@
   .chart-controls .df-refresh{height:26px; padding:0 10px; font-size:12px; font-weight:500; color:var(--muted); border-color:var(--border); box-shadow:none}
   .chart-controls .df-refresh:hover{color:var(--ink); border-color:#CBD2DA}
   .chart-range{margin-left:auto; font-size:12px; color:var(--muted); white-space:nowrap}
+  #mergedChart .axis-label{font-family:"Roboto Condensed","Arial Narrow","Noto Sans TC",sans-serif; font-size:14.5px !important; letter-spacing:.2px}
+  .trend-legend .tl-item{font-family:"Roboto Condensed","Arial Narrow","Noto Sans TC",sans-serif; font-size:14px}
   .trend-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin:0; font-size:12.5px; color:var(--muted)}
   .trend-legend .tl-item{display:inline-flex; align-items:center; gap:7px}
   .trend-legend .tl-sw{width:10px; height:10px; border-radius:3px; flex:none}
@@ -452,7 +466,7 @@
   .store-card-head .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   .head-filter{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   #chatstore .store-card-head .right{justify-content:flex-end}
-  #chatstore .rate-note{margin-top:4px}
+  #chatstore .rate-notes{margin-top:-2px}
   .store-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
   .seg{display:inline-flex; border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; background:var(--bg)}
   .seg button{border:0; background:transparent; padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:500; color:var(--muted); cursor:pointer; font-family:inherit}
@@ -535,7 +549,7 @@
   }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
 
 <div class="brand-rainbow" aria-hidden="true"></div>
 <div class="topbar">
@@ -834,7 +848,10 @@
         </div>
       </div>
       <div class="store-body" id="chatStoreBody"><div class="store-body-inner">
-      <div class="rate-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span><b class="rn-up">▲</b><b class="rn-down">▼</b> <span data-i18n="rate_delta_note">＝ 該店互動率與所屬通路平均的差距，單位為百分點</span></span></div>
+      <div class="rate-notes">
+        <div class="rate-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span><b class="rn-up">▲</b><b class="rn-down">▼</b> <span data-i18n="rate_delta_note">該店互動率與所屬通路平均的差距，單位為百分點</span></span></div>
+        <div class="rate-note rate-def"><span data-i18n="rate_def">互動率計算: 對話視窗數(累積) / 總會員數(累積) × 100%</span></div>
+      </div>
       <div class="store-table-wrap">
         <table class="store-table" id="chatStoreTable">
           <thead>
@@ -886,7 +903,7 @@
       sort_field:"排序欄位", sort_short_shipped:"結案筆數", sort_short_conv:"轉換筆數", sort_by:"排序方式", sort_desc:"由多至少", sort_asc:"由少至多", sort_default:"排序",
       store_footnote:"點選上方趨勢圖任一月份，即可查看該通路當月的門市明細",
       click_drill:"點擊查看門市明細", subtotal:"總計", stores:"家門市", ch_all_btn:"全部", latest_opt:"最新（累積至今）",
-      rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"＝ 該店互動率與所屬通路平均的差距，單位為百分點",
+      rate_avg:"平均", rate_vs_avg:"與通路平均差距(百分點)", rate_delta_note:"該店互動率與所屬通路平均的差距，單位為百分點", rate_def:"互動率計算: 對話視窗數(累積) / 總會員數(累積) × 100%",
       export_img:"匯出圖片", export_csv:"匯出 CSV", csv_saved:"CSV 已儲存", csv_channel:"通路", exporting:"匯出中…", export_saved:"圖片已儲存", export_fail:"匯出失敗，請再試一次",
       h1_1:"會員表現",
       total_members:"零售會員總數", total_conversion:"零售總轉換率",
@@ -894,14 +911,14 @@
       def_closed_formula:"計算方式 : 結案筆數(累積) / 總會員數(累積) × 100%",
       def_conv_formula:"計算方式 : 轉換筆數(累積) / 總會員數(累積) × 100%",
       funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
-      delta_up:"較上月 +{n} 人", delta_down:"較上月 -{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月轉換", tgt_unit:"{n} 筆",
+      delta_up:"+{n} 人", delta_down:"-{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月結單", tgt_unit:"{n} 筆",
       def_closed_title:"涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
       def_conv_title:"涵蓋範圍",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
-      period:"顯示區間：", mom:"月增率", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
+      period:"顯示區間：", mom:"較上月", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"會員成長趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員成長趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選",
       h2_2:"CRM 系統使用",
@@ -922,7 +939,7 @@
       sort_field:"Sort by", sort_short_shipped:"Closed", sort_short_conv:"Conversions", sort_by:"Order", sort_desc:"Most to least", sort_asc:"Least to most", sort_default:"Sort",
       store_footnote:"Click any month on the trend chart above to see that channel's store breakdown",
       click_drill:"click for store breakdown", subtotal:"Total", stores:"stores", ch_all_btn:"All", latest_opt:"Latest (to date)",
-      rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"= gap between the store's rate and its own channel's average, in percentage points",
+      rate_avg:"Average", rate_vs_avg:"vs channel avg (pp)", rate_delta_note:"gap between the store's rate and its own channel's average, in percentage points", rate_def:"Engagement rate calc: Chat windows (cum.) / Total members (cum.) × 100%",
       export_img:"Export image", export_csv:"Export CSV", csv_saved:"CSV saved", csv_channel:"Channel", exporting:"Exporting…", export_saved:"Image saved", export_fail:"Export failed — please try again",
       h1_1:"Retail Member Performance",
       total_members:"Total Retail Members", total_conversion:"Total Retail Conversion",
@@ -930,14 +947,14 @@
       def_closed_formula:"Calculation : Closed count (cum.) / Total members (cum.) × 100%",
       def_conv_formula:"Calculation : Converted count (cum.) / Total members (cum.) × 100%",
       funnel_title:"All-Channel Member Funnel", fn_members:"Total members (cum.)", fn_closed:"Closed", fn_conv:"Converted", fn_unit_m:"", fn_unit_n:"", fn_of:"of members",
-      delta_up:"+{n} vs last month", delta_down:"-{n} vs last month", vs_last:"vs last month", chat_delta_unit:"", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
+      delta_up:"+{n}", delta_down:"-{n}", vs_last:"vs last month", chat_delta_unit:"", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
       def_closed_title:"Coverage",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
       def_conv_title:"Coverage",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
-      period:"Period:", mom:"MoM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
+      period:"Period:", mom:"vs last month", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Member Growth Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Growth Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter",
       h2_2:"CRM System Usage",
@@ -1228,7 +1245,7 @@
     })();
     var niceMax = niceMin + 4 * niceStep;
     var range = niceMax - niceMin || 1;
-    var band = plotW / Math.max(labels.length, 1), barW = Math.min(band * 0.32, 38);
+    var band = plotW / Math.max(labels.length, 1), barW = Math.min(band * 0.46, 56);
     var x = function(i){ return padL + band * (i + 0.5); };
     var y = function(v){ return padT + plotH - (plotH * (v - niceMin)) / range; };
 
@@ -1268,11 +1285,8 @@
       var dx = [], sl = [], m = [], k;
       for (k = 0; k < n - 1; k++){ dx[k] = pts[k+1][0] - pts[k][0]; sl[k] = (pts[k+1][1] - pts[k][1]) / dx[k]; }
       m[0] = sl[0]; m[n-1] = sl[n-2];
-      for (k = 1; k < n - 1; k++) m[k] = sl[k-1] * sl[k] <= 0 ? 0 : (sl[k-1] + sl[k]) / 2;
+      for (k = 1; k < n - 1; k++) m[k] = (pts[k+1][1] - pts[k-1][1]) / (pts[k+1][0] - pts[k-1][0]);   // Catmull-Rom tangent: rounded peaks, no flat spots
       for (k = 0; k < n - 1; k++){
-        if (sl[k] === 0){ m[k] = 0; m[k+1] = 0; continue; }
-        var a = m[k] / sl[k], b = m[k+1] / sl[k], h = a * a + b * b;
-        if (h > 9){ var t3 = 3 / Math.sqrt(h); m[k] = t3 * a * sl[k]; m[k+1] = t3 * b * sl[k]; }
       }
       for (k = 0; k < n - 1; k++){
         var c = dx[k] / 3;
@@ -1281,7 +1295,7 @@
       return d;
     };
     // Members as bars: one bar per month; in the "All" view DDS and Showroom are stacked (negatives hang below zero).
-    var bars = '', outlines = '', points = [], clipDefs = '', barR = Math.min(barW * 0.38, 11);
+    var bars = '', outlines = '', points = [], clipDefs = '', barR = 0;   // square-cornered bars
     values.forEach(function(v, i){
       var segs = stacked ? [{v: opts.breakdown[i].dds, c: purpleC}, {v: opts.breakdown[i].showroom, c: tealC}] : [{v: v, c: color}];
       var pb = 0, nb = 0, inner = '';
