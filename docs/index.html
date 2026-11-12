@@ -1332,6 +1332,22 @@
         if (pts.length > 1) rateSvg += '<path d="' + curve(pts) + '" fill="none" stroke="' + r.color + '" stroke-width="' + (r.width || 0.9) + '" stroke-dasharray="' + (r.solid ? 'none' : (r.dash || '5,4')) + '" stroke-linecap="round" stroke-linejoin="round"/>';
         rateSvg += pts.map(function(q){ return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="2.6" fill="var(--surface)" stroke="' + r.color + '" stroke-width="1"/>'; }).join('');
       });
+      // % value on every rate point: higher line's label above its point, lower line's below, so the two never collide
+      var byIdx = {};
+      opts.rates.forEach(function(r){
+        r.values.forEach(function(v, i){ if (v != null) (byIdx[i] = byIdx[i] || []).push({x: x(i), y: ry(v), v: v, c: r.tcolor || r.color}); });
+      });
+      Object.keys(byIdx).forEach(function(k){
+        var i = +k;
+        if ((lastIdx - i) % vStep !== 0 && !(drillKey && months[i] === drill.month)) return;
+        // one fixed spot for every month: the % values stack straight above the bar's member count (closing on top, conversion under it)
+        var fs = ptFont * 0.8, step = fs + 3;
+        var baseY = points[i][1] - 8 - 6 * (scale - 1);   // the bar's own member-count label
+        var shown = byIdx[k].filter(function(q){ return q.v; });   // 0% = nothing to read (or not tracked yet): leave it blank
+        shown.reverse().forEach(function(q, n){
+          rateSvg += '<text x="' + q.x + '" y="' + (baseY - (n + 1) * step) + '" text-anchor="middle" class="pt-label" style="font-size:' + fs + 'px" fill="' + q.c + '">' + q.v.toFixed(1) + '%</text>';
+        });
+              });
     }
 
     // Monthly view: closed-per-month dashed lines on the same (left) axis, to read against monthly new members.
@@ -1513,6 +1529,7 @@
       var convRateOf = function(ch, m){ var c = sumOf(m, ch, 'cum'); return c && hasConvIn(m) ? sumOf(m, ch, 'conv') / c * 100 : null; };
       if (showClose) lines.push(seriesOf(chKey, '#F28A50', chPrefix + t('close_rate'), rateOf, closeStyle));
       if (showConv) lines.push(seriesOf(chKey, '#FFB088', chPrefix + t('conv_rate'), convRateOf, convStyle));
+      lines.forEach(function(l){ l.tcolor = l.color === '#F28A50' ? '#D9622A' : '#E27B45'; });   // darker text colour so the % reads on the surface
       chartOpts.rates = lines;
     } else {
       var deltaOf = function(ch, m){
