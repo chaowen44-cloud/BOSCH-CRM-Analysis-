@@ -911,8 +911,7 @@
       def_closed_formula:"計算方式 : 結案筆數(累積) / 總會員數(累積) × 100%",
       def_conv_formula:"計算方式 : 轉換筆數(累積) / 總會員數(累積) × 100%",
       funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
-      delta_up:"+{n} 人", delta_down:"-{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月結單", tgt_unit:"{n} 筆",
-      def_closed_title:"涵蓋範圍",
+      delta_up:"+{n} 人", delta_down:"-{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月結單", tgt_unit:"{n} 筆",      def_closed_title:"涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
       def_conv_title:"涵蓋範圍",
@@ -947,14 +946,13 @@
       def_closed_formula:"Calculation : Closed count (cum.) / Total members (cum.) × 100%",
       def_conv_formula:"Calculation : Converted count (cum.) / Total members (cum.) × 100%",
       funnel_title:"All-Channel Member Funnel", fn_members:"Total members (cum.)", fn_closed:"Closed", fn_conv:"Converted", fn_unit_m:"", fn_unit_n:"", fn_of:"of members",
-      delta_up:"+{n}", delta_down:"-{n}", vs_last:"vs last month", chat_delta_unit:"", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",
-      def_closed_title:"Coverage",
+      delta_up:"+{n}", delta_down:"-{n}", vs_last:"vs. LM", chat_delta_unit:"", tgt_close:"Closed this month", tgt_conv:"Converted this month", tgt_unit:"{n}",      def_closed_title:"Coverage",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
       def_conv_title:"Coverage",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
-      period:"Period:", mom:"vs last month", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
+      period:"Period:", mom:"vs. LM", conv_sub:"{c} converted", closed_sub:"{s} closed", members:"Members", conversion:"Conversion", vs_prev:"vs {m}",
       total_trend:"Member Growth Trend", to:"to", query:"Query", cumulative:"Cumulative", monthly:"Monthly net-add", close_rate:"Closing Rate", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"Closed in month",
       trend_suffix:" Member Growth Trend", metric_members:"Members", conv_month:"Converted in Month", metric_conv:"Conversion Rate", conv_rate:"Conversion Rate", conv_trend:"Total Retail Conversion Rate Trend", conv_trend_suffix:" Conversion Rate Trend", no_conv_data:"No conversion data yet", shared_filter_label:"Filter",
       h2_2:"CRM System Usage",
@@ -2072,6 +2070,19 @@
     el.hidden = false;
     el.innerHTML = '<span class="tgt-lbl">' + t(kind === 'close' ? 'tgt_close' : 'tgt_conv') + '</span><b class="tgt-val num">' + t('tgt_unit').replace('{n}', n.toLocaleString()) + '</b>';
   }
+  // Empty divider line under each cumulative-members card (same look as the closing-rate cards)
+  function renderPrevCum(ch, n, ok){
+    var cumEl = document.querySelector('[data-kpi="cum"][data-ch="' + ch + '"]');
+    if (!cumEl) return;
+    var card = cumEl.closest('.stat-card');
+    var el = card.querySelector('.tgt[data-kpi="prevtgt"]');
+    if (!el){
+      el = document.createElement('div'); el.className = 'tgt'; el.setAttribute('data-kpi', 'prevtgt');
+      card.appendChild(el);
+    }
+    el.hidden = false;
+    el.innerHTML = '';   // divider line only, left empty on purpose
+  }
   /* ---------- member funnel: total cumulative members > closed > converted (month = the KPI month picker, channel = shared filter) ---------- */
   function renderFunnelCard(){
     var body = document.getElementById('funnelBody');
@@ -2141,6 +2152,7 @@
       } else {
         momEl.className = 'trend'; momEl.textContent = ''; deltaEl.textContent = '';
       }
+      renderPrevCum(ch);
       q('conv').textContent = cum && hasConv ? (conv / cum * 100).toFixed(1) + '%' : '–';
       q('close').textContent = cum ? (shipped / cum * 100).toFixed(1) + '%' : '–';
       // month-over-month of a rate: relative change of the rate and the count gap vs the previous month; only shown when the
