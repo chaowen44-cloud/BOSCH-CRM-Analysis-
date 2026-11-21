@@ -199,6 +199,9 @@
   .chart-card .shared-filter .df-query{height:26px; padding:0 12px; font-size:12px; box-sizing:border-box}
   .chart-card .shared-filter .shared-filter-label{flex:none}
   .funnel-card{display:flex; flex-direction:column}
+  /* funnel hidden for now (kept in the markup + JS for when the data volume grows): remove the `hidden` attribute on #funnelCard and the `no-funnel` class on .trend-row to bring it back */
+  .funnel-card[hidden]{display:none !important}
+  .trend-row.no-funnel{grid-template-columns:minmax(0,1fr)}
   .funnel-card .chart-head{margin-bottom:4px}
   .fn-month{margin-left:auto; padding:3px 10px; border-radius:999px; background:#CFE4F7; color:var(--navy); font-size:12px; font-weight:700; white-space:nowrap}
   .fn-sub{font-size:12px; color:var(--muted); margin:2px 0 14px}
@@ -663,8 +666,8 @@
       </div>
     </div>
 
-    <div class="trend-row">
-    <div class="chart-card funnel-card" id="funnelCard">
+    <div class="trend-row no-funnel">
+    <div class="chart-card funnel-card" id="funnelCard" hidden>
       <div class="chart-head"><span class="swatch" style="background:var(--c-total)"></span><b data-i18n="funnel_title">全通路會員漏斗</b></div>
       <div class="fn-sub" id="funnelSub"></div>
       <div class="fn-body" id="funnelBody"></div>
@@ -911,13 +914,13 @@
       def_closed_formula:"計算方式 : 結案筆數(累積) / 總會員數(累積) × 100%",
       def_conv_formula:"計算方式 : 轉換筆數(累積) / 總會員數(累積) × 100%",
       funnel_title:"全通路會員漏斗", fn_members:"總累積會員", fn_closed:"結案", fn_conv:"轉換", fn_unit_m:"人", fn_unit_n:"筆", fn_of:"占累積會員",
-      delta_up:"+{n} 人", delta_down:"-{n} 人", vs_last:"較上月", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月結單", tgt_unit:"{n} 筆",      def_closed_title:"涵蓋範圍",
+      delta_up:"+{n} 人", delta_down:"-{n} 人", vs_last:"vs. LM", chat_delta_unit:"", tgt_close:"本月結案", tgt_conv:"本月結單", tgt_unit:"{n} 筆",      def_closed_title:"涵蓋範圍",
       def_closed_dds:"已結單 未出貨/已結單 已出貨/至其他通路購買/環境因素 無法安裝/無購買意願",
       def_closed_sr:"未購顧客- 至其他通路購買/未購顧客- 環境因素無法安裝/未購顧客- 暫時無需求/未購顧客- 無意願參加體驗活動/已購顧客(全)",
       def_conv_title:"涵蓋範圍",
       def_conv_dds:"已結單 未出貨/已結單 已出貨",
       def_conv_sr:"已購顧客(全)",
-      period:"顯示區間：", mom:"較上月", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
+      period:"顯示區間：", mom:"vs. LM", conv_sub:"轉換 {c} 筆", closed_sub:"結案 {s} 筆", members:"會員數", conversion:"轉換率", vs_prev:"較{m}",
       total_trend:"會員成長趨勢", to:"至", query:"查詢", cumulative:"累積", monthly:"當月新增", close_rate:"結案率", mem_total:"Total Retail", mem_dds:"DDS", mem_sr:"Showroom", pfx_total:"Total ", closed_month:"當月結案",
       trend_suffix:" 會員成長趨勢", metric_members:"會員數", conv_month:"當月轉換", metric_conv:"轉換率", conv_rate:"轉換率", conv_trend:"Total Retail 轉換率趨勢", conv_trend_suffix:" 轉換率趨勢", no_conv_data:"尚無轉換率資料", shared_filter_label:"篩選",
       h2_2:"CRM 系統使用",
