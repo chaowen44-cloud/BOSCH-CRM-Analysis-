@@ -1942,16 +1942,51 @@
     return Promise.resolve();
   }
 
+  // The page runs at html{zoom:.855} on wide screens. html2canvas does not understand CSS zoom: it reads
+  // text positions from the zoomed layout but paints the text at the unzoomed font size, so glyphs overlap
+  // ("Showroom-Taipei", squeezed Chinese headers). So the hidden clone is rendered at zoom 1 in a window
+  // 1/zoom times wider, which gives the same layout, and the canvas scale is multiplied by the zoom so the
+  // exported image keeps the same pixel size as before.
+  function pageZoom(){
+    var z = parseFloat(getComputedStyle(document.documentElement).zoom);
+    return (z > 0 && isFinite(z)) ? z : 1;
+  }
+
   function exportCardAsImage(btn, card, filename, ignoreSelector){
     if (typeof html2canvas === 'undefined') return;
     var label = btn.querySelector('.export-label');
     var prevLabel = label.textContent;
+    var zoom = pageZoom();
     btn.disabled = true;
     label.textContent = t('exporting');
-    html2canvas(card, {
-      backgroundColor: cssVar('--surface'),
-      scale: 2,
-      ignoreElements: function(el){ return ignoreSelector && el.matches && el.matches(ignoreSelector); }
+    Promise.resolve().then(function(){
+      return html2canvas(card, {
+        backgroundColor: cssVar('--surface'),
+        scale: 2 * zoom,
+        windowWidth: Math.round(window.innerWidth / zoom),
+        windowHeight: Math.round(window.innerHeight / zoom),
+        ignoreElements: function(el){ return ignoreSelector && el.matches && el.matches(ignoreSelector); },
+        onclone: function(cloneDoc){
+          cloneDoc.documentElement.style.zoom = '1';
+          // html2canvas positions multi-character CJK text unreliably (a stray gap inside the card title), so the
+          // title is rebuilt with every character in its own box. Uppercase is applied here, not by CSS.
+          var st = cloneDoc.createElement('style');
+          st.textContent = '.store-card-head .label{letter-spacing:0 !important; text-transform:none !important}';
+          cloneDoc.head.appendChild(st);
+          Array.prototype.forEach.call(cloneDoc.querySelectorAll('.store-card-head .label'), function(el){
+            var txt = (el.textContent || '').toUpperCase(), wrap = cloneDoc.createElement('span');
+            wrap.style.cssText = 'display:inline-block; white-space:nowrap';
+            Array.from(txt).forEach(function(ch){
+              var c = cloneDoc.createElement('span');
+              c.style.cssText = 'display:inline-block; white-space:pre';
+              c.textContent = ch;
+              wrap.appendChild(c);
+            });
+            el.textContent = '';
+            el.appendChild(wrap);
+          });
+        }
+      });
     }).then(function(canvas){
       return new Promise(function(resolve){ canvas.toBlob(resolve, 'image/png'); });
     }).then(function(blob){
